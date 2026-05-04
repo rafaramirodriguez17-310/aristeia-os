@@ -1084,6 +1084,32 @@ export default function App() {
     a.click();
   };
 
+  // Import
+  const importJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (data.healthLog) setHL(data.healthLog);
+        if (data.foodLog) setFL(data.foodLog);
+        if (data.nutritionDB) setDb(data.nutritionDB);
+        if (data.strengthLog) setStr(data.strengthLog);
+        if (data.runs) setRuns(data.runs);
+        if (data.biometrics) setBios(data.biometrics);
+        if (data.habits) setHab(data.habits);
+        if (data.goals) setGoals(data.goals);
+        if (data.program) setProg(data.program);
+        if (data.weeklyPlans) setPlans(data.weeklyPlans);
+        alert("✅ Datos importados correctamente");
+      } catch (err) {
+        alert("❌ Error al leer el archivo JSON");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // Nav & header
   const TABS = [
     {id:"dashboard",l:"📊 Dashboard"},{id:"dailylog",l:"📋 Daily Log"},
@@ -1119,6 +1145,9 @@ export default function App() {
           </button>
           <button onClick={exportJSON} style={{ background:T.navy, color:"#fff", border:"none", borderRadius:999, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer" }}>
             ↓ JSON
+          </button>
+          <button onClick={() => document.getElementById('import-json').click()} style={{ background: T.card, color: T.text, border: `1.5px solid ${T.border}`, borderRadius: 999, padding: "8px 18px", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+          ↑ IMPORTAR
           </button>
         </div>
       </div>
