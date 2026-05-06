@@ -5,25 +5,25 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS - MINIMALIST & MUTED
+// DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
-  bg:"#0A0A0A", card:"#121212", card2:"#1A1A1A", card3:"#242424",
-  accent:"#C4B27C", accentDim:"rgba(196,178,124,0.1)",
-  navy:"#1F1F1F", navyBright:"#2C2C2C",
-  text:"#EDEDED", muted:"#737373", border:"#262626", inputBg:"#0F0F0F",
-  green:"#7A9B76", red:"#C06C6C", blue:"#6B8EAD",
-  purple:"#9A84B5", orange:"#C28E62", teal:"#659898", pink:"#B58499",
-  shadow:"0 0 0 1px #262626",
+  bg:"#070709", card:"#101013", card2:"#18181C", card3:"#222226",
+  accent:"#FFD700", accentDim:"rgba(255,215,0,0.08)",
+  navy:"#0A1628", navyBright:"#1A3A6B",
+  text:"#EBEBEB", muted:"#545460", border:"#1E1E24", inputBg:"#131316",
+  green:"#34D399", red:"#F87171", blue:"#60A5FA",
+  purple:"#C084FC", orange:"#FB923C", teal:"#2DD4BF", pink:"#F472B6",
+  shadow:"0 0 0 1px #1E1E24",
 };
 const LIGHT = {
-  bg:"#F5F5F5", card:"#FFFFFF", card2:"#EAEAEA", card3:"#D4D4D4",
-  accent:"#A8965E", accentDim:"rgba(168,150,94,0.1)",
-  navy:"#1A1A1A", navyBright:"#2C2C2C",
-  text:"#121212", muted:"#737373", border:"#D4D4D4", inputBg:"#FFFFFF",
-  green:"#678763", red:"#A85555", blue:"#5A7994",
-  purple:"#836B9E", orange:"#A8754D", teal:"#528080", pink:"#9E6B83",
-  shadow:"0 1px 4px rgba(0,0,0,0.05),0 0 0 1px rgba(0,0,0,0.03)",
+  bg:"#F3F4F8", card:"#FFFFFF", card2:"#F0F1F5", card3:"#E4E6ED",
+  accent:"#C8960C", accentDim:"rgba(200,150,12,0.08)",
+  navy:"#001F3F", navyBright:"#1A3A6B",
+  text:"#0C0C0E", muted:"#868E9E", border:"#DEE1EA", inputBg:"#FFFFFF",
+  green:"#059669", red:"#DC2626", blue:"#2563EB",
+  purple:"#7C3AED", orange:"#EA580C", teal:"#0D9488", pink:"#DB2777",
+  shadow:"0 1px 4px rgba(0,0,0,0.07),0 0 0 1px rgba(0,0,0,0.04)",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -31,9 +31,9 @@ const LIGHT = {
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
   Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
-  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",         Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
-  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",        Jue:"LISS 45min",          Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
-  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",             Dom:"🔋 Descanso" },
+  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",           Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
+  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",            Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
+  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",      Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",   Vie:"Pliometría + Velocidad", Sáb:"LISS",             Dom:"🔋 Descanso" },
 };
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 const TODAY_DOW = PLAN_KEYS[new Date().getDay()===0 ? 6 : new Date().getDay()-1];
@@ -47,7 +47,7 @@ const EXERCISE_LIB = {
   "🏃 Cardio":  ["Caminata Inclinada","Carrera en Cinta","Bicicleta Estacionaria","HIIT","Saltar la Cuerda","Escaladora"],
 };
 const TODAY         = new Date().toISOString().split("T")[0];
-const DEFAULT_GOALS = { cal:2200, p:180, c:280, g:60 };
+const DEFAULT_GOALS = { cal:2400, p:180, c:280, g:60 };
 const SEED_HEALTH   = [
   { date:"2026-04-27", calOut:2895, calIn:2171, p:181, c:241, g:57, sleep:7.57, score:81, steps:4141,  goals:{...DEFAULT_GOALS} },
   { date:"2026-04-28", calOut:3117, calIn:2576, p:191, c:272, g:72, sleep:6.37, score:92, steps:4680,  goals:{...DEFAULT_GOALS} },
@@ -131,7 +131,7 @@ function mkS(T) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ATOMS 
+// ATOMS — all outside App so React never re-mounts them on keystroke
 // ─────────────────────────────────────────────────────────────────────────────
 function ChartTip({ active, payload, T }) {
   if (!active||!payload?.length) return null;
@@ -157,6 +157,7 @@ function ProgBar({ value, max, color, h=4 }) {
   );
 }
 
+/** Mini SVG ring — used inside KPI cards */
 function MiniRing({ pct, color, size=42, sw=5 }) {
   const r=(size-sw)/2, c=2*Math.PI*r, off=c*(1-Math.min(pct,1));
   return (
@@ -169,6 +170,7 @@ function MiniRing({ pct, color, size=42, sw=5 }) {
   );
 }
 
+/** Apple Fitness-style circular ring for Running */
 function RunRing({ value, max, isDark, T }) {
   const size=230, sw=26, r=(size-sw)/2, circ=2*Math.PI*r;
   const pct=Math.min(value/max,1), off=circ*(1-pct);
@@ -205,6 +207,7 @@ function RunRing({ value, max, isDark, T }) {
   );
 }
 
+/** Milestone track below the RunRing */
 function RunMilestones({ value, max, T }) {
   const milestones=[{km:5,l:"5K"},{km:10,l:"10K"},{km:15,l:"15K"},{km:max,l:"🏁"}];
   const pct=Math.min(value/max,1);
@@ -231,6 +234,7 @@ function RunMilestones({ value, max, T }) {
   );
 }
 
+/** Generic inline row editor */
 function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
   const st=mkS(T);
   return (
@@ -249,6 +253,7 @@ function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
   );
 }
 
+/** Food log item editor — handles qty-based recalc for DB items */
 function FoodEditRow({ entry, onSave, onCancel, T }) {
   const st=mkS(T);
   const hasUnit=!!entry.unitCal;
@@ -275,6 +280,7 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
     vals={raw} onChange={(k,v)=>setRaw(p=>({...p,[k]:v}))} onSave={doSave} onCancel={onCancel} T={T}/>;
 }
 
+/** Bento KPI card with mini ring and gradient glow */
 function KPICard({ icon, label, value, sub, color, pct, goalLabel, isDark, T }) {
   return (
     <div style={{
@@ -312,11 +318,10 @@ function Placeholder({ msg, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: DASHBOARD
+// TAB: DASHBOARD — Bento Command Center
 // ─────────────────────────────────────────────────────────────────────────────
-function Dashboard({ today, weekData, last7, goals, program, plans, setPlans, setTab, isDark, T }) {
+function Dashboard({ today, weekData, last7, goals, program, plans, setTab, isDark, T }) {
   const st=mkS(T);
-  const [editDay, setEditDay] = useState(null);
   const tip=p=><ChartTip {...p} T={T}/>;
   const pCol=(v,g)=>v>=g?T.green:v>=g*.8?T.accent:T.red;
   const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
@@ -326,19 +331,19 @@ function Dashboard({ today, weekData, last7, goals, program, plans, setPlans, se
 
   const kpis=[
     { icon:"🔥",label:"Cal In",  value:today.calIn||"—",  sub:`de ${goals.cal} kcal`,  color:T.accent, pct:today.calIn?clamp1(today.calIn,goals.cal):null, goalLabel:`${today.calIn||0} / ${goals.cal} kcal` },
-    { icon:"💨",label:"Cal Out", value:today.calOut||"—", sub:"kcal quemadas",       color:T.blue,   pct:null },
+    { icon:"💨",label:"Cal Out", value:today.calOut||"—", sub:"kcal quemadas",           color:T.blue,   pct:null },
     { icon:"⚖️",label:"Balance", value:today.calOut>0?(today.balance>0?`+${today.balance}`:today.balance):"—",
       sub:today.balance<0?"déficit ✓":"superávit", color:today.calOut>0?bCol(today.balance):T.muted, pct:null },
     { icon:"🥩",label:"Proteína",value:today.p?`${Math.round(today.p)}g`:"—", sub:`meta ${goals.p}g`, color:pCol(today.p,goals.p), pct:today.p?clamp1(today.p,goals.p):null, goalLabel:`${Math.round(today.p||0)}/${goals.p}g` },
     { icon:"🍞",label:"Carbos",  value:today.c?`${Math.round(today.c)}g`:"—", sub:`máx ${goals.c}g`,  color:cCol(today.c,goals.c), pct:today.c?clamp1(today.c,goals.c):null, goalLabel:`${Math.round(today.c||0)}/${goals.c}g` },
     { icon:"😴",label:"Sueño",   value:today.sleep?`${fmt(today.sleep,1)}h`:"—", sub:"horas",          color:sCol(today.sleep), pct:today.sleep?clamp1(today.sleep,8):null, goalLabel:"meta 8h" },
-    { icon:"💤",label:"Score",   value:today.score?`${today.score}%`:"—", sub:"sleep score",          color:scCol(today.score), pct:today.score?clamp1(today.score,100):null, goalLabel:"meta 85%" },
+    { icon:"💤",label:"Score",   value:today.score?`${today.score}%`:"—", sub:"sleep score",            color:scCol(today.score), pct:today.score?clamp1(today.score,100):null, goalLabel:"meta 85%" },
     { icon:"👟",label:"Pasos",   value:today.steps?today.steps.toLocaleString():"—", sub:"pasos hoy",  color:T.purple, pct:today.steps?clamp1(today.steps,10000):null, goalLabel:"meta 10,000" },
   ];
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      {/* 8 KPI cards */}
+      {/* 8 KPI cards — bento grid */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:10 }}>
         {kpis.map(k=><KPICard key={k.label} {...k} isDark={isDark} T={T}/>)}
       </div>
@@ -416,23 +421,15 @@ function Dashboard({ today, weekData, last7, goals, program, plans, setPlans, se
       {/* Plan widget */}
       <div style={st.card}>
         <SH title={<>🗓️ Plan Semanal · <span style={{color:T.accent}}>{program}</span></>}
-          right={<span style={{fontSize:11, color:T.muted}}>Click para editar</span>}/>
+          right={<button style={st.btnSm} onClick={()=>setTab("fuerza")}>⚙️ Editar →</button>}/>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))", gap:8 }}>
           {PLAN_KEYS.map(day=>{
             const label=plans[program]?.[day]||"—", isT=day===TODAY_DOW, isR=label.includes("Descanso");
             return (
-              <div key={day} onClick={() => setEditDay(day)} style={{ background:isT?T.accentDim:T.card2, border:`1.5px solid ${isT?T.accent:T.border}`, borderRadius:14, padding:"12px 10px", textAlign:"center", cursor:"pointer",
+              <div key={day} style={{ background:isT?T.accentDim:T.card2, border:`1.5px solid ${isT?T.accent:T.border}`, borderRadius:14, padding:"12px 10px", textAlign:"center",
                 boxShadow:isT?`0 0 0 1px ${T.accent}40,0 4px 16px ${T.accent}10`:"none" }}>
                 <div style={{ fontSize:9, fontWeight:700, color:isT?T.accent:T.muted, letterSpacing:"0.09em", marginBottom:6 }}>{day.toUpperCase()}</div>
-                {editDay === day ? (
-                  <input autoFocus value={plans[program]?.[day] || ""}
-                    onChange={e => setPlans(p => ({...p, [program]: {...p[program], [day]: e.target.value}}))}
-                    onBlur={() => setEditDay(null)}
-                    onKeyDown={e => e.key === 'Enter' && setEditDay(null)}
-                    style={{...st.inp, fontSize:11, padding:"4px", textAlign:"center"}} />
-                ) : (
-                  <div style={{ fontSize:11, fontWeight:600, color:isR?T.muted:T.text, lineHeight:1.4 }}>{label}</div>
-                )}
+                <div style={{ fontSize:11, fontWeight:600, color:isR?T.muted:T.text, lineHeight:1.4 }}>{label}</div>
                 {isT&&<div style={{ marginTop:6, fontSize:9, background:T.navy, color:"#fff", borderRadius:999, padding:"2px 8px", display:"inline-block", fontWeight:700 }}>HOY</div>}
               </div>
             );
@@ -444,7 +441,7 @@ function Dashboard({ today, weekData, last7, goals, program, plans, setPlans, se
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: DAILY LOG
+// TAB: DAILY LOG — Accordion (Month > Week) + Project Names
 // ─────────────────────────────────────────────────────────────────────────────
 function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T }) {
   const st=mkS(T);
@@ -473,6 +470,7 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
     setForm({ date:TODAY, calOut:"", steps:"", sleep:"", score:"" });
   };
 
+  // Group all data by month > week
   const rows=allDayData.filter(d=>d.calOut>0||d.sleep||d.steps||d.calIn>0);
   const grouped=useMemo(()=>{
     const byMonth={};
@@ -516,15 +514,16 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
         {editG&&<div style={{ fontSize:10, color:T.muted, marginTop:8 }}>Los cambios de objetivos no alteran el historial pasado.</div>}
       </div>
 
+      {/* Register form */}
       <div style={st.g2}>
         <div style={st.card}>
           <SH title="📋 Registrar Día"/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
             <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Fecha</span>
               <input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            {[["Cal Quemadas","calOut","2895"],["Pasos","steps","8000"],["Horas de Sueño","sleep","7.57"],["Sleep Score %","score","81"]].map(([l,k,ph])=>(
+            {[["Cal Quemadas","calOut"],["Pasos","steps"],["Horas de Sueño","sleep"],["Sleep Score %","score"]].map(([l,k])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder={ph}
+                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder=""
                   value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
           </div>
@@ -536,6 +535,7 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
           {grouped.length===0&&<div style={{ ...st.card2, color:T.muted, fontSize:12 }}>Sin registros aún.</div>}
           {grouped.map(({ mk, weeks })=>(
             <div key={mk} style={st.card}>
+              {/* Month header */}
               <button onClick={()=>toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
                 <div style={{ fontSize:14, fontWeight:700, textTransform:"capitalize" }}>{fmtMonth(mk)}</div>
                 <div style={{ fontSize:11, color:T.muted }}>{openMonths.has(mk)?"▲":"▼"} {weeks.reduce((s,w)=>s+w.days.length,0)} días</div>
@@ -545,18 +545,20 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
                 const projName=projects[wk];
                 return (
                   <div key={wk} style={{ marginTop:10 }}>
+                    {/* Week header */}
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
                       <button onClick={()=>toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
                         <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk)?"▼":"▶"}</span>
                         <span style={{ fontSize:12, fontWeight:700 }}>{fmtWeek(wk)}</span>
                       </button>
+                      {/* Project name tag */}
                       {editProjKey===wk?(
                         <input autoFocus style={{ ...st.inp, width:160, padding:"5px 10px", fontSize:11 }}
                           value={projTemp}
                           onChange={e=>setProjTemp(e.target.value)}
                           onBlur={()=>{ setProjects(p=>({...p,[wk]:projTemp||undefined})); setEPK(null); }}
                           onKeyDown={e=>{ if(e.key==="Enter")e.target.blur(); if(e.key==="Escape")setEPK(null); }}
-                          placeholder="Nombre del proyecto…"/>
+                          placeholder=""/>
                       ):(
                         <button onClick={()=>{ setEPK(wk); setProjTemp(projects[wk]||""); }}
                           style={{ background:projName?T.accentDim:"transparent", border:`1px dashed ${projName?T.accent:T.border}`,
@@ -583,6 +585,8 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
                                     {d.date===TODAY?"● Hoy":d.date.slice(5)}
                                   </span>
                                   <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+                                    {d.sleep&&<span style={{fontSize:10,color:sCol(d.sleep)}}>😴{fmt(d.sleep,1)}h</span>}
+                                    {d.score&&<span style={{fontSize:10,color:scCol(d.score),marginLeft:3}}>💤{d.score}%</span>}
                                     <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({calOut:d.calOut||"",steps:d.steps||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
                                     <button style={st.icon(T.red)}    onClick={()=>setHL(p=>p.filter(x=>x.date!==d.date))}>🗑</button>
                                   </div>
@@ -595,23 +599,6 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
                                       <div style={{fontSize:12,fontWeight:700,color:m.c}}>{m.v}</div></div>
                                   ))}
                                 </div>
-                                {/* SECCIÓN DE SUEÑO REDISEÑADA */}
-                                {(d.sleep || d.score || d.steps) && (
-                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(80px, 1fr))", gap: 10, marginTop: 10, paddingTop: 10, borderTop: `1px dashed ${T.border}` }}>
-                                    {d.sleep && <div style={{background:T.card, padding:"8px 12px", borderRadius:10}}>
-                                      <div style={{fontSize:10, color:T.muted, fontWeight:700}}>😴 SUEÑO</div>
-                                      <div style={{fontSize:16, fontWeight:800, color:sCol(d.sleep)}}>{d.sleep}h</div>
-                                    </div>}
-                                    {d.score && <div style={{background:T.card, padding:"8px 12px", borderRadius:10}}>
-                                      <div style={{fontSize:10, color:T.muted, fontWeight:700}}>💤 SCORE</div>
-                                      <div style={{fontSize:16, fontWeight:800, color:scCol(d.score)}}>{d.score}%</div>
-                                    </div>}
-                                    {d.steps && <div style={{background:T.card, padding:"8px 12px", borderRadius:10}}>
-                                      <div style={{fontSize:10, color:T.muted, fontWeight:700}}>👟 PASOS</div>
-                                      <div style={{fontSize:16, fontWeight:800, color:T.purple}}>{d.steps}</div>
-                                    </div>}
-                                  </div>
-                                )}
                               </div>
                             )}
                           </div>
@@ -630,7 +617,7 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, T
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: NUTRICIÓN
+// TAB: NUTRICIÓN — qty+unit display, qty-based editing
 // ─────────────────────────────────────────────────────────────────────────────
 function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
   const st=mkS(T);
@@ -668,10 +655,11 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"minmax(260px,1.15fr) minmax(260px,1fr)", gap:16, alignItems:"start" }}>
+        {/* LEFT — full-height input panel */}
         <div style={{ ...st.card, display:"flex", flexDirection:"column", minHeight:460 }}>
           {mode==="search"&&(<>
             <SH title={`🔍 Base de Datos (${db.length})`}/>
-            <input style={{ ...st.inp, marginBottom:10 }} placeholder="Buscar alimento…" value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
+            <input style={{ ...st.inp, marginBottom:10 }} placeholder="" value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
             <div style={{ flex:1, overflowY:"auto", marginBottom:10, minHeight:0 }}>
               {filtered.map(f=>(
                 <div key={f.id} onClick={()=>setSel(f)} style={{ padding:"9px 12px", borderRadius:10, cursor:"pointer", marginBottom:4,
@@ -699,10 +687,10 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
             <SH title="✏️ Entrada Manual"/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
               <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Descripción</span>
-                <input style={st.inp} placeholder="Cena fuera · pollo y arroz…" value={mf.name} onChange={e=>setMF(p=>({...p,name:e.target.value}))}/></div>
-              {[["Calorías *","cal","800"],["Proteína","p","40"],["Carbos","c","60"],["Grasas","g","20"]].map(([l,k,ph])=>(
+                <input style={st.inp} placeholder="" value={mf.name} onChange={e=>setMF(p=>({...p,name:e.target.value}))}/></div>
+              {[["Calorías *","cal"],["Proteína","p"],["Carbos","c"],["Grasas","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
-                  <input style={st.inp} type="number" placeholder={ph} value={mf[k]} onChange={e=>setMF(p=>({...p,[k]:e.target.value}))}/></div>
+                  <input style={st.inp} type="number" placeholder="" value={mf[k]} onChange={e=>setMF(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
             {mf.cal&&<div style={{fontSize:11,color:T.muted,marginBottom:10}}>Preview: {mf.cal} kcal · {mf.p||0}P · {mf.c||0}C · {mf.g||0}G</div>}
@@ -712,11 +700,11 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
             <SH title="➕ Nuevo Alimento"/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
               <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Nombre</span>
-                <input style={st.inp} placeholder="Yogurt Griego Fage…" value={adb.name} onChange={e=>setAdb(p=>({...p,name:e.target.value}))}/></div>
-              <div><span style={st.lbl}>Unidad</span><input style={st.inp} placeholder="Taza / Scoop…" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
-              {[["Kcal","cal","100"],["Proteína","p","10"],["Carbos","c","10"],["Grasas","g","5"]].map(([l,k,ph])=>(
+                <input style={st.inp} placeholder="" value={adb.name} onChange={e=>setAdb(p=>({...p,name:e.target.value}))}/></div>
+              <div><span style={st.lbl}>Unidad</span><input style={st.inp} placeholder="" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
+              {[["Kcal","cal"],["Proteína","p"],["Carbos","c"],["Grasas","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
-                  <input style={st.inp} type="number" placeholder={ph} value={adb[k]} onChange={e=>setAdb(p=>({...p,[k]:e.target.value}))}/></div>
+                  <input style={st.inp} type="number" placeholder="" value={adb[k]} onChange={e=>setAdb(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
             <button style={st.btn} onClick={addToDb}>💾 Guardar en DB</button>
@@ -742,6 +730,7 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
           </>)}
         </div>
 
+        {/* RIGHT — macro summary + today log */}
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           <div style={st.card}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
@@ -772,6 +761,7 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
             </div>
           </div>
 
+          {/* Today's food log — shows qty × unit */}
           <div style={{ ...st.card, flex:1 }}>
             <SH title="📋 Log de Hoy" right={<span style={{fontSize:11,color:T.muted}}>{todayFood.length} entradas</span>}/>
             {todayFood.length===0?(
@@ -807,7 +797,7 @@ function Nutricion({ today, todayFood, setFL, db, setDb, goals, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: FUERZA - Carga Rápida (Text-to-Workout)
+// TAB: FUERZA
 // ─────────────────────────────────────────────────────────────────────────────
 function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, T }) {
   const st=mkS(T);
@@ -816,38 +806,14 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, T }) {
   const [planOpen,setPlanO]=useState(false);
   const [editId,setEId]=useState(null), [editRow,setER]=useState({});
   
-  // Quick load state
-  const [quickLoad, setQuickLoad] = useState("");
-
   const isCustom=exSel==="__custom__";
-  
   const addSet=()=>{ const n=isCustom?exCust:exSel; if(!n) return;
     setStr(p=>[...p,{...form,exercise:n,date:TODAY,program,id:uid(),weight:+form.weight||0,reps:+form.reps||0,sets:+form.sets||0,rpe:+form.rpe||0}]);
     setExSel("");setExCust("");setForm({weight:"",reps:"",sets:"",rpe:""}); };
-    
-  const parseAndLoad = () => {
-    if (!quickLoad) return;
-    const lines = quickLoad.split("\n");
-    const newSets = [];
-    lines.forEach(line => {
-       const m = line.match(/(.+?)\s+(\d+)\s*[xX]\s*(\d+)/);
-       if (m) {
-         newSets.push({
-           id: uid(), exercise: m[1].trim(), sets: +m[2], reps: +m[3],
-           weight: 0, rpe: 0, date: TODAY, program
-         });
-       }
-    });
-    if (newSets.length > 0) {
-       setStr(p => [...p, ...newSets]);
-       setQuickLoad("");
-       alert(`✅ ${newSets.length} ejercicios cargados.`);
-    } else {
-       alert("❌ Formato inválido. Usa: Ejercicio 4x10");
-    }
-  };
-
   const saveEd=()=>{ setStr(p=>p.map(l=>l.id===editId?{...l,...editRow,weight:+editRow.weight,reps:+editRow.reps,sets:+editRow.sets,rpe:+editRow.rpe}:l)); setEId(null); };
+
+  // Buscar el último registro para este ejercicio (para la función de carga rápida)
+  const lastSet = [...strLog].reverse().find(s => s.exercise === (isCustom ? exCust : exSel));
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -871,14 +837,13 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, T }) {
                     {isT&&<span style={{fontSize:8,background:T.navy,color:"#fff",borderRadius:999,padding:"2px 7px",fontWeight:700}}>HOY</span>}
                   </div>
                   <input value={plans[program]?.[day]||""} onChange={e=>setPlans(p=>({...p,[program]:{...p[program],[day]:e.target.value}}))}
-                    style={{...st.inp,fontSize:12,padding:"7px 10px"}} placeholder="Ej: Pecho + Tríceps"/>
+                    style={{...st.inp,fontSize:12,padding:"7px 10px"}} placeholder=""/>
                 </div>
               );})}
             </div>
           </div>
         )}
       </div>
-
       <div style={st.g2}>
         <div style={st.card}>
           <SH title="🏋️ Registrar Set"/>
@@ -892,66 +857,55 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, T }) {
             </select>
           </div>
           {isCustom&&<div style={{marginBottom:10}}><span style={st.lbl}>Nombre</span>
-            <input style={{...st.inp,borderColor:T.navy+"60"}} placeholder="Escribe el ejercicio…" value={exCust} onChange={e=>setExCust(e.target.value)}/></div>}
-          {(exSel&&!isCustom)&&<div style={{background:T.accentDim,border:`1px solid ${T.accent}40`,borderRadius:8,padding:"6px 12px",marginBottom:10,fontSize:12,color:T.accent}}>✓ {exSel}</div>}
+            <input style={{...st.inp,borderColor:T.navy+"60"}} placeholder="" value={exCust} onChange={e=>setExCust(e.target.value)}/></div>}
+          
+          {/* CARGA RÁPIDA RESTAURADA */}
+          {(exSel&&!isCustom)&&<div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10}}>
+            <div style={{background:T.accentDim,border:`1px solid ${T.accent}40`,borderRadius:8,padding:"6px 12px",fontSize:12,color:T.accent}}>✓ {exSel}</div>
+            {lastSet && <button style={{...st.btnSm, background:T.card3, color:T.text}} onClick={()=>setForm(p=>({...p, weight:lastSet.weight, reps:lastSet.reps, sets:lastSet.sets, rpe:lastSet.rpe}))}>⚡ Cargar ant. ({lastSet.weight}kg)</button>}
+          </div>}
+
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-            {[["Peso (kg)","weight","80"],["RPE","rpe","8"],["Reps","reps","10"],["Series","sets","4"]].map(([l,k,ph])=>(
+            {[["Peso (kg)","weight"],["RPE","rpe"],["Reps","reps"],["Series","sets"]].map(([l,k])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" placeholder={ph} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
+                <input style={st.inp} type="number" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
           </div>
           <button style={{...st.btn,opacity:(exSel&&!(isCustom&&!exCust))?1:0.4}} onClick={addSet}>+ Registrar Set</button>
         </div>
-
-        {/* Carga Rapida */}
         <div style={st.card}>
-          <SH title="⚡ Carga Rápida (Copiar & Pegar)"/>
-          <span style={st.lbl}>Pega tu rutina aquí</span>
-          <textarea 
-            style={{ ...st.inp, minHeight: 140, resize: "vertical", marginBottom: 12, lineHeight: 1.5, fontFamily: "'DM Mono', monospace" }}
-            placeholder="Ejemplo:&#10;Press Banca 4x10&#10;Sentadilla Búlgara 3x12"
-            value={quickLoad}
-            onChange={e => setQuickLoad(e.target.value)}
-          />
-          <button style={st.btn} onClick={parseAndLoad}>⚡ Cargar Ejercicios</button>
-          <div style={{ fontSize:11, color:T.muted, marginTop:8 }}>
-            Extraerá el nombre, series y repeticiones. Luego podrás editar el peso y RPE en el historial.
-          </div>
-        </div>
-      </div>
-
-      <div style={st.card}>
-        <SH title="📊 Historial" right={<span style={{fontSize:11,color:T.muted}}>{strLog.length} sets</span>}/>
-        {strLog.length===0?<div style={{color:T.muted,fontSize:12,textAlign:"center",padding:30}}>Sin registros</div>:(<>
-          <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"6px 0", borderBottom:`1px solid ${T.border}`, fontSize:9, color:T.muted, fontWeight:700 }}>
-            {["EJERCICIO","KG","REPS","SER","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
-          </div>
-          <div style={{ maxHeight:380, overflowY:"auto" }}>
-            {[...strLog].reverse().map(l=>editId===l.id?(
-              <div key={l.id} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}>
-                <EditRow fields={[{k:"exercise",l:"Ejercicio"},{k:"weight",l:"Peso kg",t:"number"},{k:"reps",l:"Reps",t:"number"},{k:"sets",l:"Series",t:"number"},{k:"rpe",l:"RPE",t:"number"}]}
-                  vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
-              </div>
-            ):(
-              <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"9px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:l.date===TODAY?T.accentDim:"transparent" }}>
-                <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600,color:l.date===TODAY?T.accent:T.text}}>{l.exercise}</span>
-                <span style={{color:T.accent,fontWeight:700}}>{l.weight}</span><span>{l.reps}</span><span>{l.sets}</span>
-                <span style={{color:l.rpe>=9?T.red:l.rpe>=7?T.accent:T.green,fontWeight:700}}>{l.rpe}</span>
-                <div style={{display:"flex",gap:2}}>
-                  <button style={st.icon(T.accent)} onClick={()=>{setEId(l.id);setER({exercise:l.exercise,weight:l.weight,reps:l.reps,sets:l.sets,rpe:l.rpe});}}>✏️</button>
-                  <button style={st.icon(T.red)}    onClick={()=>setStr(p=>p.filter(x=>x.id!==l.id))}>🗑</button>
+          <SH title="📊 Historial" right={<span style={{fontSize:11,color:T.muted}}>{strLog.length} sets</span>}/>
+          {strLog.length===0?<div style={{color:T.muted,fontSize:12,textAlign:"center",padding:30}}>Sin registros</div>:(<>
+            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"6px 0", borderBottom:`1px solid ${T.border}`, fontSize:9, color:T.muted, fontWeight:700 }}>
+              {["EJERCICIO","KG","REPS","SER","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
+            </div>
+            <div style={{ maxHeight:380, overflowY:"auto" }}>
+              {[...strLog].reverse().map(l=>editId===l.id?(
+                <div key={l.id} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}>
+                  <EditRow fields={[{k:"exercise",l:"Ejercicio"},{k:"weight",l:"Peso kg",t:"number"},{k:"reps",l:"Reps",t:"number"},{k:"sets",l:"Series",t:"number"},{k:"rpe",l:"RPE",t:"number"}]}
+                    vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
                 </div>
-              </div>
-            ))}
-          </div>
-        </>)}
+              ):(
+                <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"9px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:l.date===TODAY?T.accentDim:"transparent" }}>
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600,color:l.date===TODAY?T.accent:T.text}}>{l.exercise}</span>
+                  <span style={{color:T.accent,fontWeight:700}}>{l.weight}</span><span>{l.reps}</span><span>{l.sets}</span>
+                  <span style={{color:l.rpe>=9?T.red:l.rpe>=7?T.accent:T.green,fontWeight:700}}>{l.rpe}</span>
+                  <div style={{display:"flex",gap:2}}>
+                    <button style={st.icon(T.accent)} onClick={()=>{setEId(l.id);setER({exercise:l.exercise,weight:l.weight,reps:l.reps,sets:l.sets,rpe:l.rpe});}}>✏️</button>
+                    <button style={st.icon(T.red)}    onClick={()=>setStr(p=>p.filter(x=>x.id!==l.id))}>🗑</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>)}
+        </div>
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: RUNNING
+// TAB: RUNNING — Circular Ring + Dynamic Goal
 // ─────────────────────────────────────────────────────────────────────────────
 function Running({ runs, setRuns, runGoal, setRunGoal, isDark, T }) {
   const st=mkS(T);
@@ -965,6 +919,7 @@ function Running({ runs, setRuns, runGoal, setRunGoal, isDark, T }) {
   const saveEd=()=>{ setRuns(p=>p.map(r=>r.id===editId?{...r,...editRow,km:+editRow.km,pace:calcPace(+editRow.km,editRow.time)}:r)); setEId(null); };
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      {/* Dynamic goal + ring hero */}
       <div style={{ ...st.card, display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
         <SH title="🏃 Progreso de Carrera"
           right={
@@ -976,6 +931,7 @@ function Running({ runs, setRuns, runGoal, setRunGoal, isDark, T }) {
           }/>
         <RunRing value={total} max={runGoal} isDark={isDark} T={T}/>
         <RunMilestones value={total} max={runGoal} T={T}/>
+        {/* Stats strip */}
         <div style={{ display:"flex", gap:16, flexWrap:"wrap", justifyContent:"center" }}>
           {[{l:"Total KM",v:total.toFixed(1),c:T.accent},{l:"Faltan",v:Math.max(runGoal-total,0).toFixed(1)+"km",c:T.muted},{l:"Carreras",v:runs.length,c:T.blue},{l:"Mejor pace",v:runs.length?[...runs].sort((a,b)=>a.pace?.localeCompare(b.pace))[0]?.pace||"—":"—",c:T.green}].map(m=>(
             <div key={m.l} style={{ textAlign:"center" }}>
@@ -990,9 +946,9 @@ function Running({ runs, setRuns, runGoal, setRunGoal, isDark, T }) {
         <div style={st.card}>
           <SH title="➕ Registrar Carrera"/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
-            {[["Fecha","date","date",TODAY],["Distancia (km)","km","number","10.0"],["Tiempo (hh:mm:ss)","time","text","1:00:00"],["LPM (FC media)","lpm","number","150"],["PPM (Cadencia)","ppm","number","170"]].map(([l,k,t,ph])=>(
+            {[["Fecha","date","date"],["Distancia (km)","km","number"],["Tiempo (hh:mm:ss)","time","text"],["LPM (FC media)","lpm","number"],["PPM (Cadencia)","ppm","number"]].map(([l,k,t])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type={t} placeholder={ph} step={k==="km"?"0.1":undefined} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
+                <input style={st.inp} type={t} placeholder="" step={k==="km"?"0.1":undefined} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div><span style={st.lbl}>Pace calculado</span>
               <div style={{ fontSize:24, fontWeight:800, color:T.accent, paddingTop:6 }}>{calcPace(+form.km,form.time)}</div></div>
@@ -1066,10 +1022,10 @@ function Biometria({ bios, setBios, T }) {
           <SH title="⚖️ Registro Steren"/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
             <div><span style={st.lbl}>Fecha</span><input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            <div><span style={st.lbl}>Estatura (cm)</span><input style={st.inp} type="number" placeholder="175" value={form.height} onChange={e=>setForm(p=>({...p,height:e.target.value}))}/></div>
-            {[["Peso (kg) *","weight","75.5",T.accent],["% Grasa","fat","18.5",T.red],["Masa Muscular kg","muscle","58.2",T.green],["Grasa Visceral","visceral","6",T.orange],["Agua %","water","55.3",T.blue],["Proteína %","protein","17.5",T.purple],["DMR/TMB kcal","dmr","1850",T.muted]].map(([l,k,ph,c])=>(
+            <div><span style={st.lbl}>Estatura (cm)</span><input style={st.inp} type="number" placeholder="" value={form.height} onChange={e=>setForm(p=>({...p,height:e.target.value}))}/></div>
+            {[["Peso (kg) *","weight",T.accent],["% Grasa","fat",T.red],["Masa Muscular kg","muscle",T.green],["Grasa Visceral","visceral",T.orange],["Agua %","water",T.blue],["Proteína %","protein",T.purple],["DMR/TMB kcal","dmr",T.muted]].map(([l,k,c])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder={ph} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
+                <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div><span style={st.lbl}>IMC (auto)</span>
               <div style={{...st.inp,color:(form.height&&form.weight)?T.accent:T.muted,fontWeight:700,pointerEvents:"none"}}>
@@ -1278,26 +1234,27 @@ export default function App() {
   ];
   const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
 
-  // ── Saludo y Fecha ──
-  const currentHour = new Date().getHours();
-  const greeting = currentHour < 12 ? "Buenos días" : currentHour < 18 ? "Buenas tardes" : "Buenas noches";
-  const rawDate = new Date().toLocaleDateString("es-ES", { weekday: 'long', day: 'numeric', month: 'long' });
+  // FECHA Y SALUDO RESTAURADOS
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Buenos días" : hour < 18 ? "Buenas tardes" : "Buenas noches";
+  const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const rawDate = new Date().toLocaleDateString('es-ES', dateOpts);
   const formattedDate = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
 
   return (
     <div style={{ background:T.bg, minHeight:"100vh", fontFamily:"system-ui,-apple-system,'Segoe UI',sans-serif", color:T.text, padding:"16px 18px", transition:"background 0.3s,color 0.3s" }}>
       <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
 
-      {/* Header Dinámico */}
+      {/* Header */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:22, fontWeight:800, color:isDark?T.text:T.navy, letterSpacing:"-0.5px", lineHeight:1.2 }}>
-            {greeting}, Rafa
+          <div style={{ fontSize:26, fontWeight:800, color:isDark?T.accent:T.navy, letterSpacing:"-1px", lineHeight:1 }}>
+            {greeting}, Rafa <span style={{color:T.muted,fontSize:11,fontWeight:500}}>v7</span>
           </div>
-          <div style={{ fontSize:12, color:T.muted, marginTop:4 }}>{formattedDate}</div>
+          <div style={{ fontSize:10, color:T.muted, marginTop:2, fontFamily:"'DM Mono',monospace" }}>{formattedDate} · {program}</div>
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          {today.calIn>0&&<div style={{ background:T.card, borderRadius:999, padding:"6px 14px", fontSize:12, color:T.accent, fontWeight:700, boxShadow:T.shadow }}>{today.calIn} kcal in</div>}
+          {today.calIn>0&&<div style={{ background:T.card, borderRadius:999, padding:"6px 14px", fontSize:12, color:T.accent, fontWeight:700, boxShadow:T.shadow }}>{today.calIn} kcal</div>}
           {today.calOut>0&&<div style={{ background:T.card, borderRadius:999, padding:"6px 14px", fontSize:12, fontWeight:700, color:bCol(today.balance), boxShadow:T.shadow }}>{today.balance>0?"+":""}{today.balance} bal</div>}
           <button onClick={()=>setDark(d=>!d)} style={{ background:T.card, border:`1.5px solid ${T.border}`, borderRadius:999, padding:"7px 16px", cursor:"pointer", fontSize:12, color:T.text, fontWeight:600 }}>{isDark?"☀️ Light":"🌙 Dark"}</button>
           <button onClick={()=>importRef.current?.click()} style={{ background:T.card2, color:T.text, border:`1.5px solid ${T.border}`, borderRadius:999, padding:"8px 16px", fontWeight:700, fontSize:12, cursor:"pointer" }}>↑ Importar</button>
@@ -1315,7 +1272,7 @@ export default function App() {
       </div>
 
       {/* Stable component tree — no inline definitions */}
-      {tab==="dashboard" && <Dashboard today={today} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} isDark={isDark} T={T}/>}
+      {tab==="dashboard" && <Dashboard today={today} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setTab={setTab} isDark={isDark} T={T}/>}
       {tab==="dailylog"  && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} T={T}/>}
       {tab==="nutricion" && <Nutricion today={today} todayFood={todayFood} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
       {tab==="fuerza"    && <Fuerza    strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} T={T}/>}
