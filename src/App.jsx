@@ -49,7 +49,12 @@ const EXERCISE_LIB = {
   "⚡ Core":    ["Plancha","Crunch","Russian Twist","Leg Raise","Dragon Flag","Ab Wheel"],
   "🏃 Cardio":  ["Caminata Inclinada","Carrera en Cinta","Bicicleta Estacionaria","HIIT","Saltar la Cuerda","Escaladora"],
 };
-const TODAY         = new Date().toISOString().split("T")[0];
+const getLocalYYYYMMDD = () => {
+  const d = new Date();
+  // Ajustamos la diferencia de tu zona horaria local antes de convertir a texto
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+};
+const TODAY = getLocalYYYYMMDD();
 // Metas personalizadas de Rafa
 const DEFAULT_GOALS = { cal:2400, p:180, c:280, g:60 };
 const SEED_HEALTH   = [
