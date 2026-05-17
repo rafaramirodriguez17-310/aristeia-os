@@ -99,6 +99,19 @@ const calcPace = (km,t) => {
 };
 const calcIMC = (kg,cm) => cm ? r1(kg/((cm/100)**2)) : null;
 
+// Convertir Pace string a segundos para cálculos (ej. "05:40/km" -> 340s)
+const paceToSecs = (p) => {
+  if (!p || p === "--:--") return 0;
+  const parts = p.replace("/km", "").split(":").map(Number);
+  return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+};
+const secsToPace = (s) => {
+  if (!s || isNaN(s)) return "--:--";
+  const m = Math.floor(s / 60);
+  const sc = Math.round(s % 60).toString().padStart(2, "0");
+  return `${m}:${sc}/km`;
+};
+
 function getWeekStart(dateStr) {
   const d=new Date(dateStr+"T12:00:00"), dow=d.getDay()||7;
   d.setDate(d.getDate()-dow+1);
@@ -329,66 +342,57 @@ function MiniRing({ pct, color, size=42, sw=5 }) {
     </svg>
   );
 }
-function RunRing({ value, max, isDark, T }) {
+
+// Anillo Adaptado para mostrar Progreso de Pace en la meta
+function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
   const size=230, sw=26, r=(size-sw)/2, circ=2*Math.PI*r;
-  const pct=Math.min(value/max,1), off=circ*(1-pct);
-  const done=pct>=1;
+  
+  // Logica de porcentaje: A menor pace, mejor. Asumimos un "peor caso" de pace como base para llenar el anillo (ej. target + 120s)
+  const basePace = targetPaceSecs + 180; 
+  let rawPct = 0;
+  if (currentPaceSecs > 0) {
+    // Cuanto más nos acercamos al target, el porcentaje sube a 100%
+    const progress = basePace - currentPaceSecs;
+    const totalRange = basePace - targetPaceSecs;
+    rawPct = Math.max(0, progress / totalRange);
+  }
+  const pct = Math.min(rawPct, 1);
+  const off = circ*(1-pct);
+  const done = currentPaceSecs > 0 && currentPaceSecs <= targetPaceSecs;
+  
   const gradA=done?T.green:T.accent, gradB=done?T.teal:T.orange;
   const trackClr=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)";
+  
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
       <svg width={size} height={size} style={{ display:"block" }}>
         <defs>
-          <linearGradient id="rring" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="pring" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={gradA}/><stop offset="100%" stopColor={gradB}/>
           </linearGradient>
-          <filter id="rGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="pGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={trackClr} strokeWidth={sw}
           transform={`rotate(-90 ${size/2} ${size/2})`}/>
-        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#rring)"
+        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#pring)"
           strokeWidth={sw} strokeLinecap="round"
           strokeDasharray={`${circ} ${circ}`} strokeDashoffset={off}
           transform={`rotate(-90 ${size/2} ${size/2})`}
-          filter="url(#rGlow)"
+          filter="url(#pGlow)"
           style={{ transition:"stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)" }}/>}
       </svg>
       <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2 }}>
-        <div style={{ fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.1em", textTransform:"uppercase" }}>DISTANCIA</div>
-        <div style={{ fontSize:52, fontWeight:900, color:done?T.green:gradA, lineHeight:1 }}>{value.toFixed(1)}</div>
-        <div style={{ fontSize:12, color:T.muted }}>/ {max} km meta</div>
+        <div style={{ fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.1em", textTransform:"uppercase" }}>PACE ACTUAL</div>
+        <div style={{ fontSize:46, fontWeight:900, color:done?T.green:gradA, lineHeight:1 }}>{currentPaceSecs > 0 ? secsToPace(currentPaceSecs) : "--:--"}</div>
+        <div style={{ fontSize:12, color:T.muted }}>/ {secsToPace(targetPaceSecs)} meta</div>
         <div style={{ fontSize:12, fontWeight:700, color:done?T.green:T.muted, marginTop:2 }}>
-          {Math.round(pct*100)}%{done?" 🎉 META LOGRADA":""}
+          {done ? "🎉 META LOGRADA" : `${Math.round(pct*100)}% de avance`}
         </div>
       </div>
     </div>
   );
 }
-function RunMilestones({ value, max, T }) {
-  const milestones=[{km:5,l:"5K"},{km:10,l:"10K"},{km:15,l:"15K"},{km:max,l:"🏁"}];
-  const pct=Math.min(value/max,1);
-  return (
-    <div style={{ width:"100%", maxWidth:420, padding:"0 8px" }}>
-      <div style={{ position:"relative", height:8, background:T.card2, borderRadius:999, marginBottom:30, marginTop:8 }}>
-        <div style={{ position:"absolute", inset:0, width:`${pct*100}%`, borderRadius:999, transition:"width 0.8s ease",
-          background:`linear-gradient(to right, ${T.accent}, ${T.orange}, ${T.green})` }}/>
-        {milestones.map(m=>{
-          const mp=Math.min(m.km/max,1)*100, reached=value>=m.km;
-          return (
-            <div key={m.km} style={{ position:"absolute", left:`${mp}%`, top:"50%", transform:"translate(-50%,-50%)", zIndex:2 }}>
-              <div style={{ width:16, height:16, borderRadius:"50%", border:`2px solid ${reached?T.green:T.border}`,
-                background:reached?T.green:T.card3, display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.3s" }}>
-                {reached&&<div style={{ width:6, height:6, borderRadius:"50%", background:"#fff" }}/>}
-              </div>
-              <div style={{ position:"absolute", top:20, left:"50%", transform:"translateX(-50%)", fontSize:9,
-                color:reached?T.green:T.muted, whiteSpace:"nowrap", fontWeight:reached?700:400 }}>{m.l}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+
 function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
   const st=mkS(T);
   return (
@@ -990,7 +994,6 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
       if(m) {
          newSets.push({ id:uid(), exercise:m[1].trim(), sets:m[2]?+m[2]:"", reps:m[3]?+m[3]:"", weight:m[4]?+m[4]:"", rpe:"", date:activeDate, program });
       } else {
-         // Si no hace match con nada (aunque es poco probable), guarda toda la línea como nombre
          newSets.push({ id:uid(), exercise:txt, sets:"", reps:"", weight:"", rpe:"", date:activeDate, program });
       }
     });
@@ -1155,19 +1158,23 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: RUNNING
 // ─────────────────────────────────────────────────────────────────────────────
-function Running({ runs, setRuns, runGoal, setRunGoal, shoes, setShoes, activeDate, isDark, T }) {
+function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime, shoes, setShoes, activeDate, isDark, T }) {
   const st=mkS(T);
   const [form,setForm]=useState({ date:activeDate,km:"",time:"",lpm:"",ppm:"",shoe:"" });
   const [editId,setEId]=useState(null), [editRow,setER]=useState({});
   
-  // Calculadora de Ritmo (Media Maratón La Prensa u otra)
-  const [targetTime, setTargetTime] = useState("02:00:00");
   const requiredPace = calcPace(runGoal, targetTime);
+  const reqSecs = paceToSecs(requiredPace);
   
   useEffect(() => { setForm(p => ({ ...p, date: activeDate })); }, [activeDate]);
 
   const tip=p=><ChartTip {...p} T={T}/>;
   const total=runs.reduce((s,r)=>s+r.km,0);
+  
+  // Stats para la meta
+  const validPaces = runs.map(r => paceToSecs(r.pace)).filter(s => s > 0);
+  const bestPaceSecs = validPaces.length ? Math.min(...validPaces) : 0;
+  const avgPaceSecs = validPaces.length ? validPaces.reduce((a,b)=>a+b,0) / validPaces.length : 0;
   
   const handleShoeChange = (e) => {
     const val = e.target.value;
@@ -1195,8 +1202,8 @@ function Running({ runs, setRuns, runGoal, setRunGoal, shoes, setShoes, activeDa
       {/* Calculadora de Pace para Metas Específicas */}
       <div style={{...st.card2, background: T.accentDim, border:`1px solid ${T.accent}50`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: T.accent, marginBottom: 4 }}>🏁 Planificador de Carrera (Ej. Media Maratón)</div>
-          <div style={{ fontSize: 11, color: T.muted }}>Ingresa tu objetivo de tiempo para la distancia meta ({runGoal} km). El ritmo (pace) necesario y volumen sugerido se calcularán solos.</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: T.accent, marginBottom: 4 }}>🏁 Objetivo de Carrera ({runGoal} km)</div>
+          <div style={{ fontSize: 11, color: T.muted }}>Edita tu meta de tiempo. El anillo de progreso de abajo evaluará cómo se compara tu ritmo de entrenamiento vs el requerido.</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div>
@@ -1212,7 +1219,7 @@ function Running({ runs, setRuns, runGoal, setRunGoal, shoes, setShoes, activeDa
 
       <div style={st.g2}>
         <div style={{ ...st.card, display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
-          <SH title="🏃 Progreso de Carrera"
+          <SH title="🏃 Progreso de Pace"
             right={
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <span style={st.lbl}>Meta (km):</span>
@@ -1220,10 +1227,10 @@ function Running({ runs, setRuns, runGoal, setRunGoal, shoes, setShoes, activeDa
                   value={runGoal} onChange={e=>setRunGoal(+e.target.value||21.1)}/>
               </div>
             }/>
-          <RunRing value={total} max={runGoal} isDark={isDark} T={T}/>
-          <RunMilestones value={total} max={runGoal} T={T}/>
-          <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center" }}>
-            {[{l:"Total KM",v:total.toFixed(1),c:T.accent},{l:"Faltan",v:Math.max(runGoal-total,0).toFixed(1)+"km",c:T.muted},{l:"Carreras",v:runs.length,c:T.blue},{l:"Mejor pace",v:runs.length?[...runs].sort((a,b)=>a.pace?.localeCompare(b.pace))[0]?.pace||"—":"—",c:T.green}].map(m=>(
+          <PaceRing currentPaceSecs={avgPaceSecs} targetPaceSecs={reqSecs} isDark={isDark} T={T}/>
+          
+          <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center", marginTop: 8 }}>
+            {[{l:"Pace Requerido",v:requiredPace,c:T.muted},{l:"Pace Promedio",v:avgPaceSecs?secsToPace(avgPaceSecs):"—",c:T.blue},{l:"Mejor Pace",v:bestPaceSecs?secsToPace(bestPaceSecs):"—",c:T.green}].map(m=>(
               <div key={m.l} style={{ textAlign:"center" }}>
                 <div style={{fontSize:9,color:T.muted,fontWeight:800,letterSpacing:"0.09em"}}>{m.l.toUpperCase()}</div>
                 <div style={{fontSize:22,fontWeight:900,color:m.c,letterSpacing:"-0.5px"}}>{m.v}</div>
@@ -1424,79 +1431,132 @@ function Biometria({ bios, setBios, activeDate, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: SUEÑO (NUEVA TAB DE ANÁLISIS)
+// TAB: SUEÑO (Whoop-style & Semanal)
 // ─────────────────────────────────────────────────────────────────────────────
 function Sueno({ healthLog, T }) {
   const st = mkS(T);
   const tip = p => <ChartTip {...p} T={T} />;
   
-  // Filtrar solo los días que tengan registro de sueño o score, ordenados cronológicamente
-  const sleepData = healthLog
-    .filter(d => d.sleep > 0 || d.score > 0)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  // Extraer registros con sueño/score
+  const sleepData = useMemo(() => {
+    return healthLog.filter(d => d.sleep > 0 || d.score > 0).sort((a, b) => a.date.localeCompare(b.date));
+  }, [healthLog]);
 
+  // Agrupar por semana
+  const { weeks, weekKeys } = useMemo(() => {
+    const wks = {};
+    sleepData.forEach(d => {
+      const wk = getWeekStart(d.date);
+      if (!wks[wk]) wks[wk] = [];
+      wks[wk].push(d);
+    });
+    return { weeks: wks, weekKeys: Object.keys(wks).sort().reverse() };
+  }, [sleepData]);
+
+  const [selWk, setSelWk] = useState(() => weekKeys[0] || getWeekStart(TODAY));
+  
+  // Asegurarnos que la semana seleccionada exista si los datos cambian
+  useEffect(() => {
+    if (weekKeys.length > 0 && !weeks[selWk]) {
+      setSelWk(weekKeys[0]);
+    }
+  }, [weekKeys, weeks, selWk]);
+
+  const currentWkData = weeks[selWk] || [];
   const lastNight = sleepData[sleepData.length - 1];
+
+  // Calcular promedios de la semana seleccionada
+  const avgWkSleep = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.sleep||0),0) / currentWkData.length) : 0;
+  const avgWkScore = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.score||0),0) / currentWkData.length) : 0;
+
+  const scCol = s => s >= 85 ? T.green : s >= 70 ? T.accent : T.red;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* WIDGET WHOOP-STYLE ULTIMA NOCHE */}
+      {lastNight && (
+        <div style={{ display: "flex", alignItems: "center", gap: 16, background: T.card, borderRadius: 24, padding: "12px 20px", boxShadow: T.shadow, border: `1px solid ${T.border}` }}>
+          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={46} sw={5}/>
+          <div>
+            <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>SLEEP PERFORMANCE (ANOCHE)</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginTop: 2 }}>
+              Score: <span style={{ color: scCol(lastNight.score) }}>{lastNight.score}%</span> • {fmt(lastNight.sleep, 1)} hrs
+            </div>
+          </div>
+        </div>
+      )}
+
       {sleepData.length === 0 ? (
         <div style={st.card}>
           <Placeholder msg="No hay datos de sueño registrados en el Daily Log." T={T} />
         </div>
       ) : (
         <>
-          <div style={st.g2}>
-            <div style={{ ...st.card, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <SH title={`Última Noche · ${lastNight.date.slice(5)}`} />
-              <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
-                <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>HORAS DE SUEÑO</div>
-                  <div style={{ fontSize: 36, fontWeight: 900, color: lastNight.sleep >= 7 ? T.green : lastNight.sleep >= 6 ? T.accent : T.red }}>
-                    {lastNight.sleep ? `${fmt(lastNight.sleep, 1)}h` : "—"}
-                  </div>
+          {/* SELECTOR DE SEMANA Y PROMEDIOS */}
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
+            <div style={{ ...st.card, flex: 1, minWidth: 260 }}>
+              <SH title="🗓 Selector de Semana" />
+              <select style={st.sel} value={selWk} onChange={e => setSelWk(e.target.value)}>
+                {weekKeys.map(wk => <option key={wk} value={wk}>{fmtWeek(wk)}</option>)}
+              </select>
+            </div>
+            
+            <div style={{ ...st.card, flex: 1.5, minWidth: 260, display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROMEDIO HORAS</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: avgWkSleep >= 7 ? T.green : avgWkSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                  {avgWkSleep ? `${fmt(avgWkSleep, 1)}h` : "—"}
                 </div>
-                <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>SLEEP SCORE</div>
-                  <div style={{ fontSize: 36, fontWeight: 900, color: lastNight.score >= 85 ? T.green : lastNight.score >= 70 ? T.accent : T.red }}>
-                    {lastNight.score ? `${lastNight.score}%` : "—"}
-                  </div>
+              </div>
+              <div style={{ width: 1, height: 40, background: T.border }} />
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROMEDIO SCORE</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: avgWkScore >= 85 ? T.green : avgWkScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                  {avgWkScore ? `${Math.round(avgWkScore)}%` : "—"}
                 </div>
               </div>
             </div>
-
-            <div style={st.card}>
-              <SH title="⏱️ Tendencia Horas de Sueño (Meta: 8h)" />
-              <ResponsiveContainer width="100%" height={160}>
-                <LineChart data={sleepData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                  <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 9 }} tickFormatter={d => d.slice(5)} />
-                  <YAxis tick={{ fill: T.muted, fontSize: 9 }} domain={[4, 10]} />
-                  <Tooltip content={tip} />
-                  <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" />
-                  <Line type="monotone" dataKey="sleep" stroke={T.blue} strokeWidth={3} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} name="Horas" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
           </div>
 
-          <div style={st.card}>
-            <SH title="🔋 Evolución Sleep Score (Meta: 85%)" />
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={sleepData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                <defs>
-                  <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={T.purple} stopOpacity={0.4} />
-                    <stop offset="95%" stopColor={T.purple} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10 }} tickFormatter={d => d.slice(5)} />
-                <YAxis tick={{ fill: T.muted, fontSize: 10 }} domain={[40, 100]} />
-                <Tooltip content={tip} />
-                <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
-                <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={3} dot={{ fill: T.purple, r: 4 }} name="Score %" />
-              </AreaChart>
-            </ResponsiveContainer>
+          {/* GRAFICAS DE LA SEMANA */}
+          <div style={st.g2}>
+            <div style={st.card}>
+              <SH title="⏱️ Horas (Meta: 8h)" />
+              {currentWkData.length < 2 ? <Placeholder msg="Registra más días en esta semana" T={T} /> : (
+                <ResponsiveContainer width="100%" height={160}>
+                  <LineChart data={currentWkData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 9 }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 9 }} domain={[4, 10]} />
+                    <Tooltip content={tip} />
+                    <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" />
+                    <Line type="monotone" dataKey="sleep" stroke={T.blue} strokeWidth={3} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} name="Horas" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div style={st.card}>
+              <SH title="🔋 Sleep Score (Meta: 85%)" />
+              {currentWkData.length < 2 ? <Placeholder msg="Registra más días en esta semana" T={T} /> : (
+                <ResponsiveContainer width="100%" height={160}>
+                  <AreaChart data={currentWkData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                    <defs>
+                      <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={T.purple} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={T.purple} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10 }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 10 }} domain={[40, 100]} />
+                    <Tooltip content={tip} />
+                    <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
+                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={3} dot={{ fill: T.purple, r: 4 }} name="Score %" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </>
       )}
@@ -1527,13 +1587,14 @@ export default function App() {
   const [strLog,   setStr]  =useState(()=>lsGet("str", []));
   const [runs,     setRuns] =useState(()=>lsGet("runs",[]));
   const [bios,     setBios] =useState(()=>lsGet("bios",[]));
-  // Estado para los zapatos de Running
   const [shoes,    setShoes]=useState(()=>lsGet("shoes", []));
   const [goals,    setGoals]=useState(()=>lsGet("goals",{...DEFAULT_GOALS}));
   const [program,  setProg] =useState(()=>lsGet("prog","Hipertrofia"));
   const [plans,    setPlans]=useState(()=>lsGet("plans",Object.fromEntries(Object.entries(PLANS).map(([k,v])=>[k,{...v}]))));
   const [projects, setProjs]=useState(()=>lsGet("projs",{}));
-  const [runGoal,  setRunGoal]=useState(()=>lsGet("runGoal",21.1));
+  
+  const [runGoal,    setRunGoal]   =useState(()=>lsGet("runGoal",21.1));
+  const [targetTime, setTargetTime] =useState(()=>lsGet("targetTime", "02:00:00"));
 
   useEffect(()=>{lsSet("dark",isDark);},[isDark]);
   useEffect(()=>{lsSet("hl",healthLog);},[healthLog]);
@@ -1548,6 +1609,7 @@ export default function App() {
   useEffect(()=>{lsSet("plans",plans);},[plans]);
   useEffect(()=>{lsSet("projs",projects);},[projects]);
   useEffect(()=>{lsSet("runGoal",runGoal);},[runGoal]);
+  useEffect(()=>{lsSet("targetTime",targetTime);},[targetTime]);
 
   const importRef=useRef(null);
   const handleImport=useCallback(e=>{
@@ -1568,6 +1630,7 @@ export default function App() {
         if(d.weeklyPlans&&typeof d.weeklyPlans==="object") setPlans(d.weeklyPlans);
         if(d.projects&&typeof d.projects==="object")  setProjs(d.projects);
         if(typeof d.runGoal==="number")               setRunGoal(d.runGoal);
+        if(typeof d.targetTime==="string")            setTargetTime(d.targetTime);
         alert("✅ Importación exitosa");
       } catch(err){alert("❌ JSON inválido: "+err.message);}
     };
@@ -1575,11 +1638,11 @@ export default function App() {
   },[]);
 
   const exportJSON=useCallback(()=>{
-    const data={healthLog,foodLog,nutritionDB:db,strengthLog:strLog,runs,biometrics:bios,shoes,goals,program,weeklyPlans:plans,projects,runGoal,exportedAt:new Date().toISOString()};
+    const data={healthLog,foodLog,nutritionDB:db,strengthLog:strLog,runs,biometrics:bios,shoes,goals,program,weeklyPlans:plans,projects,runGoal,targetTime,exportedAt:new Date().toISOString()};
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
     a.download=`aristeia_v7_${TODAY}.json`; a.click();
-  },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,projects,runGoal]);
+  },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,projects,runGoal,targetTime]);
 
   const getDayData=useCallback((date)=>{
     const h=healthLog.find(d=>d.date===date)||{};
@@ -1635,7 +1698,6 @@ export default function App() {
             {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
           </div>
           
-          {/* MÁQUINA DEL TIEMPO - CONTROL GLOBAL DE FECHA */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
             <div style={{ fontSize:12, color:T.muted, fontWeight:500 }}>
               {formattedDate}
@@ -1685,7 +1747,7 @@ export default function App() {
         {tab==="dailylog"  && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="nutricion" && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
         {tab==="fuerza"    && <Fuerza    strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
-        {tab==="running"   && <Running   runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="running"   && <Running   runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
         {tab==="bio"       && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
         {tab==="sleep"     && <Sueno     healthLog={healthLog} T={T}/>}
       </div>
