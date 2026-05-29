@@ -35,7 +35,7 @@ const PLANS = {
   Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
   Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",           Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
   Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",            Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
-  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",             Dom:"🔋 Descanso" },
+  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
 };
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 const DAY_FULL_ES = { Lun:"LUNES", Mar:"MARTES", Mié:"MIÉRCOLES", Jue:"JUEVES", Vie:"VIERNES", Sáb:"SÁBADO", Dom:"DOMINGO" };
@@ -99,7 +99,6 @@ const calcPace = (km,t) => {
 };
 const calcIMC = (kg,cm) => cm ? r1(kg/((cm/100)**2)) : null;
 
-// Convertir Pace string a segundos
 const paceToSecs = (p) => {
   if (!p || p === "--:--") return 0;
   const parts = p.replace("/km", "").split(":").map(Number);
@@ -605,27 +604,30 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: CALENDARIO (Nuevo)
+// TAB: CALENDARIO (Actualizado con Info Diaria y UI de Mes Rediseñado)
 // ─────────────────────────────────────────────────────────────────────────────
 function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) {
   const st = mkS(T);
   const [selMonthStr, setSelMonthStr] = useState(() => activeDate.slice(0, 7));
 
+  // Sincronizar el mes si la fecha activa cambia desde otro componente
+  useEffect(() => {
+    if (!activeDate.startsWith(selMonthStr)) {
+      setSelMonthStr(activeDate.slice(0, 7));
+    }
+  }, [activeDate, selMonthStr]);
+
   const [year, month] = selMonthStr.split("-").map(Number);
   const daysInMonth = new Date(year, month, 0).getDate();
   const firstDay = new Date(year, month - 1, 1).getDay();
-  const startPad = firstDay === 0 ? 6 : firstDay - 1; // Hacer que Lunes sea 0
+  const startPad = firstDay === 0 ? 6 : firstDay - 1; 
 
   const monthData = allDayData.filter(d => d.date.startsWith(selMonthStr));
-  const monthBios = bios.filter(b => b.date.startsWith(selMonthStr));
 
   const avgCalIn = monthData.filter(d => d.calIn > 0).reduce((s, d) => s + d.calIn, 0) / (monthData.filter(d => d.calIn > 0).length || 1);
   const avgCalOut = monthData.filter(d => d.calOut > 0).reduce((s, d) => s + d.calOut, 0) / (monthData.filter(d => d.calOut > 0).length || 1);
-  const avgProt = monthData.filter(d => d.p > 0).reduce((s, d) => s + d.p, 0) / (monthData.filter(d => d.p > 0).length || 1);
-  
-  // Peso promedio del mes en libras
-  const avgWeightKg = monthBios.length ? monthBios.reduce((s, b) => s + b.weight, 0) / monthBios.length : 0;
-  const avgWeightLbs = avgWeightKg * 2.20462;
+  const avgSleep = monthData.filter(d => d.sleep > 0).reduce((s, d) => s + d.sleep, 0) / (monthData.filter(d => d.sleep > 0).length || 1);
+  const avgScore = monthData.filter(d => d.score > 0).reduce((s, d) => s + d.score, 0) / (monthData.filter(d => d.score > 0).length || 1);
 
   const prevMonth = () => {
     const d = new Date(year, month - 2, 1);
@@ -644,22 +646,25 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
     return { d, dateStr, data };
   });
 
+  const selectedDayData = monthData.find(d => d.date === activeDate) || { calIn: 0, calOut: 0, p: 0, c: 0, sleep: 0, score: 0 };
+  const isSelectedDayInMonth = activeDate.startsWith(selMonthStr);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       
-      {/* Selector de Mes */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: T.card, padding: "16px 22px", borderRadius: 26, boxShadow: T.shadow }}>
-        <button style={st.icon(T.text)} onClick={prevMonth}>◀ Ant</button>
-        <div style={{ fontSize: 18, fontWeight: 900, textTransform: "capitalize" }}>
+      {/* Selector de Mes Estilo Apple Fitness */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", marginBottom: 4 }}>
+        <button style={{ ...st.icon(T.text), background: T.card, padding: "10px 18px", borderRadius: 999, fontWeight: 900, boxShadow: T.shadow, cursor: "pointer", transition: "all 0.15s" }} onClick={prevMonth}>◀</button>
+        <div style={{ fontSize: 22, fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: T.text }}>
           {new Date(year, month - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
         </div>
-        <button style={st.icon(T.text)} onClick={nextMonth}>Sig ▶</button>
+        <button style={{ ...st.icon(T.text), background: T.card, padding: "10px 18px", borderRadius: 999, fontWeight: 900, boxShadow: T.shadow, cursor: "pointer", transition: "all 0.15s" }} onClick={nextMonth}>▶</button>
       </div>
 
       <div style={st.g2}>
         {/* Grid del Calendario */}
-        <div style={st.card}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 12, textAlign: "center" }}>
+        <div style={{ ...st.card, padding: "24px 20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, marginBottom: 16, textAlign: "center" }}>
             {["L", "M", "X", "J", "V", "S", "D"].map(d => (
               <div key={d} style={{ fontSize: 10, fontWeight: 800, color: T.muted }}>{d}</div>
             ))}
@@ -675,12 +680,12 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                   style={{
                     background: isSelected ? T.accent : hasData ? T.card2 : "transparent",
                     border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
-                    borderRadius: 12, aspectRatio: "1/1", display: "flex", flexDirection: "column",
+                    borderRadius: 14, aspectRatio: "1/1", display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center", cursor: "pointer",
-                    color: isSelected ? "#fff" : T.text, transition: "all 0.15s"
+                    color: isSelected ? "#fff" : T.text, transition: "all 0.15s", padding: 0
                 }}>
                   <span style={{ fontSize: 13, fontWeight: isToday || isSelected ? 900 : 600 }}>{day.d}</span>
-                  <div style={{ display: "flex", gap: 2, marginTop: 3 }}>
+                  <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
                     {day.data?.calIn > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.accent }}/>}
                     {day.data?.p > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.green }}/>}
                     {day.data?.sleep > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.purple }}/>}
@@ -691,39 +696,68 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           </div>
         </div>
 
-        {/* Monthly Recap */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ ...st.card2, border: `1.5px solid ${T.accent}40`, padding: 20 }}>
+        {/* Panel lateral: Día seleccionado y Recap */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          
+          {isSelectedDayInMonth && (
+            <div style={{ ...st.card2, border: `1.5px solid ${T.accent}`, padding: 20, boxShadow: `0 8px 24px ${T.accent}20` }}>
+              <SH title={`📌 Info del ${activeDate === TODAY ? "Día (Hoy)" : activeDate}`} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL IN / OUT</div>
+                  <div style={{ fontSize: 18, fontWeight: 900 }}>
+                    <span style={{ color: T.accent }}>{selectedDayData.calIn || 0}</span>
+                    <span style={{ color: T.muted, fontSize: 14 }}> / </span>
+                    <span style={{ color: T.blue }}>{selectedDayData.calOut || 0}</span>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>PROTEÍNA</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.green }}>{Math.round(selectedDayData.p || 0)}g</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SUEÑO</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.purple }}>{selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SCORE</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.teal }}>{selectedDayData.score ? `${selectedDayData.score}%` : "—"}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ ...st.card, padding: 20, flex: 1 }}>
             <SH title="📊 Recap del Mes" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
                 <span style={st.lbl}>Promedio Cal In</span>
-                <div style={{ fontSize: 24, fontWeight: 900, color: T.accent }}>{Math.round(avgCalIn)}<span style={{fontSize:12, color:T.muted}}> kcal</span></div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: T.accent }}>{Math.round(avgCalIn)}<span style={{fontSize:11, color:T.muted}}> kcal</span></div>
               </div>
               <div>
                 <span style={st.lbl}>Promedio Cal Out</span>
-                <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{Math.round(avgCalOut)}<span style={{fontSize:12, color:T.muted}}> kcal</span></div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: T.blue }}>{Math.round(avgCalOut)}<span style={{fontSize:11, color:T.muted}}> kcal</span></div>
               </div>
               <div>
-                <span style={st.lbl}>Proteína Promedio</span>
-                <div style={{ fontSize: 24, fontWeight: 900, color: T.green }}>{Math.round(avgProt)}<span style={{fontSize:12, color:T.muted}}> g</span></div>
+                <span style={st.lbl}>Sueño Promedio</span>
+                <div style={{ fontSize: 22, fontWeight: 900, color: T.purple }}>{avgSleep > 0 ? avgSleep.toFixed(1) : "—"}<span style={{fontSize:11, color:T.muted}}> h</span></div>
               </div>
               <div>
-                <span style={st.lbl}>Peso Promedio (Lbs)</span>
-                <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>
-                  {avgWeightLbs > 0 ? avgWeightLbs.toFixed(1) : "—"}<span style={{fontSize:12, color:T.muted}}> lbs</span>
-                </div>
+                <span style={st.lbl}>Score Promedio</span>
+                <div style={{ fontSize: 22, fontWeight: 900, color: T.teal }}>{avgScore > 0 ? Math.round(avgScore) : "—"}<span style={{fontSize:11, color:T.muted}}> %</span></div>
               </div>
             </div>
-          </div>
-          
-          <div style={{ ...st.card, flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Días de registro (Log)</div>
-            <div style={{ fontSize: 36, fontWeight: 900, color: T.text, lineHeight: 1 }}>
-              {monthData.length} / {daysInMonth}
+            
+            <div style={{ marginTop: 24 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8, color: T.muted }}>DÍAS REGISTRADOS</div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <div style={{ fontSize: 28, fontWeight: 900, color: T.text, lineHeight: 1 }}>{monthData.length}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.muted }}>/ {daysInMonth}</div>
+              </div>
+              <ProgBar value={monthData.length} max={daysInMonth} color={T.accent} h={6} />
             </div>
-            <ProgBar value={monthData.length} max={daysInMonth} color={T.accent} h={6} />
           </div>
+
         </div>
       </div>
     </div>
@@ -1804,7 +1838,6 @@ export default function App() {
   const activeFood = useMemo(()=>foodLog.filter(f=>f.date===activeDate), [foodLog, activeDate]);
   const allDayData = useMemo(()=>allDates.map(d=>getDayData(d)), [allDates, getDayData]);
 
-  const st=mkS(T);
   const TABS=[
     {id:"dashboard",l:"📊 Dashboard"},
     {id:"calendario",l:"📅 Calendario"},
@@ -1832,52 +1865,49 @@ export default function App() {
       <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
 
       {/* ── Header Modificado ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
-        <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-          <div>
-            <div style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1, color:T.text }}>
-              {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
-            </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-              {/* Fecha interactiva unificada */}
-              <label style={{ 
-                display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
-                background: T.card2, padding: "6px 12px", borderRadius: 12, border: `1.5px solid ${T.border}`,
-                transition: "all 0.15s"
-              }}>
-                <span style={{ fontSize:13, color:T.text, fontWeight:700 }}>{formattedDate}</span>
-                <span style={{ fontSize:10, color:T.accent }}>▼</span>
-                <input 
-                  type="date" 
-                  value={activeDate} 
-                  max={TODAY} 
-                  onChange={(e) => setActiveDate(e.target.value)} 
-                  style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
-                />
-              </label>
-
-              {activeDate !== TODAY && (
-                <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 10, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontWeight: 800 }}>
-                  ↺ Hoy
-                </button>
-              )}
-            </div>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
+        <div>
+          <div style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1, color:T.text }}>
+            {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
           </div>
-
-          {/* Widget de Clima */}
-          {weather && (
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+            {/* Fecha interactiva unificada con Hack de Opacity para input type date nativo */}
             <div style={{ 
-              display: "flex", flexDirection: "column", justifyContent: "center",
-              background: T.card, padding: "8px 16px", borderRadius: 16, 
-              border: `1.5px solid ${T.border}`, boxShadow: T.shadow, height: "100%"
+              position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
+              background: T.card2, padding: "8px 14px", borderRadius: 14, border: `1.5px solid ${T.border}`,
+              transition: "all 0.15s"
             }}>
-              <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>CLIMA EN S.P.S.</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: T.text, display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-                {getWeatherEmoji(weather.weathercode)} {weather.temperature}°C
-              </div>
+              <span style={{ fontSize:13, color:T.text, fontWeight:700 }}>{formattedDate}</span>
+              <span style={{ fontSize:10, color:T.accent }}>▼</span>
+              <input 
+                type="date" 
+                value={activeDate} 
+                max={TODAY} 
+                onChange={(e) => setActiveDate(e.target.value)} 
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}
+              />
             </div>
-          )}
+
+            {activeDate !== TODAY && (
+              <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 14, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontWeight: 800 }}>
+                ↺ Hoy
+              </button>
+            )}
+
+            {/* Widget de Clima */}
+            {weather && (
+              <div style={{ 
+                display: "flex", alignItems: "center", gap: 8,
+                background: T.card2, padding: "8px 14px", borderRadius: 14, 
+                border: `1.5px solid ${T.border}`
+              }}>
+                <span style={{ fontSize: 16 }}>{getWeatherEmoji(weather.weathercode)}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: T.text }}>{weather.temperature}°C</span>
+                <span style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.05em" }}>S.P.S.</span>
+              </div>
+            )}
+          </div>
         </div>
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
