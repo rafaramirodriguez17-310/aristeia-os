@@ -99,7 +99,7 @@ const calcPace = (km,t) => {
 };
 const calcIMC = (kg,cm) => cm ? r1(kg/((cm/100)**2)) : null;
 
-// Convertir Pace string a segundos para cálculos (ej. "05:40/km" -> 340s)
+// Convertir Pace string a segundos
 const paceToSecs = (p) => {
   if (!p || p === "--:--") return 0;
   const parts = p.replace("/km", "").split(":").map(Number);
@@ -141,6 +141,16 @@ function getCurrentWeekDates(refDateStr = TODAY) {
     return d.toISOString().split("T")[0];
   });
 }
+
+const getWeatherEmoji = (code) => {
+  if ([0].includes(code)) return "☀️";
+  if ([1,2,3].includes(code)) return "⛅";
+  if ([45,48].includes(code)) return "🌫️";
+  if ([51,53,55,61,63,65,80,81,82].includes(code)) return "🌧️";
+  if ([71,73,75,85,86].includes(code)) return "❄️";
+  if ([95,96,99].includes(code)) return "⛈️";
+  return "🌡️";
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STYLE FACTORY
@@ -343,15 +353,11 @@ function MiniRing({ pct, color, size=42, sw=5 }) {
   );
 }
 
-// Anillo Adaptado para mostrar Progreso de Pace en la meta
 function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
   const size=230, sw=26, r=(size-sw)/2, circ=2*Math.PI*r;
-  
-  // Logica de porcentaje: A menor pace, mejor. Asumimos un "peor caso" de pace como base para llenar el anillo (ej. target + 120s)
   const basePace = targetPaceSecs + 180; 
   let rawPct = 0;
   if (currentPaceSecs > 0) {
-    // Cuanto más nos acercamos al target, el porcentaje sube a 100%
     const progress = basePace - currentPaceSecs;
     const totalRange = basePace - targetPaceSecs;
     rawPct = Math.max(0, progress / totalRange);
@@ -592,6 +598,132 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
               </div>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB: CALENDARIO (Nuevo)
+// ─────────────────────────────────────────────────────────────────────────────
+function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) {
+  const st = mkS(T);
+  const [selMonthStr, setSelMonthStr] = useState(() => activeDate.slice(0, 7));
+
+  const [year, month] = selMonthStr.split("-").map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const startPad = firstDay === 0 ? 6 : firstDay - 1; // Hacer que Lunes sea 0
+
+  const monthData = allDayData.filter(d => d.date.startsWith(selMonthStr));
+  const monthBios = bios.filter(b => b.date.startsWith(selMonthStr));
+
+  const avgCalIn = monthData.filter(d => d.calIn > 0).reduce((s, d) => s + d.calIn, 0) / (monthData.filter(d => d.calIn > 0).length || 1);
+  const avgCalOut = monthData.filter(d => d.calOut > 0).reduce((s, d) => s + d.calOut, 0) / (monthData.filter(d => d.calOut > 0).length || 1);
+  const avgProt = monthData.filter(d => d.p > 0).reduce((s, d) => s + d.p, 0) / (monthData.filter(d => d.p > 0).length || 1);
+  
+  // Peso promedio del mes en libras
+  const avgWeightKg = monthBios.length ? monthBios.reduce((s, b) => s + b.weight, 0) / monthBios.length : 0;
+  const avgWeightLbs = avgWeightKg * 2.20462;
+
+  const prevMonth = () => {
+    const d = new Date(year, month - 2, 1);
+    setSelMonthStr(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  };
+  const nextMonth = () => {
+    const d = new Date(year, month, 1);
+    setSelMonthStr(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  };
+
+  const daysGrid = Array.from({ length: startPad + daysInMonth }, (_, i) => {
+    if (i < startPad) return null;
+    const d = i - startPad + 1;
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const data = monthData.find(x => x.date === dateStr);
+    return { d, dateStr, data };
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      
+      {/* Selector de Mes */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: T.card, padding: "16px 22px", borderRadius: 26, boxShadow: T.shadow }}>
+        <button style={st.icon(T.text)} onClick={prevMonth}>◀ Ant</button>
+        <div style={{ fontSize: 18, fontWeight: 900, textTransform: "capitalize" }}>
+          {new Date(year, month - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
+        </div>
+        <button style={st.icon(T.text)} onClick={nextMonth}>Sig ▶</button>
+      </div>
+
+      <div style={st.g2}>
+        {/* Grid del Calendario */}
+        <div style={st.card}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 12, textAlign: "center" }}>
+            {["L", "M", "X", "J", "V", "S", "D"].map(d => (
+              <div key={d} style={{ fontSize: 10, fontWeight: 800, color: T.muted }}>{d}</div>
+            ))}
+            {daysGrid.map((day, i) => {
+              if (!day) return <div key={`pad-${i}`} />;
+              const isToday = day.dateStr === TODAY;
+              const isSelected = day.dateStr === activeDate;
+              const hasData = day.data && (day.data.calIn > 0 || day.data.calOut > 0 || day.data.sleep > 0);
+              
+              return (
+                <button key={day.dateStr} 
+                  onClick={() => setActiveDate(day.dateStr)}
+                  style={{
+                    background: isSelected ? T.accent : hasData ? T.card2 : "transparent",
+                    border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
+                    borderRadius: 12, aspectRatio: "1/1", display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center", cursor: "pointer",
+                    color: isSelected ? "#fff" : T.text, transition: "all 0.15s"
+                }}>
+                  <span style={{ fontSize: 13, fontWeight: isToday || isSelected ? 900 : 600 }}>{day.d}</span>
+                  <div style={{ display: "flex", gap: 2, marginTop: 3 }}>
+                    {day.data?.calIn > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.accent }}/>}
+                    {day.data?.p > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.green }}/>}
+                    {day.data?.sleep > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.purple }}/>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Monthly Recap */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ ...st.card2, border: `1.5px solid ${T.accent}40`, padding: 20 }}>
+            <SH title="📊 Recap del Mes" />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <span style={st.lbl}>Promedio Cal In</span>
+                <div style={{ fontSize: 24, fontWeight: 900, color: T.accent }}>{Math.round(avgCalIn)}<span style={{fontSize:12, color:T.muted}}> kcal</span></div>
+              </div>
+              <div>
+                <span style={st.lbl}>Promedio Cal Out</span>
+                <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{Math.round(avgCalOut)}<span style={{fontSize:12, color:T.muted}}> kcal</span></div>
+              </div>
+              <div>
+                <span style={st.lbl}>Proteína Promedio</span>
+                <div style={{ fontSize: 24, fontWeight: 900, color: T.green }}>{Math.round(avgProt)}<span style={{fontSize:12, color:T.muted}}> g</span></div>
+              </div>
+              <div>
+                <span style={st.lbl}>Peso Promedio (Lbs)</span>
+                <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>
+                  {avgWeightLbs > 0 ? avgWeightLbs.toFixed(1) : "—"}<span style={{fontSize:12, color:T.muted}}> lbs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ ...st.card, flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Días de registro (Log)</div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: T.text, lineHeight: 1 }}>
+              {monthData.length} / {daysInMonth}
+            </div>
+            <ProgBar value={monthData.length} max={daysInMonth} color={T.accent} h={6} />
+          </div>
         </div>
       </div>
     </div>
@@ -1171,7 +1303,6 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
   const tip=p=><ChartTip {...p} T={T}/>;
   const total=runs.reduce((s,r)=>s+r.km,0);
   
-  // Stats para la meta
   const validPaces = runs.map(r => paceToSecs(r.pace)).filter(s => s > 0);
   const bestPaceSecs = validPaces.length ? Math.min(...validPaces) : 0;
   const avgPaceSecs = validPaces.length ? validPaces.reduce((a,b)=>a+b,0) / validPaces.length : 0;
@@ -1199,7 +1330,6 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       
-      {/* Calculadora de Pace para Metas Específicas */}
       <div style={{...st.card2, background: T.accentDim, border:`1px solid ${T.accent}50`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: T.accent, marginBottom: 4 }}>🏁 Objetivo de Carrera ({runGoal} km)</div>
@@ -1437,12 +1567,10 @@ function Sueno({ healthLog, T }) {
   const st = mkS(T);
   const tip = p => <ChartTip {...p} T={T} />;
   
-  // Extraer registros con sueño/score
   const sleepData = useMemo(() => {
     return healthLog.filter(d => d.sleep > 0 || d.score > 0).sort((a, b) => a.date.localeCompare(b.date));
   }, [healthLog]);
 
-  // Agrupar por semana
   const { weeks, weekKeys } = useMemo(() => {
     const wks = {};
     sleepData.forEach(d => {
@@ -1455,7 +1583,6 @@ function Sueno({ healthLog, T }) {
 
   const [selWk, setSelWk] = useState(() => weekKeys[0] || getWeekStart(TODAY));
   
-  // Asegurarnos que la semana seleccionada exista si los datos cambian
   useEffect(() => {
     if (weekKeys.length > 0 && !weeks[selWk]) {
       setSelWk(weekKeys[0]);
@@ -1465,7 +1592,6 @@ function Sueno({ healthLog, T }) {
   const currentWkData = weeks[selWk] || [];
   const lastNight = sleepData[sleepData.length - 1];
 
-  // Calcular promedios de la semana seleccionada
   const avgWkSleep = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.sleep||0),0) / currentWkData.length) : 0;
   const avgWkScore = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.score||0),0) / currentWkData.length) : 0;
 
@@ -1473,7 +1599,6 @@ function Sueno({ healthLog, T }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* WIDGET WHOOP-STYLE ULTIMA NOCHE */}
       {lastNight && (
         <div style={{ display: "flex", alignItems: "center", gap: 16, background: T.card, borderRadius: 24, padding: "12px 20px", boxShadow: T.shadow, border: `1px solid ${T.border}` }}>
           <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={46} sw={5}/>
@@ -1492,7 +1617,6 @@ function Sueno({ healthLog, T }) {
         </div>
       ) : (
         <>
-          {/* SELECTOR DE SEMANA Y PROMEDIOS */}
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
             <div style={{ ...st.card, flex: 1, minWidth: 260 }}>
               <SH title="🗓 Selector de Semana" />
@@ -1518,7 +1642,6 @@ function Sueno({ healthLog, T }) {
             </div>
           </div>
 
-          {/* GRAFICAS DE LA SEMANA */}
           <div style={st.g2}>
             <div style={st.card}>
               <SH title="⏱️ Horas (Meta: 8h)" />
@@ -1596,6 +1719,21 @@ export default function App() {
   const [runGoal,    setRunGoal]   =useState(()=>lsGet("runGoal",21.1));
   const [targetTime, setTargetTime] =useState(()=>lsGet("targetTime", "02:00:00"));
 
+  // ── ESTADO PARA CLIMA ──
+  const [weather, setWeather] = useState(null);
+
+  // ── EFECTO PARA TRAER EL CLIMA (Coordenadas de San Pedro Sula) ──
+  useEffect(() => {
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=15.5042&longitude=-88.0250&current_weather=true")
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.current_weather) {
+          setWeather(data.current_weather);
+        }
+      })
+      .catch(err => console.error("Error fetching weather:", err));
+  }, []);
+
   useEffect(()=>{lsSet("dark",isDark);},[isDark]);
   useEffect(()=>{lsSet("hl",healthLog);},[healthLog]);
   useEffect(()=>{lsSet("fl",foodLog);},[foodLog]);
@@ -1668,9 +1806,14 @@ export default function App() {
 
   const st=mkS(T);
   const TABS=[
-    {id:"dashboard",l:"📊 Dashboard"},{id:"dailylog",l:"📋 Daily Log"},
-    {id:"nutricion",l:"🥗 Nutrición"},{id:"fuerza",l:"🏋️ Fuerza"},
-    {id:"running",l:"🏃 Running"},{id:"bio",l:"⚖️ Biometría"},{id:"sleep",l:"😴 Sueño"},
+    {id:"dashboard",l:"📊 Dashboard"},
+    {id:"calendario",l:"📅 Calendario"},
+    {id:"dailylog",l:"📋 Daily Log"},
+    {id:"nutricion",l:"🥗 Nutrición"},
+    {id:"fuerza",l:"🏋️ Fuerza"},
+    {id:"running",l:"🏃 Running"},
+    {id:"bio",l:"⚖️ Biometría"},
+    {id:"sleep",l:"😴 Sueño"},
   ];
 
   const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
@@ -1688,33 +1831,53 @@ export default function App() {
     }}>
       <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
 
-      {/* ── Header ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, flexWrap:"wrap", gap:10, position:"relative", zIndex:1 }}>
-        <div>
-          <div style={{
-            fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1,
-            color:T.text
-          }}>
-            {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
-          </div>
-          
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-            <div style={{ fontSize:12, color:T.muted, fontWeight:500 }}>
-              {formattedDate}
+      {/* ── Header Modificado ── */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
+        <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+          <div>
+            <div style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1, color:T.text }}>
+              {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
             </div>
-            <input 
-              type="date" 
-              value={activeDate} 
-              max={TODAY} 
-              onChange={(e) => setActiveDate(e.target.value)} 
-              style={{ background: "transparent", color: T.accent, border: `1.5px solid ${T.accent}60`, borderRadius: 10, padding: "4px 8px", fontSize: 12, outline: "none", cursor: "pointer", fontFamily: "system-ui", fontWeight:700 }}
-            />
-            {activeDate !== TODAY && (
-              <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 10, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontWeight: 800 }}>
-                ↺ Volver a Hoy
-              </button>
-            )}
+            
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+              {/* Fecha interactiva unificada */}
+              <label style={{ 
+                display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
+                background: T.card2, padding: "6px 12px", borderRadius: 12, border: `1.5px solid ${T.border}`,
+                transition: "all 0.15s"
+              }}>
+                <span style={{ fontSize:13, color:T.text, fontWeight:700 }}>{formattedDate}</span>
+                <span style={{ fontSize:10, color:T.accent }}>▼</span>
+                <input 
+                  type="date" 
+                  value={activeDate} 
+                  max={TODAY} 
+                  onChange={(e) => setActiveDate(e.target.value)} 
+                  style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
+                />
+              </label>
+
+              {activeDate !== TODAY && (
+                <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 10, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontWeight: 800 }}>
+                  ↺ Hoy
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Widget de Clima */}
+          {weather && (
+            <div style={{ 
+              display: "flex", flexDirection: "column", justifyContent: "center",
+              background: T.card, padding: "8px 16px", borderRadius: 16, 
+              border: `1.5px solid ${T.border}`, boxShadow: T.shadow, height: "100%"
+            }}>
+              <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>CLIMA EN S.P.S.</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: T.text, display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                {getWeatherEmoji(weather.weathercode)} {weather.temperature}°C
+              </div>
+            </div>
+          )}
         </div>
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
@@ -1743,13 +1906,14 @@ export default function App() {
 
       {/* ── Content ── */}
       <div style={{ position:"relative", zIndex:1 }}>
-        {tab==="dashboard" && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
-        {tab==="dailylog"  && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
-        {tab==="nutricion" && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
-        {tab==="fuerza"    && <Fuerza    strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
-        {tab==="running"   && <Running   runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
-        {tab==="bio"       && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
-        {tab==="sleep"     && <Sueno     healthLog={healthLog} T={T}/>}
+        {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} isDark={isDark} T={T}/>}
+        {tab==="dailylog"   && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
+        {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
+        {tab==="fuerza"     && <Fuerza    strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
+        {tab==="running"    && <Running   runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
+        {tab==="sleep"      && <Sueno     healthLog={healthLog} T={T}/>}
       </div>
     </div>
   );
