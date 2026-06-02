@@ -5,27 +5,29 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS — BENTO BOX · BOLD MINIMALIST · ORANGE FIRE
+// DESIGN TOKENS — BENTO BOX · BOLD MINIMALIST · NEW PALETTE
 // ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
-  bg:"#080808", card:"#101010", card2:"#181818", card3:"#222222",
-  accent:"#FF4D1A", accentDim:"rgba(255,77,26,0.13)",
-  navy:"#181818", navyBright:"#222222",
-  text:"#EFEFEF", muted:"#525252", border:"#242424", inputBg:"#0C0C0C",
-  green:"#4ADE80", red:"#F87171", blue:"#60A5FA",
-  purple:"#C084FC", orange:"#FB923C", teal:"#34D399", pink:"#F472B6",
-  shadow:"0 0 0 1px #242424, 0 20px 60px rgba(0,0,0,0.7)",
-  pickerBg:"#080808",
+  bg:"#09090B", card:"#18181B", card2:"#27272A", card3:"#3F3F46",
+  accent:"#06B6D4", // Cyan/Blue for dark mode
+  accentDim:"rgba(6,182,212,0.15)",
+  navy:"#18181B", navyBright:"#27272A",
+  text:"#FAFAFA", muted:"#A1A1AA", border:"#3F3F46", inputBg:"#09090B",
+  green:"#10B981", red:"#EF4444", blue:"#3B82F6",
+  purple:"#8B5CF6", orange:"#F97316", teal:"#14B8A6", pink:"#EC4899",
+  shadow:"0 0 0 1px #27272A, 0 20px 60px rgba(0,0,0,0.7)",
+  pickerBg:"#09090B",
 };
 const LIGHT = {
-  bg:"#DEDEDE", card:"#FFFFFF", card2:"#F3F3F3", card3:"#E8E8E8",
-  accent:"#FF4D1A", accentDim:"rgba(255,77,26,0.09)",
-  navy:"#0C0C0C", navyBright:"#181818",
-  text:"#0A0A0A", muted:"#909090", border:"#DCDCDC", inputBg:"#FAFAFA",
+  bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
+  accent:"#60A5FA", // Baby Blue
+  accentDim:"rgba(96,165,250,0.15)",
+  navy:"#0F172A", navyBright:"#1E293B",
+  text:"#0F172A", muted:"#64748B", border:"#E2E8F0", inputBg:"#F8FAFC",
   green:"#16A34A", red:"#DC2626", blue:"#2563EB",
   purple:"#9333EA", orange:"#EA580C", teal:"#0D9488", pink:"#DB2777",
   shadow:"0 2px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
-  pickerBg:"#0A0A0A",
+  pickerBg:"#0F172A",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,8 +35,8 @@ const LIGHT = {
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
   Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
-  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",           Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
-  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",            Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
+  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",            Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
+  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",             Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
 };
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
@@ -365,7 +367,7 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
   const off = circ*(1-pct);
   const done = currentPaceSecs > 0 && currentPaceSecs <= targetPaceSecs;
   
-  const gradA=done?T.green:T.accent, gradB=done?T.teal:T.orange;
+  const gradA=done?T.green:T.accent, gradB=done?T.teal:T.blue; // Ajustado a los nuevos colores
   const trackClr=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)";
   
   return (
@@ -447,7 +449,7 @@ function KPICard({ icon, label, value, sub, color, pct, goalLabel, isDark, T }) 
       background: `linear-gradient(145deg, ${color}15 0%, ${T.card} 60%)`,
       borderRadius:22, padding:"16px 18px",
       boxShadow: isDark
-        ? `0 0 0 1px ${T.border}, 0 8px 32px ${color}20`
+        ? `0 0 0 1px ${T.border}, 0 8px 32px ${color}15` // Suavizado para el cyan
         : `0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)`,
       color:T.text, minHeight:116, display:"flex", flexDirection:"column", justifyContent:"space-between",
     }}>
@@ -490,7 +492,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
 
   const kpis=[
-    { icon:"🔥",label:"Cal In",  value:activeDayData.calIn||"—",  sub:`de ${goals.cal} kcal`,  color:T.accent, pct:activeDayData.calIn?clamp1(activeDayData.calIn,goals.cal):null, goalLabel:`${activeDayData.calIn||0} / ${goals.cal} kcal` },
+    { icon:"🔥",label:"Cal In",  value:activeDayData.calIn||"—", sub:`de ${goals.cal} kcal`,  color:T.accent, pct:activeDayData.calIn?clamp1(activeDayData.calIn,goals.cal):null, goalLabel:`${activeDayData.calIn||0} / ${goals.cal} kcal` },
     { icon:"💨",label:"Cal Out", value:activeDayData.calOut||"—", sub:"kcal quemadas",        color:T.blue,   pct:null },
     { icon:"⚖️",label:"Balance", value:activeDayData.calOut>0?(activeDayData.balance>0?`+${activeDayData.balance}`:activeDayData.balance):"—",
       sub:activeDayData.balance<0?"déficit ✓":"superávit", color:activeDayData.calOut>0?bCol(activeDayData.balance):T.muted, pct:null },
@@ -604,105 +606,194 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: CALENDARIO (Actualizado con Info Diaria y UI de Mes Rediseñado)
+// TAB: CALENDARIO (REDISEÑADO CON VISTAS SEMANA/MES/AÑO)
 // ─────────────────────────────────────────────────────────────────────────────
 function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) {
   const st = mkS(T);
-  const [selMonthStr, setSelMonthStr] = useState(() => activeDate.slice(0, 7));
+  const [view, setView] = useState("month"); // 'week' | 'month' | 'year'
+  
+  // navDate maneja en qué mes/año estamos navegando, independiente de la activeDate.
+  const [navDate, setNavDate] = useState(() => {
+    const d = new Date(activeDate + "T12:00:00");
+    d.setDate(1); // Mantenemos en el día 1 para evitar saltos al cambiar meses de distinta duración
+    return d;
+  });
 
-  // Sincronizar el mes si la fecha activa cambia desde otro componente
+  // Solo sincroniza si el mes/año cambió externamente para no forzar la vista durante la navegación libre
   useEffect(() => {
-    if (!activeDate.startsWith(selMonthStr)) {
-      setSelMonthStr(activeDate.slice(0, 7));
+    const d = new Date(activeDate + "T12:00:00");
+    if (d.getMonth() !== navDate.getMonth() || d.getFullYear() !== navDate.getFullYear()) {
+      const newNav = new Date(d);
+      newNav.setDate(1);
+      setNavDate(newNav);
     }
-  }, [activeDate, selMonthStr]);
+  }, [activeDate]); // Se omite navDate a propósito para no atrapar el efecto
 
-  const [year, month] = selMonthStr.split("-").map(Number);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const firstDay = new Date(year, month - 1, 1).getDay();
-  const startPad = firstDay === 0 ? 6 : firstDay - 1; 
+  const year = navDate.getFullYear();
+  const month = navDate.getMonth();
 
-  const monthData = allDayData.filter(d => d.date.startsWith(selMonthStr));
+  const prevPeriod = () => {
+    const d = new Date(navDate);
+    if (view === "year") d.setFullYear(year - 1);
+    else d.setMonth(month - 1);
+    setNavDate(d);
+  };
+  const nextPeriod = () => {
+    const d = new Date(navDate);
+    if (view === "year") d.setFullYear(year + 1);
+    else d.setMonth(month + 1);
+    setNavDate(d);
+  };
 
+  const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const monthData = allDayData.filter(d => d.date.startsWith(monthStr));
+
+  // Promedios para Recap
   const avgCalIn = monthData.filter(d => d.calIn > 0).reduce((s, d) => s + d.calIn, 0) / (monthData.filter(d => d.calIn > 0).length || 1);
   const avgCalOut = monthData.filter(d => d.calOut > 0).reduce((s, d) => s + d.calOut, 0) / (monthData.filter(d => d.calOut > 0).length || 1);
   const avgSleep = monthData.filter(d => d.sleep > 0).reduce((s, d) => s + d.sleep, 0) / (monthData.filter(d => d.sleep > 0).length || 1);
   const avgScore = monthData.filter(d => d.score > 0).reduce((s, d) => s + d.score, 0) / (monthData.filter(d => d.score > 0).length || 1);
+  const selectedDayData = monthData.find(d => d.date === activeDate) || { calIn: 0, calOut: 0, p: 0, c: 0, sleep: 0, score: 0 };
+  const isSelectedDayInMonth = activeDate.startsWith(monthStr);
 
-  const prevMonth = () => {
-    const d = new Date(year, month - 2, 1);
-    setSelMonthStr(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  };
-  const nextMonth = () => {
-    const d = new Date(year, month, 1);
-    setSelMonthStr(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  };
-
+  // Grid Data (Month)
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const startPad = firstDay === 0 ? 6 : firstDay - 1; 
   const daysGrid = Array.from({ length: startPad + daysInMonth }, (_, i) => {
     if (i < startPad) return null;
     const d = i - startPad + 1;
-    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const data = monthData.find(x => x.date === dateStr);
     return { d, dateStr, data };
   });
 
-  const selectedDayData = monthData.find(d => d.date === activeDate) || { calIn: 0, calOut: 0, p: 0, c: 0, sleep: 0, score: 0 };
-  const isSelectedDayInMonth = activeDate.startsWith(selMonthStr);
+  // Grid Data (Week)
+  const weekDates = getCurrentWeekDates(activeDate);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       
-      {/* Selector de Mes Estilo Apple Fitness */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", marginBottom: 4 }}>
-        <button style={{ ...st.icon(T.text), background: T.card, padding: "10px 18px", borderRadius: 999, fontWeight: 900, boxShadow: T.shadow, cursor: "pointer", transition: "all 0.15s" }} onClick={prevMonth}>◀</button>
-        <div style={{ fontSize: 22, fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: T.text }}>
-          {new Date(year, month - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
+      {/* Selector de vistas y Control de meses/años */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", background: T.card2, borderRadius: 999, padding: 4 }}>
+          {["semana", "mes", "año"].map(v => {
+            const val = v === "semana" ? "week" : v === "mes" ? "month" : "year";
+            return (
+              <button key={v} onClick={() => setView(val)}
+                style={{
+                  background: view === val ? T.card : "transparent",
+                  color: view === val ? T.text : T.muted,
+                  borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
+                  boxShadow: view === val ? T.shadow : "none", transition: "all 0.2s"
+                }}>
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+              </button>
+            )
+          })}
         </div>
-        <button style={{ ...st.icon(T.text), background: T.card, padding: "10px 18px", borderRadius: 999, fontWeight: 900, boxShadow: T.shadow, cursor: "pointer", transition: "all 0.15s" }} onClick={nextMonth}>▶</button>
+
+        {(view === "month" || view === "year") && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", borderRadius: 999, boxShadow: T.shadow, transition: "all 0.15s" }} onClick={prevPeriod}>◀</button>
+            <div style={{ fontSize: 16, fontWeight: 900, textTransform: "uppercase", letterSpacing: "1px", color: T.text, minWidth: 120, textAlign: "center" }}>
+              {view === "year" ? year : new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
+            </div>
+            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", borderRadius: 999, boxShadow: T.shadow, transition: "all 0.15s" }} onClick={nextPeriod}>▶</button>
+          </div>
+        )}
       </div>
 
       <div style={st.g2}>
-        {/* Grid del Calendario */}
+        {/* Renderizado Condicional de la Vista */}
         <div style={{ ...st.card, padding: "24px 20px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, marginBottom: 16, textAlign: "center" }}>
-            {["L", "M", "X", "J", "V", "S", "D"].map(d => (
-              <div key={d} style={{ fontSize: 10, fontWeight: 800, color: T.muted }}>{d}</div>
-            ))}
-            {daysGrid.map((day, i) => {
-              if (!day) return <div key={`pad-${i}`} />;
-              const isToday = day.dateStr === TODAY;
-              const isSelected = day.dateStr === activeDate;
-              const hasData = day.data && (day.data.calIn > 0 || day.data.calOut > 0 || day.data.sleep > 0);
-              
-              return (
-                <button key={day.dateStr} 
-                  onClick={() => setActiveDate(day.dateStr)}
-                  style={{
-                    background: isSelected ? T.accent : hasData ? T.card2 : "transparent",
-                    border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
-                    borderRadius: 14, aspectRatio: "1/1", display: "flex", flexDirection: "column",
-                    alignItems: "center", justifyContent: "center", cursor: "pointer",
-                    color: isSelected ? "#fff" : T.text, transition: "all 0.15s", padding: 0
-                }}>
-                  <span style={{ fontSize: 13, fontWeight: isToday || isSelected ? 900 : 600 }}>{day.d}</span>
-                  <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
-                    {day.data?.calIn > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.accent }}/>}
-                    {day.data?.p > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.green }}/>}
-                    {day.data?.sleep > 0 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: isSelected ? "#fff" : T.purple }}/>}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          
+          {view === "year" && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const mDate = new Date(year, i, 1);
+                const isCurrentMonth = mDate.getMonth() === new Date().getMonth() && mDate.getFullYear() === new Date().getFullYear();
+                return (
+                  <button key={i} onClick={() => { setNavDate(mDate); setView("month"); }}
+                    style={{
+                      background: isCurrentMonth ? T.accentDim : T.card2,
+                      border: `1.5px solid ${isCurrentMonth ? T.accent : "transparent"}`,
+                      borderRadius: 16, padding: "20px 10px",
+                      color: isCurrentMonth ? T.accent : T.text,
+                      fontWeight: 800, fontSize: 13, textTransform: "capitalize", cursor: "pointer", transition: "all 0.15s"
+                    }}>
+                    {mDate.toLocaleDateString("es-ES", { month: "short" })}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {view === "month" && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, textAlign: "center" }}>
+              {["L", "M", "X", "J", "V", "S", "D"].map(d => (
+                <div key={d} style={{ fontSize: 10, fontWeight: 800, color: T.muted, marginBottom: 8 }}>{d}</div>
+              ))}
+              {daysGrid.map((day, i) => {
+                if (!day) return <div key={`pad-${i}`} />;
+                const isToday = day.dateStr === TODAY;
+                const isSelected = day.dateStr === activeDate;
+                const hasData = day.data && (day.data.calIn > 0 || day.data.calOut > 0 || day.data.sleep > 0);
+                return (
+                  <button key={day.dateStr} 
+                    onClick={() => setActiveDate(day.dateStr)}
+                    style={{
+                      background: isSelected ? T.accent : hasData ? T.card2 : "transparent",
+                      border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
+                      borderRadius: 14, aspectRatio: "1/1", display: "flex", flexDirection: "column",
+                      alignItems: "center", justifyContent: "center", cursor: "pointer",
+                      color: isSelected ? "#fff" : T.text, transition: "all 0.15s", padding: 0
+                    }}>
+                    <span style={{ fontSize: 14, fontWeight: isToday || isSelected ? 900 : 600 }}>{day.d}</span>
+                    {hasData && !isSelected && <span style={{ width: 4, height: 4, borderRadius: "50%", background: T.accent, marginTop: 2 }}/>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {view === "week" && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+               {weekDates.map(dateStr => {
+                 const mDate = new Date(dateStr + "T12:00:00");
+                 const isSelected = dateStr === activeDate;
+                 const isToday = dateStr === TODAY;
+                 return (
+                   <button key={dateStr} onClick={() => setActiveDate(dateStr)}
+                    style={{
+                      flex: 1, margin: "0 4px", padding: "16px 0",
+                      background: isSelected ? T.accent : T.card2,
+                      border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
+                      borderRadius: 20, display: "flex", flexDirection: "column",
+                      alignItems: "center", cursor: "pointer", color: isSelected ? "#fff" : T.text,
+                      transition: "all 0.15s"
+                    }}>
+                     <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.8, textTransform: "uppercase" }}>
+                       {mDate.toLocaleDateString("es-ES", { weekday: "short" })}
+                     </span>
+                     <span style={{ fontSize: 20, fontWeight: 900, marginTop: 4 }}>
+                       {mDate.getDate()}
+                     </span>
+                   </button>
+                 );
+               })}
+            </div>
+          )}
+
         </div>
 
         {/* Panel lateral: Día seleccionado y Recap */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           
-          {isSelectedDayInMonth && (
-            <div style={{ ...st.card2, border: `1.5px solid ${T.accent}`, padding: 20, boxShadow: `0 8px 24px ${T.accent}20` }}>
+          {(isSelectedDayInMonth || view === "week") && (
+            <div style={{ ...st.card2, border: `1.5px solid ${T.accentDim}`, padding: 20, boxShadow: `0 8px 24px ${T.accent}15` }}>
               <SH title={`📌 Info del ${activeDate === TODAY ? "Día (Hoy)" : activeDate}`} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
                   <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL IN / OUT</div>
                   <div style={{ fontSize: 18, fontWeight: 900 }}>
@@ -728,7 +819,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           )}
 
           <div style={{ ...st.card, padding: 20, flex: 1 }}>
-            <SH title="📊 Recap del Mes" />
+            <SH title={`📊 Recap: ${new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long" })}`} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
                 <span style={st.lbl}>Promedio Cal In</span>
@@ -975,6 +1066,7 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        {/* Cambié a minúsculas por estilo de código consistente, la lógica es la misma */}
         {[["search","🔍 Buscar DB"],["manual","✏️ Manual"],["adddb","➕ Añadir"],["editdb","🛠 Editar DB"]].map(([id,label])=>(
           <button key={id} style={st.ghost(mode===id)} onClick={()=>{setMode(id);setDbEId(null);}}>{label}</button>
         ))}
@@ -1864,7 +1956,7 @@ export default function App() {
     }}>
       <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
 
-      {/* ── Header Modificado ── */}
+      {/* ── Header ── */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
         <div>
           <div style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1, color:T.text }}>
@@ -1872,7 +1964,7 @@ export default function App() {
           </div>
           
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-            {/* Fecha interactiva unificada con Hack de Opacity para input type date nativo */}
+            {/* Fecha interactiva */}
             <div style={{ 
               position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
               background: T.card2, padding: "8px 14px", borderRadius: 14, border: `1.5px solid ${T.border}`,
