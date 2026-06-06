@@ -64,7 +64,6 @@ const calculateWhoopRecovery = (hrv, rhr, sleepScore) => {
   let scoreSum = 0;
   
   if (sleepScore) { scoreSum += sleepScore; factors += 1; }
-  // Normalización básica. Ajusta estos divisores base (75ms para HRV, 55bpm para RHR) según tu fisiología base real si lo deseas.
   if (hrv) { 
     const hrvScore = Math.min(100, Math.max(10, (hrv / 75) * 85)); 
     scoreSum += hrvScore; factors += 1; 
@@ -169,16 +168,6 @@ function getCurrentWeekDates(refDateStr = TODAY) {
     return d.toISOString().split("T")[0];
   });
 }
-
-const getWeatherEmoji = (code) => {
-  if ([0].includes(code)) return "☀️";
-  if ([1,2,3].includes(code)) return "⛅";
-  if ([45,48].includes(code)) return "🌫️";
-  if ([51,53,55,61,63,65,80,81,82].includes(code)) return "🌧️";
-  if ([71,73,75,85,86].includes(code)) return "❄️";
-  if ([95,96,99].includes(code)) return "⛈️";
-  return "🌡️";
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STYLE FACTORY
@@ -517,12 +506,10 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
 
-  // Cálculo de variables de recuperación para el KPI principal
   const recPct = activeDayData.recovery ? activeDayData.recovery / 100 : null;
   const recLabel = activeDayData.recovery ? (activeDayData.recovery >= 67 ? "Optimizado 🔥" : activeDayData.recovery >= 34 ? "Adecuado ⚡" : "Sobrecarga 🔋") : "Sin datos";
 
   const kpis=[
-    // NUEVO KPI DE RECOVERY
     { icon:"🔋",label:"Recovery", value:activeDayData.recovery?`${activeDayData.recovery}%`:"—", sub:recLabel, color:getRecoveryColor(activeDayData.recovery, T), pct:recPct, goalLabel: activeDayData.hrv ? `HRV: ${activeDayData.hrv}ms | RHR: ${activeDayData.rhr}bpm` : null },
     { icon:"🔥",label:"Cal In",  value:activeDayData.calIn||"—", sub:`de ${goals.cal} kcal`,  color:T.accent, pct:activeDayData.calIn?clamp1(activeDayData.calIn,goals.cal):null, goalLabel:`${activeDayData.calIn||0} / ${goals.cal} kcal` },
     { icon:"💨",label:"Cal Out", value:activeDayData.calOut||"—", sub:"kcal quemadas",        color:T.blue,   pct:null },
@@ -546,7 +533,6 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12, minWidth:700, fontFamily:"system-ui" }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}` }}>
-              {/* Añadidas columnas Rec%, HRV y RHR */}
               {[["Fecha","l"],["Rec %","r"],["HRV","r"],["RHR","r"],["Out","r"],["In","r"],["Bal","r"],["P","r"],["😴","r"],["Pasos","r"]].map(([h,a])=>(
                 <th key={h} style={{ padding:"7px 8px", color:T.muted, fontWeight:800, textAlign:a==="r"?"right":"left", fontSize:9, letterSpacing:"0.07em" }}>{h.toUpperCase()}</th>
               ))}
@@ -558,12 +544,9 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
               return (
                 <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.accentDim:"transparent" }}>
                   <td style={{ padding:"9px 8px", fontWeight:isT?800:400, color:isT?T.accent:T.text, whiteSpace:"nowrap" }}>{isT&&"▶ "}{d.date===TODAY?"Hoy":d.date.slice(5)}</td>
-                  
-                  {/* Nuevas métricas renderizadas */}
                   <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.teal }}>{d.hrv?`${d.hrv}ms`:"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.pink }}>{d.rhr?`${d.rhr}bpm`:"—"}</td>
-                  
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.blue }}>{ho?d.calOut.toLocaleString():"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.accent }}>{d.calIn?d.calIn.toLocaleString():"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:(ho&&d.calIn)?bCol(bal):T.muted }}>{(ho&&d.calIn)?(bal>0?`+${bal}`:bal):"—"}</td>
@@ -879,8 +862,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
 // ─────────────────────────────────────────────────────────────────────────────
 function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, activeDate, T }) {
   const st=mkS(T);
-  // Añadidos los campos de métricas Whoop al estado del formulario
-  const [form,setForm]=useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+  const [form,setForm]=useState({ date:activeDate, calOut:"", sleep:"", score:"", recovery:"" });
   const [editG,setEG]=useState(false);
   const [editId,setEId]=useState(null);
   const [editRow,setER]=useState({});
@@ -900,22 +882,18 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
   const save=()=>{
     if(!form.date) return;
     
-    // Calcula el Recovery si hay métricas, prioriza el Recovery Manual si el usuario lo ingresó
-    const calcRec = calculateWhoopRecovery(+form.hrv, +form.rhr, +form.score);
-    const finalRecovery = form.recovery ? +form.recovery : calcRec;
+    // Calcula el Recovery si envían Score y no han ingresado uno manual explícito
+    const finalRecovery = form.recovery ? +form.recovery : form.score ? calculateWhoopRecovery(null, null, +form.score) : null;
 
     upsert({ 
       date:form.date, 
       ...(form.calOut&&{calOut:+form.calOut}), 
-      ...(form.steps&&{steps:+form.steps}),
       ...(form.sleep&&{sleep:+form.sleep}), 
       ...(form.score&&{score:+form.score}),
-      ...(form.hrv&&{hrv:+form.hrv}),
-      ...(form.rhr&&{rhr:+form.rhr}),
       ...(finalRecovery&&{recovery: finalRecovery}),
       goals:{...goals} 
     });
-    setForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+    setForm({ date:activeDate, calOut:"", sleep:"", score:"", recovery:"" });
   };
 
   const rows=allDayData.filter(d=>d.calOut>0||d.sleep||d.steps||d.calIn>0||d.recovery>0);
@@ -962,31 +940,14 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
 
       <div style={st.g2}>
         <div style={st.card}>
-          <SH title="📋 Registrar Día (Whoop-Style Biometrics)"/>
+          <SH title="📋 Registrar Día"/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
             <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Fecha</span>
               <input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
             
-            <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4}}>
-              <span style={{...st.lbl, color:T.accent}}>⚡ Recovery & Sueño</span>
-            </div>
-            
-            {[["HRV (ms)","hrv"],["RHR (bpm)","rhr"],["Horas de Sueño","sleep"],["Sleep Score %","score"]].map(([l,k])=>(
+            {[["Cal Quemadas (OUT)","calOut"],["Horas de Sueño","sleep"],["Sleep Score %","score"],["Recovery %","recovery"]].map(([l,k])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder="Whoop metric"
-                  value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
-            ))}
-
-            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Manual Recovery % (Opcional — Auto si dejas vacío)</span>
-              <input style={{...st.inp, borderColor:T.green+"50"}} type="number" max="100" placeholder="Ej: 85" value={form.recovery} onChange={e=>setForm(p=>({...p,recovery:e.target.value}))}/></div>
-
-            <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:8}}>
-              <span style={{...st.lbl, color:T.blue}}>🏃 Actividad & Rendimiento</span>
-            </div>
-
-            {[["Cal Quemadas","calOut"],["Pasos","steps"]].map(([l,k])=>(
-              <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
+                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
           </div>
           <button style={st.btn} onClick={save}>💾 Guardar Registro</button>
@@ -1028,22 +989,22 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                     {openWeeks.has(wk)&&(
                       <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
                         {days.map(d=>{
-                          // Actualizamos los métricos del Daily Log Historial para priorizar la salud / recovery
+                          // Solamente Calories IN, OUT, PROT, SUEÑO SCORE, HORAS, RECOVERY
                           const dayMetrics = [
-                            { l:"RECOVERY", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) },
-                            { l:"HRV", v:d.hrv?`${d.hrv}ms`:"—", c:T.teal },
-                            { l:"RHR", v:d.rhr?`${d.rhr}b`:"—", c:T.pink },
                             { l:"IN", v:d.calIn||"—", c:T.accent },
                             { l:"OUT", v:d.calOut||"—", c:T.blue },
-                            { l:"SUEÑO", v:d.sleep?`${d.sleep}h`:"—", c:T.purple }
+                            { l:"PROT", v:d.p?`${Math.round(d.p)}g`:"—", c:T.green },
+                            { l:"SUEÑO", v:d.sleep?`${d.sleep}h`:"—", c:T.purple },
+                            { l:"SCORE", v:d.score?`${d.score}%`:"—", c:T.teal },
+                            { l:"RECOVERY", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) }
                           ];
 
                           return (
                             <div key={d.date}>
                               {editId===d.date?(
-                                <EditRow fields={[{k:"recovery",l:"Recovery %"},{k:"hrv",l:"HRV ms"},{k:"rhr",l:"RHR bpm"},{k:"calOut",l:"Cal Out"},{k:"sleep",l:"Sueño h",step:"0.01"}]}
+                                <EditRow fields={[{k:"calOut",l:"Cal Out",t:"number"},{k:"sleep",l:"Sueño h",t:"number",step:"0.01"},{k:"score",l:"Score %",t:"number"},{k:"recovery",l:"Recovery %",t:"number"}]}
                                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))}
-                                  onSave={()=>{ upsert({date:d.date,recovery:+editRow.recovery||null,hrv:+editRow.hrv||null,rhr:+editRow.rhr||null,calOut:+editRow.calOut||0,sleep:+editRow.sleep||null}); setEId(null); }}
+                                  onSave={()=>{ upsert({date:d.date,calOut:+editRow.calOut||0,sleep:+editRow.sleep||null,score:+editRow.score||null,recovery:+editRow.recovery||null}); setEId(null); }}
                                   onCancel={()=>setEId(null)} T={T}/>
                               ):(
                                 <div style={{ ...st.card2, padding:"12px 14px", borderLeft:`3px solid ${d.date===activeDate?T.accent:T.border}`, borderRadius:16 }}>
@@ -1052,11 +1013,11 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                                       {d.date===TODAY?"● Hoy":d.date.slice(5)}
                                     </span>
                                     <div style={{ display:"flex", gap:4 }}>
-                                      <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",hrv:d.hrv||"",rhr:d.rhr||"",calOut:d.calOut||"",sleep:d.sleep||""});}}>✏️</button>
+                                      <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",calOut:d.calOut||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
                                       <button style={st.icon(T.red)} onClick={()=>setHL(p=>p.filter(x=>x.date!==d.date))}>🗑</button>
                                     </div>
                                   </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(60px,1fr))", gap:8, marginTop:10 }}>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:8, marginTop:10 }}>
                                     {dayMetrics.map(m => (
                                       <div key={m.l} style={{ background:T.card, padding:"8px 6px", borderRadius:12, textAlign:"center", boxShadow:T.shadow }}>
                                         <div style={{ fontSize:9, color:T.muted, fontWeight:800, marginBottom:4, letterSpacing:"0.05em" }}>{m.l}</div>
@@ -1893,19 +1854,6 @@ export default function App() {
   const [runGoal,    setRunGoal]   =useState(()=>lsGet("runGoal",21.1));
   const [targetTime, setTargetTime] =useState(()=>lsGet("targetTime", "02:00:00"));
 
-  const [weather, setWeather] = useState(null);
-
-  useEffect(() => {
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=15.5042&longitude=-88.0250&current_weather=true")
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.current_weather) {
-          setWeather(data.current_weather);
-        }
-      })
-      .catch(err => console.error("Error fetching weather:", err));
-  }, []);
-
   useEffect(()=>{lsSet("dark",isDark);},[isDark]);
   useEffect(()=>{lsSet("hl",healthLog);},[healthLog]);
   useEffect(()=>{lsSet("fl",foodLog);},[foodLog]);
@@ -1954,7 +1902,6 @@ export default function App() {
     a.download=`aristeia_v7_${TODAY}.json`; a.click();
   },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,projects,runGoal,targetTime]);
 
-  // Actualizado para extraer hrv, rhr y recovery
   const getDayData=useCallback((date)=>{
     const h=healthLog.find(d=>d.date===date)||{};
     const fs=foodLog.filter(f=>f.date===date), hasF=fs.length>0;
@@ -2031,18 +1978,6 @@ export default function App() {
               <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 14, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontWeight: 800 }}>
                 ↺ Hoy
               </button>
-            )}
-
-            {weather && (
-              <div style={{ 
-                display: "flex", alignItems: "center", gap: 8,
-                background: T.card2, padding: "8px 14px", borderRadius: 14, 
-                border: `1.5px solid ${T.border}`
-              }}>
-                <span style={{ fontSize: 16 }}>{getWeatherEmoji(weather.weathercode)}</span>
-                <span style={{ fontSize: 13, fontWeight: 800, color: T.text }}>{weather.temperature}°C</span>
-                <span style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.05em" }}>S.P.S.</span>
-              </div>
             )}
           </div>
         </div>
