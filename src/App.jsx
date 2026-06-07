@@ -9,8 +9,8 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
   bg:"#09090B", card:"#18181B", card2:"#27272A", card3:"#3F3F46",
-  accent:"#06B6D4", // Cyan/Blue for dark mode
-  accentDim:"rgba(6,182,212,0.15)",
+  accent:"#102E4A", // Dark Blue (Replaced Cyan)
+  accentDim:"rgba(16,46,74,0.30)", // Adjusted opacity for dark mode visibility
   navy:"#18181B", navyBright:"#27272A",
   text:"#FAFAFA", muted:"#A1A1AA", border:"#3F3F46", inputBg:"#09090B",
   green:"#10B981", red:"#EF4444", blue:"#3B82F6",
@@ -20,8 +20,8 @@ const DARK = {
 };
 const LIGHT = {
   bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
-  accent:"#60A5FA", // Baby Blue
-  accentDim:"rgba(96,165,250,0.15)",
+  accent:"#102E4A", // Dark Blue (Replaced Baby Blue)
+  accentDim:"rgba(16,46,74,0.15)",
   navy:"#0F172A", navyBright:"#1E293B",
   text:"#0F172A", muted:"#64748B", border:"#E2E8F0", inputBg:"#F8FAFC",
   green:"#16A34A", red:"#DC2626", blue:"#2563EB",
@@ -808,7 +808,19 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           {(isSelectedDayInMonth || view === "week") && (
             <div style={{ ...st.card2, border: `1.5px solid ${T.accentDim}`, padding: 20, boxShadow: `0 8px 24px ${T.accent}15` }}>
               <SH title={`📌 Info del ${activeDate === TODAY ? "Día (Hoy)" : activeDate}`} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL OUT</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.blue }}>
+                    {selectedDayData.calOut ? `${selectedDayData.calOut} kcal` : "—"}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL IN</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.accent }}>
+                    {selectedDayData.calIn ? `${selectedDayData.calIn} kcal` : "—"}
+                  </div>
+                </div>
                 <div>
                   <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>WHOOP RECOVERY</div>
                   <div style={{ fontSize: 18, fontWeight: 900, color: getRecoveryColor(selectedDayData.recovery, T) }}>
@@ -817,17 +829,21 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>HRV / RHR</div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: T.text }}>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: T.text, paddingTop: 2 }}>
                     {selectedDayData.hrv ? `${selectedDayData.hrv}ms` : "—"} / {selectedDayData.rhr ? `${selectedDayData.rhr}bpm` : "—"}
                   </div>
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SUEÑO</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.purple }}>{selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.purple }}>
+                    {selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}
+                  </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SCORE</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.teal }}>{selectedDayData.score ? `${selectedDayData.score}%` : "—"}</div>
+                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SCORE DE SUEÑO</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.teal }}>
+                    {selectedDayData.score ? `${selectedDayData.score}%` : "—"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1721,41 +1737,58 @@ function Biometria({ bios, setBios, activeDate, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: SUEÑO (Whoop-style & Semanal)
+// TAB: SUEÑO (Whoop-style & Semanal/Mensual/Anual)
 // ─────────────────────────────────────────────────────────────────────────────
 function Sueno({ healthLog, T }) {
   const st = mkS(T);
   const tip = p => <ChartTip {...p} T={T} />;
+  const [filterType, setFilterType] = useState("week"); // "week", "month", "year"
   
   const sleepData = useMemo(() => {
-    return healthLog.filter(d => d.sleep > 0 || d.score > 0).sort((a, b) => a.date.localeCompare(b.date));
+    return healthLog.filter(d => d.sleep > 0 || d.score > 0 || d.recovery > 0).sort((a, b) => a.date.localeCompare(b.date));
   }, [healthLog]);
 
-  const { weeks, weekKeys } = useMemo(() => {
-    const wks = {};
+  const { grouped, groupKeys } = useMemo(() => {
+    const groups = {};
     sleepData.forEach(d => {
-      const wk = getWeekStart(d.date);
-      if (!wks[wk]) wks[wk] = [];
-      wks[wk].push(d);
-    });
-    return { weeks: wks, weekKeys: Object.keys(wks).sort().reverse() };
-  }, [sleepData]);
+      let key;
+      if (filterType === "week") key = getWeekStart(d.date);
+      else if (filterType === "month") key = getMonthKey(d.date);
+      else key = d.date.substring(0, 4);
 
-  const [selWk, setSelWk] = useState(() => weekKeys[0] || getWeekStart(TODAY));
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(d);
+    });
+    return { grouped: groups, groupKeys: Object.keys(groups).sort().reverse() };
+  }, [sleepData, filterType]);
+
+  const [selKey, setSelKey] = useState("");
   
   useEffect(() => {
-    if (weekKeys.length > 0 && !weeks[selWk]) {
-      setSelWk(weekKeys[0]);
+    if (groupKeys.length > 0 && !grouped[selKey]) {
+      setSelKey(groupKeys[0]);
     }
-  }, [weekKeys, weeks, selWk]);
+  }, [groupKeys, grouped, selKey]);
 
-  const currentWkData = weeks[selWk] || [];
+  const currentData = grouped[selKey] || [];
   const lastNight = sleepData[sleepData.length - 1];
 
-  const avgWkSleep = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.sleep||0),0) / currentWkData.length) : 0;
-  const avgWkScore = currentWkData.length ? (currentWkData.reduce((s,d)=>s+(d.score||0),0) / currentWkData.length) : 0;
+  const calcAvg = (arr, key) => {
+    const valid = arr.filter(x => x[key] > 0);
+    return valid.length ? valid.reduce((s,x)=>s+x[key], 0) / valid.length : 0;
+  };
+
+  const avgSleep = calcAvg(currentData, 'sleep');
+  const avgScore = calcAvg(currentData, 'score');
+  const avgRec = calcAvg(currentData, 'recovery');
 
   const scCol = s => s >= 85 ? T.green : s >= 70 ? T.accent : T.red;
+
+  const formatPeriod = (k, type) => {
+    if (type === "week") return fmtWeek(k);
+    if (type === "month") return fmtMonth(k);
+    return k;
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1773,30 +1806,51 @@ function Sueno({ healthLog, T }) {
 
       {sleepData.length === 0 ? (
         <div style={st.card}>
-          <Placeholder msg="No hay datos de sueño registrados en el Daily Log." T={T} />
+          <Placeholder msg="No hay datos registrados en el Daily Log." T={T} />
         </div>
       ) : (
         <>
+          <div style={{ display: "flex", gap: 12, marginBottom: 4 }}>
+            {["week", "month", "year"].map(type => (
+              <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
+                style={{
+                  background: filterType === type ? T.accent : T.card2,
+                  color: filterType === type ? "#fff" : T.muted,
+                  borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
+                  transition: "all 0.2s"
+                }}>
+                {type === "week" ? "Semana" : type === "month" ? "Mes" : "Año"}
+              </button>
+            ))}
+          </div>
+
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
             <div style={{ ...st.card, flex: 1, minWidth: 260 }}>
-              <SH title="🗓 Selector de Semana" />
-              <select style={st.sel} value={selWk} onChange={e => setSelWk(e.target.value)}>
-                {weekKeys.map(wk => <option key={wk} value={wk}>{fmtWeek(wk)}</option>)}
+              <SH title={`🗓 Selector de ${filterType === "week" ? "Semana" : filterType === "month" ? "Mes" : "Año"}`} />
+              <select style={st.sel} value={selKey} onChange={e => setSelKey(e.target.value)}>
+                {groupKeys.map(k => <option key={k} value={k}>{formatPeriod(k, filterType)}</option>)}
               </select>
             </div>
             
-            <div style={{ ...st.card, flex: 1.5, minWidth: 260, display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+            <div style={{ ...st.card, flex: 2, minWidth: 260, display: "flex", justifyContent: "space-around", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROMEDIO HORAS</div>
-                <div style={{ fontSize: 32, fontWeight: 900, color: avgWkSleep >= 7 ? T.green : avgWkSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
-                  {avgWkSleep ? `${fmt(avgWkSleep, 1)}h` : "—"}
+                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. HORAS</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                  {avgSleep ? `${fmt(avgSleep, 1)}h` : "—"}
                 </div>
               </div>
               <div style={{ width: 1, height: 40, background: T.border }} />
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROMEDIO SCORE</div>
-                <div style={{ fontSize: 32, fontWeight: 900, color: avgWkScore >= 85 ? T.green : avgWkScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
-                  {avgWkScore ? `${Math.round(avgWkScore)}%` : "—"}
+                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. SCORE</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                  {avgScore ? `${Math.round(avgScore)}%` : "—"}
+                </div>
+              </div>
+              <div style={{ width: 1, height: 40, background: T.border }} />
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. RECOVERY</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 4 }}>
+                  {avgRec ? `${Math.round(avgRec)}%` : "—"}
                 </div>
               </div>
             </div>
@@ -1805,9 +1859,9 @@ function Sueno({ healthLog, T }) {
           <div style={st.g2}>
             <div style={st.card}>
               <SH title="⏱️ Horas (Meta: 8h)" />
-              {currentWkData.length < 2 ? <Placeholder msg="Registra más días en esta semana" T={T} /> : (
+              {currentData.length < 2 ? <Placeholder msg="Registra más días en este periodo" T={T} /> : (
                 <ResponsiveContainer width="100%" height={160}>
-                  <LineChart data={currentWkData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                  <LineChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
                     <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 9 }} tickFormatter={d => d.slice(5)} />
                     <YAxis tick={{ fill: T.muted, fontSize: 9 }} domain={[4, 10]} />
@@ -1821,9 +1875,9 @@ function Sueno({ healthLog, T }) {
 
             <div style={st.card}>
               <SH title="🔋 Sleep Score (Meta: 85%)" />
-              {currentWkData.length < 2 ? <Placeholder msg="Registra más días en esta semana" T={T} /> : (
+              {currentData.length < 2 ? <Placeholder msg="Registra más días en este periodo" T={T} /> : (
                 <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={currentWkData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                  <AreaChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                     <defs>
                       <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={T.purple} stopOpacity={0.4} />
@@ -1836,6 +1890,27 @@ function Sueno({ healthLog, T }) {
                     <Tooltip content={tip} />
                     <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
                     <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={3} dot={{ fill: T.purple, r: 4 }} name="Score %" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div style={{ ...st.card, gridColumn: "1 / -1" }}>
+              <SH title="🔥 Recovery Trend" />
+              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="Registra más días de recovery en este periodo" T={T} /> : (
+                <ResponsiveContainer width="100%" height={160}>
+                  <AreaChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                    <defs>
+                      <linearGradient id="recGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={T.green} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={T.green} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10 }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 10 }} domain={[0, 100]} />
+                    <Tooltip content={tip} />
+                    <Area type="monotone" dataKey="recovery" stroke={T.green} fill="url(#recGrad)" strokeWidth={3} dot={{ fill: T.green, r: 4 }} name="Recovery %" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
