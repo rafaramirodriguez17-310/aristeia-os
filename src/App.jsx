@@ -9,7 +9,7 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
   bg:"#09090B", card:"#18181B", card2:"#27272A", card3:"#3F3F46",
-  accent:"#102E4A", // Dark Blue (Replaced Cyan)
+  accent:"#123499", // Main
   accentDim:"rgba(16,46,74,0.30)", // Adjusted opacity for dark mode visibility
   navy:"#18181B", navyBright:"#27272A",
   text:"#FAFAFA", muted:"#A1A1AA", border:"#3F3F46", inputBg:"#09090B",
@@ -20,8 +20,8 @@ const DARK = {
 };
 const LIGHT = {
   bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
-  accent:"#102E4A", // Dark Blue (Replaced Baby Blue)
-  accentDim:"rgba(16,46,74,0.15)",
+  accent:"#123499", // Main
+  accentDim:"rgba(2, 2, 2, 0.15)",
   navy:"#0F172A", navyBright:"#1E293B",
   text:"#0F172A", muted:"#64748B", border:"#E2E8F0", inputBg:"#F8FAFC",
   green:"#16A34A", red:"#DC2626", blue:"#2563EB",
@@ -35,8 +35,8 @@ const LIGHT = {
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
   Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
-  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",            Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
-  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",             Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
+  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",             Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
+  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
 };
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
@@ -535,7 +535,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12, minWidth:700, fontFamily:"system-ui" }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}` }}>
-              {[["Fecha","l"],["Rec %","r"],["HRV","r"],["RHR","r"],["Out","r"],["In","r"],["Bal","r"],["P","r"],["😴","r"],["Pasos","r"]].map(([h,a])=>(
+              {[["Fecha","l"],["Out","r"],["In","r"],["Bal","r"],["P","r"],["C","r"],["G","r"],["😴","r"],["Rec %","r"],["Pasos","r"]].map(([h,a])=>(
                 <th key={h} style={{ padding:"7px 8px", color:T.muted, fontWeight:800, textAlign:a==="r"?"right":"left", fontSize:9, letterSpacing:"0.07em" }}>{h.toUpperCase()}</th>
               ))}
             </tr>
@@ -546,16 +546,14 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
               return (
                 <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.accentDim:"transparent" }}>
                   <td style={{ padding:"9px 8px", fontWeight:isT?800:400, color:isT?T.accent:T.text, whiteSpace:"nowrap" }}>{isT&&"▶ "}{d.date===TODAY?"Hoy":d.date.slice(5)}</td>
-                  
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:T.teal }}>{d.hrv?`${d.hrv}ms`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:T.pink }}>{d.rhr?`${d.rhr}bpm`:"—"}</td>
-                  
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.blue }}>{ho?d.calOut.toLocaleString():"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.accent }}>{d.calIn?d.calIn.toLocaleString():"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:(ho&&d.calIn)?bCol(bal):T.muted }}>{(ho&&d.calIn)?(bal>0?`+${bal}`:bal):"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.p?pCol(d.p,g.p):T.muted }}>{d.p?`${Math.round(d.p)}g`:"—"}</td>
+                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.c?cCol(d.c,g.c):T.muted }}>{d.c?`${Math.round(d.c)}g`:"—"}</td>
+                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.g?T.purple:T.muted }}>{d.g?`${Math.round(d.g)}g`:"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:d.sleep?sCol(d.sleep):T.muted }}>{d.sleep?`${fmt(d.sleep,1)}h`:"—"}</td>
+                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
                   <td style={{ padding:"9px 8px", textAlign:"right", color:T.purple }}>{d.steps?d.steps.toLocaleString():"—"}</td>
                 </tr>
               );
@@ -789,12 +787,12 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                       alignItems: "center", cursor: "pointer", color: isSelected ? "#fff" : T.text,
                       transition: "all 0.15s"
                     }}>
-                     <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.8, textTransform: "uppercase" }}>
-                       {mDate.toLocaleDateString("es-ES", { weekday: "short" })}
-                     </span>
-                     <span style={{ fontSize: 20, fontWeight: 900, marginTop: 4 }}>
-                       {mDate.getDate()}
-                     </span>
+                      <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.8, textTransform: "uppercase" }}>
+                        {mDate.toLocaleDateString("es-ES", { weekday: "short" })}
+                      </span>
+                      <span style={{ fontSize: 20, fontWeight: 900, marginTop: 4 }}>
+                        {mDate.getDate()}
+                      </span>
                    </button>
                  );
                })}
@@ -1035,6 +1033,7 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                             { l:"IN", v:d.calIn||"—", c:T.accent },
                             { l:"OUT", v:d.calOut||"—", c:T.blue },
                             { l:"PROT", v:d.p?`${Math.round(d.p)}g`:"—", c:T.green },
+                            { l:"PASOS", v:d.steps?d.steps.toLocaleString():"—", c:T.purple },
                             { l:"SUEÑO", v:d.sleep?`${d.sleep}h`:"—", c:T.purple },
                             { l:"SCORE", v:d.score?`${d.score}%`:"—", c:d.score>=85?T.green:d.score>=70?T.accent:T.red },
                             { l:"RECOVERY", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) }
@@ -1043,9 +1042,9 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                           return (
                             <div key={d.date}>
                               {editId===d.date?(
-                                <EditRow fields={[{k:"recovery",l:"Recovery %"},{k:"hrv",l:"HRV ms"},{k:"rhr",l:"RHR bpm"},{k:"calOut",l:"Cal Out"},{k:"sleep",l:"Sueño h",step:"0.01"},{k:"score",l:"Score %"}]}
+                                <EditRow fields={[{k:"recovery",l:"Recovery %"},{k:"hrv",l:"HRV ms"},{k:"rhr",l:"RHR bpm"},{k:"calOut",l:"Cal Out"},{k:"steps",l:"Pasos",t:"number"},{k:"sleep",l:"Sueño h",step:"0.01"},{k:"score",l:"Score %"}]}
                                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))}
-                                  onSave={()=>{ upsert({date:d.date,recovery:+editRow.recovery||null,hrv:+editRow.hrv||null,rhr:+editRow.rhr||null,calOut:+editRow.calOut||0,sleep:+editRow.sleep||null,score:+editRow.score||null}); setEId(null); }}
+                                  onSave={()=>{ upsert({date:d.date,recovery:+editRow.recovery||null,hrv:+editRow.hrv||null,rhr:+editRow.rhr||null,calOut:+editRow.calOut||0,steps:+editRow.steps||null,sleep:+editRow.sleep||null,score:+editRow.score||null}); setEId(null); }}
                                   onCancel={()=>setEId(null)} T={T}/>
                               ):(
                                 <div style={{ ...st.card2, padding:"12px 14px", borderLeft:`3px solid ${d.date===activeDate?T.accent:T.border}`, borderRadius:16 }}>
@@ -1054,7 +1053,7 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                                       {d.date===TODAY?"● Hoy":d.date.slice(5)}
                                     </span>
                                     <div style={{ display:"flex", gap:4 }}>
-                                      <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",hrv:d.hrv||"",rhr:d.rhr||"",calOut:d.calOut||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
+                                      <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",hrv:d.hrv||"",rhr:d.rhr||"",calOut:d.calOut||"",steps:d.steps||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
                                       <button style={st.icon(T.red)} onClick={()=>setHL(p=>p.filter(x=>x.date!==d.date))}>🗑</button>
                                     </div>
                                   </div>
