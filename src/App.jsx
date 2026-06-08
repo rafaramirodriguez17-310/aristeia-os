@@ -5,29 +5,29 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS — BENTO BOX · BOLD MINIMALIST · NEW PALETTE
+// DESIGN TOKENS — F1 TELEMETRY · ENGINEERING DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
-  bg:"#09090B", card:"#18181B", card2:"#27272A", card3:"#3F3F46",
-  accent:"#123499", // Main
-  accentDim:"rgba(16,46,74,0.30)", // Adjusted opacity for dark mode visibility
-  navy:"#18181B", navyBright:"#27272A",
-  text:"#FAFAFA", muted:"#A1A1AA", border:"#3F3F46", inputBg:"#09090B",
-  green:"#10B981", red:"#EF4444", blue:"#3B82F6",
-  purple:"#8B5CF6", orange:"#F97316", teal:"#14B8A6", pink:"#EC4899",
-  shadow:"0 0 0 1px #27272A, 0 20px 60px rgba(0,0,0,0.7)",
-  pickerBg:"#09090B",
+  bg:"#050506", card:"#0A0B0E", card2:"#12141A", card3:"#1A1D24",
+  accent:"#00E5FF", // Neon Cyan (Telemetry standard)
+  accentDim:"rgba(0, 229, 255, 0.12)", 
+  navy:"#0A0B0E", navyBright:"#12141A",
+  text:"#E2E8F0", muted:"#64748B", border:"#1F242F", inputBg:"#050506",
+  green:"#39FF14", red:"#FF007F", blue:"#3B82F6",
+  purple:"#B026FF", orange:"#FFD700", teal:"#14B8A6", pink:"#EC4899",
+  shadow:"0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
+  pickerBg:"#050506", font:"'DM Mono', monospace, system-ui",
 };
-const LIGHT = {
+const LIGHT = { // Fallback, though telemetry is meant for dark mode
   bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
-  accent:"#123499", // Main
-  accentDim:"rgba(2, 2, 2, 0.15)",
+  accent:"#0055FF", 
+  accentDim:"rgba(0, 85, 255, 0.1)",
   navy:"#0F172A", navyBright:"#1E293B",
-  text:"#0F172A", muted:"#64748B", border:"#E2E8F0", inputBg:"#F8FAFC",
+  text:"#0F172A", muted:"#64748B", border:"#CBD5E1", inputBg:"#F8FAFC",
   green:"#16A34A", red:"#DC2626", blue:"#2563EB",
   purple:"#9333EA", orange:"#EA580C", teal:"#0D9488", pink:"#DB2777",
-  shadow:"0 2px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
-  pickerBg:"#0F172A",
+  shadow:"0 2px 10px rgba(0,0,0,0.05)",
+  pickerBg:"#F1F5F9", font:"'DM Mono', monospace, system-ui",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,19 +82,8 @@ const getRecoveryColor = (score, T) => {
   return T.red;
 };
 
-const SEED_HEALTH   = [
-  { date:"2026-04-27", calOut:2895, calIn:2171, p:181, c:241, g:57, sleep:7.57, score:81, hrv:65, rhr:54, recovery:78, steps:4141,  goals:{...DEFAULT_GOALS} },
-  { date:"2026-04-28", calOut:3117, calIn:2576, p:191, c:272, g:72, sleep:6.37, score:92, hrv:78, rhr:50, recovery:88, steps:4680,  goals:{...DEFAULT_GOALS} },
-  { date:"2026-04-29", calOut:3457, calIn:2567, p:214, c:277, g:69, sleep:6.56, score:94, hrv:50, rhr:59, recovery:62, steps:13899, goals:{...DEFAULT_GOALS} },
-];
-const SEED_DB = [
-  { id:1, name:"Leche Descremada Sula", unit:"Taza",    cal:95,  p:9.7,  c:14.0, g:0.2 },
-  { id:2, name:"Huevo Bonovo",          unit:"Unidad",  cal:70,  p:6.0,  c:1.0,  g:5.0 },
-  { id:3, name:"Europa Top Butter",     unit:"Porción", cal:80,  p:2.5,  c:14.5, g:1.2 },
-  { id:4, name:"Avena Molida Quaker",   unit:"Taza",    cal:467, p:20.3, c:79.5, g:8.3 },
-  { id:5, name:"Atún Calvo Agua",       unit:"Porción", cal:21,  p:4.8,  c:0.0,  g:0.2 },
-  { id:6, name:"Nutrex Whey Protein",   unit:"Scoop",   cal:130, p:25.0, c:3.0,  g:2.0 },
-];
+const SEED_HEALTH   = [];
+const SEED_DB = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOCAL STORAGE HELPERS
@@ -170,20 +159,20 @@ function getCurrentWeekDates(refDateStr = TODAY) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STYLE FACTORY
+// STYLE FACTORY — TELEMETRY UI
 // ─────────────────────────────────────────────────────────────────────────────
 const SVG_ARROW=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
 function mkS(T) {
   return {
-    card:  { background:T.card, borderRadius:26, padding:22, color:T.text, boxShadow:T.shadow, fontFamily:"system-ui,-apple-system,'Segoe UI',sans-serif", position:"relative" },
-    card2: { background:T.card2, borderRadius:18, padding:14, color:T.text },
-    lbl:   { fontSize:9, color:T.muted, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:5, display:"block", fontWeight:800 },
-    inp:   { background:T.inputBg, border:`1.5px solid ${T.border}`, borderRadius:16, padding:"10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:"system-ui", transition:"border-color 0.15s" },
-    sel:   { background:T.inputBg, border:`1.5px solid ${T.border}`, borderRadius:16, padding:"10px 34px 10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:"system-ui", appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
-    btn:   { background:T.accent, color:"#fff", border:"none", borderRadius:999, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:"system-ui", width:"100%", letterSpacing:"0.02em" },
-    btnSm: { background:T.navy, color:"#fff", border:"none", borderRadius:999, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:"system-ui", whiteSpace:"nowrap" },
-    ghost: a=>({ background:a?T.navy:"transparent", color:a?"#fff":T.muted, border:`1.5px solid ${a?T.navy:T.border}`, borderRadius:999, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:"system-ui", whiteSpace:"nowrap", transition:"all 0.15s" }),
-    icon:  c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"3px 6px", borderRadius:6, fontSize:13, lineHeight:1, display:"inline-flex", alignItems:"center" }),
+    card:  { background:T.card, borderRadius:12, padding:18, color:T.text, boxShadow:T.shadow, fontFamily:T.font, border:`1px solid ${T.border}`, position:"relative" },
+    card2: { background:T.card2, borderRadius:8, padding:14, color:T.text, fontFamily:T.font, border:`1px solid ${T.border}` },
+    lbl:   { fontSize:10, color:T.muted, textTransform:"uppercase", letterSpacing:"0.15em", marginBottom:6, display:"block", fontWeight:700 },
+    inp:   { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, transition:"border-color 0.15s" },
+    sel:   { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 34px 10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
+    btn:   { background:T.accent, color:"#000", border:"none", borderRadius:6, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:T.font, width:"100%", textTransform:"uppercase", letterSpacing:"0.05em" },
+    btnSm: { background:T.navyBright, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
+    ghost: a=>({ background:a?T.accentDim:"transparent", color:a?T.accent:T.muted, border:`1px solid ${a?T.accent:T.border}`, borderRadius:6, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
+    icon:  c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"3px 6px", borderRadius:4, fontSize:13, lineHeight:1, display:"inline-flex", alignItems:"center" }),
     g2:    { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:16 },
   };
 }
@@ -199,9 +188,9 @@ function NumberPicker({ value, onChange, options, label, T }) {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, flexShrink:0 }}>
-      <span style={{ fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase" }}>{label}</span>
+      <span style={{ fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", fontFamily:T.font }}>{label}</span>
       <div style={{
-        background:T.pickerBg, borderRadius:999, padding:"8px 5px",
+        background:T.pickerBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 5px",
         height:210, overflowY:"auto", width:62,
         display:"flex", flexDirection:"column", alignItems:"center", gap:3,
         scrollbarWidth:"none", msOverflowStyle:"none",
@@ -213,11 +202,12 @@ function NumberPicker({ value, onChange, options, label, T }) {
               onClick={() => onChange(String(opt))}
               style={{
                 width:50, minHeight:38, flexShrink:0,
-                border: isSel ? `2px solid ${T.accent}` : "2px solid transparent",
-                borderRadius:999, background:"transparent",
-                color: isSel ? T.accent : "#4A4A4A",
-                fontWeight: isSel ? 900 : 400, fontSize:17,
-                cursor:"pointer", fontFamily:"system-ui", textAlign:"center",
+                border: isSel ? `1px solid ${T.accent}` : "1px solid transparent",
+                background: isSel ? T.accentDim : "transparent",
+                borderRadius:4,
+                color: isSel ? T.accent : T.text,
+                fontWeight: isSel ? 700 : 400, fontSize:15,
+                cursor:"pointer", fontFamily:T.font, textAlign:"center",
                 transition:"all 0.12s",
               }}>
               {opt}
@@ -258,27 +248,27 @@ function WeeklyStrView({ strLog, plans, program, activeDate, T }) {
           <div key={dayKey} style={{ borderBottom:`1px solid ${T.border}` }}>
             <button onClick={() => toggle(dayKey)} style={{
               width:"100%", background:isSelectedDay ? T.accentDim : "transparent",
-              border:"none", cursor:"pointer", padding:"18px 24px",
+              border:"none", cursor:"pointer", padding:"16px 20px",
               display:"flex", justifyContent:"space-between", alignItems:"center",
-              textAlign:"left", fontFamily:"system-ui", transition:"background 0.15s"
+              textAlign:"left", fontFamily:T.font, transition:"background 0.15s"
             }}>
               <div>
                 <div style={{
-                  fontSize:38, fontWeight:900, letterSpacing:"-1.5px", lineHeight:1,
-                  color: isSelectedDay ? T.accent : isRest ? T.muted : T.text,
+                  fontSize:28, fontWeight:700, letterSpacing:"-1px", lineHeight:1,
+                  color: isSelectedDay ? T.accent : isRest ? T.muted : T.text, textTransform:"uppercase"
                 }}>
                   {DAY_FULL_ES[dayKey]}
                 </div>
-                <div style={{ fontSize:11, color:T.muted, marginTop:3, display:"flex", gap:10, alignItems:"center" }}>
+                <div style={{ fontSize:11, color:T.muted, marginTop:6, display:"flex", gap:10, alignItems:"center" }}>
                   <span>{fmtDate}</span>
-                  {dateStr === TODAY && <span style={{ background:T.card3, color:T.text, borderRadius:999, padding:"1px 9px", fontSize:9, fontWeight:800 }}>HOY</span>}
-                  {isSelectedDay && dateStr !== TODAY && <span style={{ background:T.accent, color:"#fff", borderRadius:999, padding:"1px 9px", fontSize:9, fontWeight:800 }}>SELECCIÓN</span>}
-                  {planned && <span style={{ color:isRest?T.muted:T.muted }}>{planned}</span>}
+                  {dateStr === TODAY && <span style={{ background:T.card3, border:`1px solid ${T.border}`, color:T.text, borderRadius:4, padding:"2px 6px", fontSize:9, fontWeight:800 }}>HOY</span>}
+                  {isSelectedDay && dateStr !== TODAY && <span style={{ background:T.accent, color:"#000", borderRadius:4, padding:"2px 6px", fontSize:9, fontWeight:800 }}>ACTIVO</span>}
+                  {planned && <span style={{ color:isRest?T.muted:T.accent, fontWeight:600 }}>{planned}</span>}
                 </div>
               </div>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 {dayExs.length > 0 && (
-                  <span style={{ background:isSelectedDay?T.accent:T.card3, color:isSelectedDay?"#fff":T.muted, borderRadius:999, padding:"3px 11px", fontSize:12, fontWeight:800 }}>
+                  <span style={{ background:isSelectedDay?T.accent:T.card3, color:isSelectedDay?"#000":T.text, borderRadius:4, padding:"3px 8px", fontSize:12, fontWeight:700 }}>
                     {dayExs.filter(e => checked[e.id]).length}/{dayExs.length}
                   </span>
                 )}
@@ -287,40 +277,34 @@ function WeeklyStrView({ strLog, plans, program, activeDate, T }) {
             </button>
 
             {isOpen && (
-              <div style={{ padding:"0 24px 20px", borderTop:`1px solid ${T.border}` }}>
-                {planned && !isRest && (
-                  <div style={{ margin:"14px 0 10px", background:T.accentDim, border:`1px solid ${T.accent}30`, borderRadius:12, padding:"8px 14px", fontSize:12, color:T.accent, fontWeight:700, display:"inline-flex", gap:6 }}>
-                    📋 {planned}
-                  </div>
-                )}
+              <div style={{ padding:"0 20px 20px", borderTop:`1px solid ${T.border}` }}>
                 {dayExs.length === 0 ? (
-                  <div style={{ color:T.muted, fontSize:13, padding:"14px 0", fontStyle:"italic", display:"flex", alignItems:"center", gap:8 }}>
-                    <span style={{ opacity:0.4 }}>□</span>
-                    {isRest ? "Día de descanso — recupérate bien 🔋" : "Sin ejercicios registrados para este día"}
+                  <div style={{ color:T.muted, fontSize:12, padding:"14px 0", display:"flex", alignItems:"center", gap:8 }}>
+                    <span style={{ opacity:0.4 }}>[ ]</span>
+                    {isRest ? "SISTEMA EN REPOSO 🔋" : "SIN TELEMETRÍA DE ENTRENAMIENTO"}
                   </div>
                 ) : (
-                  <div style={{ display:"flex", flexDirection:"column", gap:7, marginTop:10 }}>
+                  <div style={{ display:"flex", flexDirection:"column", gap:6, marginTop:12 }}>
                     {dayExs.map(ex => {
                       const done = checked[ex.id];
                       return (
                         <div key={ex.id} onClick={() => toggleCheck(ex.id)} style={{
-                          display:"flex", alignItems:"center", gap:14, padding:"11px 16px", borderRadius:16, cursor:"pointer",
-                          background: done ? T.accentDim : T.card2, border:`1.5px solid ${done ? T.accent+"40" : "transparent"}`, transition:"all 0.18s"
+                          display:"flex", alignItems:"center", gap:12, padding:"10px 14px", borderRadius:6, cursor:"pointer",
+                          background: done ? T.accentDim : T.card2, border:`1px solid ${done ? T.accent : T.border}`, transition:"all 0.15s"
                         }}>
-                          <div style={{ width:22, height:22, borderRadius:6, flexShrink:0, border:`2px solid ${done ? T.accent : T.border}`, background: done ? T.accent : "transparent", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.18s" }}>
-                            {done && <span style={{ color:"#fff", fontSize:12, fontWeight:900, lineHeight:1 }}>✓</span>}
+                          <div style={{ width:16, height:16, borderRadius:2, flexShrink:0, border:`1px solid ${done ? T.accent : T.muted}`, background: done ? T.accent : "transparent", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s" }}>
+                            {done && <span style={{ color:"#000", fontSize:12, fontWeight:900, lineHeight:1 }}>✓</span>}
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontSize:14, fontWeight:700, color: done ? T.muted : T.text, textDecoration: done ? "line-through" : "none", letterSpacing:"-0.2px" }}>
+                            <div style={{ fontSize:13, fontWeight:700, color: done ? T.accent : T.text, textDecoration: done ? "line-through" : "none", textTransform:"uppercase" }}>
                               {ex.exercise}
                             </div>
-                            <div style={{ fontSize:11, color:T.muted, marginTop:2, display:"flex", gap:8 }}>
-                              {ex.sets && ex.reps && <span style={{ background:T.card3, borderRadius:999, padding:"1px 8px" }}>{ex.sets}×{ex.reps}</span>}
-                              {ex.weight > 0 && <span style={{ color:T.accent, fontWeight:700 }}>{ex.weight}kg</span>}
-                              {ex.rpe > 0 && <span>RPE {ex.rpe}</span>}
+                            <div style={{ fontSize:11, color:T.muted, marginTop:4, display:"flex", gap:10, fontFamily:T.font }}>
+                              {ex.sets && ex.reps && <span>{ex.sets}x{ex.reps}</span>}
+                              {ex.weight > 0 && <span style={{ color:T.text }}>{ex.weight}kg</span>}
+                              {ex.rpe > 0 && <span style={{ color:T.orange }}>RPE {ex.rpe}</span>}
                             </div>
                           </div>
-                          {done && <span style={{ fontSize:18 }}>✅</span>}
                         </div>
                       );
                     })}
@@ -338,7 +322,7 @@ function WeeklyStrView({ strLog, plans, program, activeDate, T }) {
 function ChartTip({ active, payload, T }) {
   if (!active||!payload?.length) return null;
   return (
-    <div style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:12, padding:"8px 12px", boxShadow:T.shadow, fontSize:12 }}>
+    <div style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:4, padding:"8px 12px", boxShadow:T.shadow, fontSize:11, fontFamily:T.font, textTransform:"uppercase" }}>
       {payload.map((p,i)=><div key={i} style={{color:p.color}}>{p.name}: <b>{fmt(p.value)}</b></div>)}
     </div>
   );
@@ -346,32 +330,32 @@ function ChartTip({ active, payload, T }) {
 function SH({ title, right }) {
   return (
     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:8 }}>
-      <div style={{ fontSize:14, fontWeight:800, letterSpacing:"-0.3px" }}>{title}</div>
+      <div style={{ fontSize:13, fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase" }}>{title}</div>
       {right}
     </div>
   );
 }
 function ProgBar({ value, max, color, h=4 }) {
   return (
-    <div style={{ height:h, borderRadius:h, overflow:"hidden", background:"rgba(128,128,128,0.13)", marginTop:5 }}>
-      <div style={{ height:"100%", width:`${Math.min((value/max)*100,100)}%`, background:color, borderRadius:h, transition:"width 0.45s ease" }}/>
+    <div style={{ height:h, borderRadius:1, overflow:"hidden", background:"rgba(255,255,255,0.08)", marginTop:6 }}>
+      <div style={{ height:"100%", width:`${Math.min((value/max)*100,100)}%`, background:color, borderRadius:1, transition:"width 0.45s ease" }}/>
     </div>
   );
 }
-function MiniRing({ pct, color, size=42, sw=5 }) {
+function MiniRing({ pct, color, size=42, sw=4 }) {
   const r=(size-sw)/2, c=2*Math.PI*r, off=c*(1-Math.min(pct,1));
   return (
     <svg width={size} height={size} style={{ transform:"rotate(-90deg)", flexShrink:0 }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(128,128,128,0.14)" strokeWidth={sw}/>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={sw}/>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw}
-        strokeLinecap="round" strokeDasharray={`${c} ${c}`} strokeDashoffset={off}
+        strokeLinecap="butt" strokeDasharray={`${c} ${c}`} strokeDashoffset={off}
         style={{ transition:"stroke-dashoffset 0.5s ease" }}/>
     </svg>
   );
 }
 
 function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
-  const size=230, sw=26, r=(size-sw)/2, circ=2*Math.PI*r;
+  const size=200, sw=18, r=(size-sw)/2, circ=2*Math.PI*r;
   const basePace = targetPaceSecs + 180; 
   let rawPct = 0;
   if (currentPaceSecs > 0) {
@@ -383,34 +367,23 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
   const off = circ*(1-pct);
   const done = currentPaceSecs > 0 && currentPaceSecs <= targetPaceSecs;
   
-  const gradA=done?T.green:T.accent, gradB=done?T.teal:T.blue; 
   const trackClr=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)";
   
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
       <svg width={size} height={size} style={{ display:"block" }}>
-        <defs>
-          <linearGradient id="pring" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={gradA}/><stop offset="100%" stopColor={gradB}/>
-          </linearGradient>
-          <filter id="pGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={trackClr} strokeWidth={sw}
           transform={`rotate(-90 ${size/2} ${size/2})`}/>
-        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#pring)"
-          strokeWidth={sw} strokeLinecap="round"
+        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke={done?T.green:T.accent}
+          strokeWidth={sw} strokeLinecap="butt"
           strokeDasharray={`${circ} ${circ}`} strokeDashoffset={off}
           transform={`rotate(-90 ${size/2} ${size/2})`}
-          filter="url(#pGlow)"
-          style={{ transition:"stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)" }}/>}
+          style={{ transition:"stroke-dashoffset 0.8s ease" }}/>}
       </svg>
       <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2 }}>
-        <div style={{ fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.1em", textTransform:"uppercase" }}>PACE ACTUAL</div>
-        <div style={{ fontSize:46, fontWeight:900, color:done?T.green:gradA, lineHeight:1 }}>{currentPaceSecs > 0 ? secsToPace(currentPaceSecs) : "--:--"}</div>
-        <div style={{ fontSize:12, color:T.muted }}>/ {secsToPace(targetPaceSecs)} meta</div>
-        <div style={{ fontSize:12, fontWeight:700, color:done?T.green:T.muted, marginTop:2 }}>
-          {done ? "🎉 META LOGRADA" : `${Math.round(pct*100)}% de avance`}
-        </div>
+        <div style={{ fontSize:9, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase" }}>LIVE PACE</div>
+        <div style={{ fontSize:32, fontWeight:700, color:done?T.green:T.accent, lineHeight:1, fontFamily:T.font }}>{currentPaceSecs > 0 ? secsToPace(currentPaceSecs) : "--:--"}</div>
+        <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>TGT {secsToPace(targetPaceSecs)}</div>
       </div>
     </div>
   );
@@ -419,16 +392,16 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
 function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
   const st=mkS(T);
   return (
-    <div style={{ ...st.card2, border:`1.5px solid ${T.accent}40`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
+    <div style={{ ...st.card2, border:`1px solid ${T.accent}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))", gap:6 }}>
         {fields.map(f=>(
           <div key={f.k}><span style={st.lbl}>{f.l}</span>
-            <input style={st.inp} type={f.t||"text"} step={f.step} value={vals[f.k]??""} onChange={e=>onChange(f.k,e.target.value)}/></div>
+            <input style={{...st.inp, padding:"6px 10px"}} type={f.t||"text"} step={f.step} value={vals[f.k]??""} onChange={e=>onChange(f.k,e.target.value)}/></div>
         ))}
       </div>
       <div style={{ display:"flex", gap:6 }}>
-        <button style={{ ...st.btnSm, background:T.green, flex:1 }} onClick={onSave}>✓ Guardar</button>
-        <button style={{ ...st.btnSm, background:T.card3, color:T.text, flex:1 }} onClick={onCancel}>Cancelar</button>
+        <button style={{ ...st.btnSm, background:T.green, color:"#000", border:"none", flex:1 }} onClick={onSave}>✓ OK</button>
+        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>✕ CANCEL</button>
       </div>
     </div>
   );
@@ -441,17 +414,17 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
   const preview=hasUnit?{ cal:Math.round(entry.unitCal*qty), p:r1(entry.unitP*qty), c:r1(entry.unitC*qty), g:r1(entry.unitG*qty) }:null;
   const doSave=()=>onSave(hasUnit?{ ...entry, qty, ...preview }:{ ...entry, ...raw, cal:+raw.cal, p:+raw.p||0, c:+raw.c||0, g:+raw.g||0 });
   if (hasUnit) return (
-    <div style={{ ...st.card2, border:`1.5px solid ${T.accent}40`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
-      <div style={{ fontSize:12, fontWeight:600 }}>{entry.name}</div>
+    <div style={{ ...st.card2, border:`1px solid ${T.accent}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
+      <div style={{ fontSize:12, fontWeight:700, textTransform:"uppercase" }}>{entry.name}</div>
       <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-        <div style={{ flex:1 }}><span style={st.lbl}>Cantidad</span>
-          <input style={st.inp} type="number" value={qty} min="0.25" step="0.25" onChange={e=>setQty(+e.target.value)}/></div>
-        <div style={{ fontSize:12, color:T.muted, paddingTop:16 }}>× {entry.unit}</div>
+        <div style={{ flex:1 }}><span style={st.lbl}>CANTIDAD</span>
+          <input style={{...st.inp, padding:"6px 10px"}} type="number" value={qty} min="0.25" step="0.25" onChange={e=>setQty(+e.target.value)}/></div>
+        <div style={{ fontSize:11, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {entry.unit}</div>
       </div>
-      {preview&&<div style={{ fontSize:11, color:T.muted }}>= {preview.cal} kcal · {preview.p}P · {preview.c}C · {preview.g}G</div>}
+      {preview&&<div style={{ fontSize:10, color:T.muted, fontFamily:T.font }}>= {preview.cal} KCAL · {preview.p}P · {preview.c}C · {preview.g}G</div>}
       <div style={{ display:"flex", gap:6 }}>
-        <button style={{ ...st.btnSm, background:T.green, flex:1 }} onClick={doSave}>✓ Guardar</button>
-        <button style={{ ...st.btnSm, background:T.card3, color:T.text, flex:1 }} onClick={onCancel}>Cancelar</button>
+        <button style={{ ...st.btnSm, background:T.green, color:"#000", border:"none", flex:1 }} onClick={doSave}>✓ OK</button>
+        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>✕ CANCEL</button>
       </div>
     </div>
   );
@@ -459,37 +432,29 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
     vals={raw} onChange={(k,v)=>setRaw(p=>({...p,[k]:v}))} onSave={doSave} onCancel={onCancel} T={T}/>;
 }
 
-function KPICard({ icon, label, value, sub, color, pct, goalLabel, isDark, T }) {
+function KPICard({ id, label, value, sub, color, pct, isDark, T }) {
   return (
     <div style={{
-      background: `linear-gradient(145deg, ${color}15 0%, ${T.card} 60%)`,
-      borderRadius:22, padding:"16px 18px",
-      boxShadow: isDark
-        ? `0 0 0 1px ${T.border}, 0 8px 32px ${color}15` 
-        : `0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)`,
-      color:T.text, minHeight:116, display:"flex", flexDirection:"column", justifyContent:"space-between",
+      background: T.card2, border: `1px solid ${T.border}`,
+      borderRadius:8, padding:"14px",
+      color:T.text, minHeight:90, display:"flex", flexDirection:"column", justifyContent:"space-between",
+      position:"relative", overflow:"hidden"
     }}>
-      <div style={{ fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase" }}>
-        {icon}&nbsp;{label}
+      <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:color }} />
+      <div style={{ fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", marginLeft:6 }}>
+        {id} · {label}
       </div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", margin:"8px 0" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginTop:12, marginLeft:6 }}>
         <div>
-          <div style={{ fontSize:32, fontWeight:900, color, lineHeight:1, letterSpacing:"-1px" }}>{value}</div>
-          {sub&&<div style={{ fontSize:10, color:T.muted, marginTop:3 }}>{sub}</div>}
+          <div style={{ fontSize:26, fontWeight:700, color, lineHeight:1, fontFamily:T.font }}>{value}</div>
+          {sub&&<div style={{ fontSize:10, color:T.muted, marginTop:4, fontFamily:T.font }}>{sub}</div>}
         </div>
-        {pct!=null&&<MiniRing pct={pct} color={color} size={46} sw={5}/>}
       </div>
-      {goalLabel&&pct!=null&&(
-        <div>
-          <ProgBar value={pct*100} max={100} color={color} h={3}/>
-          <div style={{ fontSize:9, color:T.muted, marginTop:3 }}>{goalLabel}</div>
-        </div>
-      )}
     </div>
   );
 }
 function Placeholder({ msg, T }) {
-  return <div style={{ height:140, display:"flex", alignItems:"center", justifyContent:"center", color:T.muted, fontSize:12 }}>{msg}</div>;
+  return <div style={{ height:120, display:"flex", alignItems:"center", justifyContent:"center", color:T.muted, fontSize:11, fontFamily:T.font, textTransform:"uppercase", letterSpacing:"0.05em" }}>[{msg}]</div>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -499,44 +464,37 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
   const st=mkS(T);
   const [editDay, setEditDay] = useState(null);
   const tip=p=><ChartTip {...p} T={T}/>;
+  
   const pCol=(v,g)=>v>=g?T.green:v>=g*.8?T.accent:T.red;
   const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
-  const sCol=s=>s>=7?T.green:s>=6?T.accent:T.red;
   const cCol=(v,g)=>v>g?T.red:v>g*.85?T.accent:T.green;
 
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
 
-  // Cálculo de variables de recuperación para el KPI principal
-  const recPct = activeDayData.recovery ? activeDayData.recovery / 100 : null;
-  const recLabel = activeDayData.recovery ? (activeDayData.recovery >= 67 ? "Optimizado 🔥" : activeDayData.recovery >= 34 ? "Adecuado ⚡" : "Sobrecarga 🔋") : "Sin datos";
-
   const kpis=[
-    { icon:"🔥",label:"Cal In",  value:activeDayData.calIn||"—", sub:`de ${goals.cal} kcal`,  color:T.accent, pct:activeDayData.calIn?clamp1(activeDayData.calIn,goals.cal):null, goalLabel:`${activeDayData.calIn||0} / ${goals.cal} kcal` },
-    { icon:"💨",label:"Cal Out", value:activeDayData.calOut||"—", sub:"kcal quemadas",        color:T.blue,   pct:null },
-    { icon:"⚖️",label:"Balance", value:activeDayData.calOut>0?(activeDayData.balance>0?`+${activeDayData.balance}`:activeDayData.balance):"—",
-      sub:activeDayData.balance<0?"déficit ✓":"superávit", color:activeDayData.calOut>0?bCol(activeDayData.balance):T.muted, pct:null },
-    { icon:"🥩",label:"Proteína",value:activeDayData.p?`${Math.round(activeDayData.p)}g`:"—", sub:`meta ${goals.p}g`, color:pCol(activeDayData.p,goals.p), pct:activeDayData.p?clamp1(activeDayData.p,goals.p):null, goalLabel:`${Math.round(activeDayData.p||0)}/${goals.p}g` },
-    { icon:"🍞",label:"Carbos",  value:activeDayData.c?`${Math.round(activeDayData.c)}g`:"—", sub:`máx ${goals.c}g`,  color:cCol(activeDayData.c,goals.c), pct:activeDayData.c?clamp1(activeDayData.c,goals.c):null, goalLabel:`${Math.round(activeDayData.c||0)}/${goals.c}g` },
-    { icon:"😴",label:"Sueño",   value:activeDayData.sleep?`${fmt(activeDayData.sleep,1)}h`:"—", sub:"horas",          color:sCol(activeDayData.sleep), pct:activeDayData.sleep?clamp1(activeDayData.sleep,8):null, goalLabel:"meta 8h" },
-    // KPI DE RECOVERY posicionado al lado de Sueño
-    { icon:"🔋",label:"Recovery", value:activeDayData.recovery?`${activeDayData.recovery}%`:"—", sub:recLabel, color:getRecoveryColor(activeDayData.recovery, T), pct:recPct, goalLabel: activeDayData.hrv ? `HRV: ${activeDayData.hrv}ms | RHR: ${activeDayData.rhr}bpm` : null },
-    { icon:"👟",label:"Pasos",   value:activeDayData.steps?activeDayData.steps.toLocaleString():"—", sub:"pasos registrados", color:T.purple, pct:activeDayData.steps?clamp1(activeDayData.steps,10000):null, goalLabel:"meta 10,000" },
+    { id:"PWR", label:"Cal In",  value:activeDayData.calIn||"—", sub:`TGT: ${goals.cal}`,  color:T.accent },
+    { id:"SYS", label:"Balance", value:activeDayData.calOut>0?(activeDayData.balance>0?`+${activeDayData.balance}`:activeDayData.balance):"—", sub:activeDayData.balance<0?"DEFICIT":"SURPLUS", color:activeDayData.calOut>0?bCol(activeDayData.balance):T.muted },
+    { id:"MAC", label:"Protein", value:activeDayData.p?`${Math.round(activeDayData.p)}g`:"—", sub:`TGT: ${goals.p}g`, color:pCol(activeDayData.p,goals.p) },
+    { id:"MAC", label:"Carbs",   value:activeDayData.c?`${Math.round(activeDayData.c)}g`:"—", sub:`MAX: ${goals.c}g`,  color:cCol(activeDayData.c,goals.c) },
+    { id:"AER", label:"Cal Out", value:activeDayData.calOut||"—", sub:"BURNED",        color:T.blue },
+    { id:"AER", label:"Steps",   value:activeDayData.steps?activeDayData.steps.toLocaleString():"—", sub:"TGT: 10K", color:T.purple },
   ];
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(148px,1fr))", gap:10 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:10 }}>
         {kpis.map(k=><KPICard key={k.label} {...k} isDark={isDark} T={T}/>)}
       </div>
 
-      <div style={{ ...st.card, overflowX:"auto" }}>
-        <SH title="📅 Historial — 7 días (relativo)"
-          right={<span style={{ fontSize:9, color:T.muted }}>P:<span style={{color:T.green}}> ≥meta</span> · Rec:<span style={{color:T.green}}> Whoop Style</span></span>}/>
-        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12, minWidth:700, fontFamily:"system-ui" }}>
+      <div style={{ ...st.card, padding:0, overflowX:"auto" }}>
+        <div style={{ padding:"16px 18px", borderBottom:`1px solid ${T.border}` }}>
+          <SH title="📊 CHAMPIONSHIP PROGRESS (7 DÍAS)" right={<span style={{ fontSize:10, color:T.muted, fontFamily:T.font }}>P:<span style={{color:T.green}}>≥TGT</span></span>}/>
+        </div>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:700, fontFamily:T.font }}>
           <thead>
-            <tr style={{ borderBottom:`1px solid ${T.border}` }}>
-              {[["Fecha","l"],["Out","r"],["In","r"],["Bal","r"],["P","r"],["C","r"],["G","r"],["😴","r"],["Rec %","r"],["Pasos","r"]].map(([h,a])=>(
-                <th key={h} style={{ padding:"7px 8px", color:T.muted, fontWeight:800, textAlign:a==="r"?"right":"left", fontSize:9, letterSpacing:"0.07em" }}>{h.toUpperCase()}</th>
+            <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
+              {[["DATE","l"],["OUT","r"],["IN","r"],["BAL","r"],["PROT","r"],["CARB","r"],["FAT","r"],["SLEEP","r"],["REC","r"],["STEPS","r"]].map(([h,a])=>(
+                <th key={h} style={{ padding:"10px 14px", color:T.muted, fontWeight:700, textAlign:a==="r"?"right":"left", letterSpacing:"0.1em" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -544,17 +502,20 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
             {weekData.slice(0,7).map(d=>{
               const isT=d.date===activeDate, g=d.goals, bal=d.calIn-d.calOut, ho=d.calOut>0;
               return (
-                <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.accentDim:"transparent" }}>
-                  <td style={{ padding:"9px 8px", fontWeight:isT?800:400, color:isT?T.accent:T.text, whiteSpace:"nowrap" }}>{isT&&"▶ "}{d.date===TODAY?"Hoy":d.date.slice(5)}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:T.blue }}>{ho?d.calOut.toLocaleString():"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:T.accent }}>{d.calIn?d.calIn.toLocaleString():"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:(ho&&d.calIn)?bCol(bal):T.muted }}>{(ho&&d.calIn)?(bal>0?`+${bal}`:bal):"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.p?pCol(d.p,g.p):T.muted }}>{d.p?`${Math.round(d.p)}g`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.c?cCol(d.c,g.c):T.muted }}>{d.c?`${Math.round(d.c)}g`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:600, color:d.g?T.purple:T.muted }}>{d.g?`${Math.round(d.g)}g`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:d.sleep?sCol(d.sleep):T.muted }}>{d.sleep?`${fmt(d.sleep,1)}h`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", fontWeight:700, color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
-                  <td style={{ padding:"9px 8px", textAlign:"right", color:T.purple }}>{d.steps?d.steps.toLocaleString():"—"}</td>
+                <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.accentDim:"transparent", transition:"background 0.2s" }}>
+                  <td style={{ padding:"12px 14px", fontWeight:isT?700:400, color:isT?T.accent:T.text, whiteSpace:"nowrap" }}>
+                    {isT && <span style={{display:"inline-block", width:8, height:8, borderRadius:"50%", background:T.accent, marginRight:8, boxShadow:`0 0 8px ${T.accent}`}}/>}
+                    {d.date===TODAY?"TODAY":d.date.slice(5)}
+                  </td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.blue }}>{ho?d.calOut.toLocaleString():"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.accent }}>{d.calIn?d.calIn.toLocaleString():"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", fontWeight:700, color:(ho&&d.calIn)?bCol(bal):T.muted }}>{(ho&&d.calIn)?(bal>0?`+${bal}`:bal):"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.p?pCol(d.p,g.p):T.muted }}>{d.p?`${Math.round(d.p)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.c?cCol(d.c,g.c):T.muted }}>{d.c?`${Math.round(d.c)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.g?T.purple:T.muted }}>{d.g?`${Math.round(d.g)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.muted }}>{d.sleep?`${fmt(d.sleep,1)}h`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.muted }}>{d.steps?d.steps.toLocaleString():"—"}</td>
                 </tr>
               );
             })}
@@ -564,57 +525,57 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 
       <div style={st.g2}>
         <div style={st.card}>
-          <div style={{ fontSize:13, fontWeight:800, marginBottom:12 }}>📈 Recuperación Whoop vs Horas de Sueño</div>
-          {last7.filter(d=>d.recovery>0).length>=2?(
-            <ResponsiveContainer width="100%" height={140}>
-              <AreaChart data={last7} margin={{top:4,right:4,bottom:0,left:-22}}>
-                <defs><linearGradient id="recg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={T.green} stopOpacity={0.35}/><stop offset="95%" stopColor={T.green} stopOpacity={0}/>
-                </linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.border}/>
-                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:9}} tickFormatter={d=>d.slice(5)}/>
-                <YAxis tick={{fill:T.muted,fontSize:9}}/>
+          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.green }}>🥩 PROT INJECTION VS TARGET</div>
+          {last7.filter(d=>d.calIn>0).length>=2?(
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={last7} margin={{top:15,right:4,bottom:0,left:-22}}>
+                <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+                <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
                 <Tooltip content={tip}/>
-                <Area type="monotone" dataKey="recovery" stroke={T.green} fill="url(#recg)" strokeWidth={2.5} dot={{fill:T.green,r:4}} name="Recovery %"/>
-              </AreaChart>
-            </ResponsiveContainer>
-          ):<Placeholder msg="Registra más días con métricas de recuperación" T={T}/>}
-        </div>
-        <div style={st.card}>
-          <div style={{ fontSize:13, fontWeight:800, marginBottom:12 }}>⚖️ Balance Calórico</div>
-          {last7.filter(d=>d.calOut>0).length>=2?(
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={last7.filter(d=>d.calOut>0)} margin={{top:4,right:4,bottom:0,left:-22}}>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.border}/>
-                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:9}} tickFormatter={d=>d.slice(5)}/>
-                <YAxis tick={{fill:T.muted,fontSize:9}}/><Tooltip content={tip}/>
-                <Bar dataKey="balance" name="Balance" radius={[6,6,0,0]}>
-                  {last7.filter(d=>d.calOut>0).map((d,i)=><Cell key={i} fill={d.balance<0?T.green:d.balance<300?T.accent:T.red}/>)}
+                <ReferenceLine y={goals.p} stroke={T.green} strokeDasharray="3 3" label={{position:"top",value:`TGT ${goals.p}g`,fill:T.green,fontSize:10,fontFamily:T.font}} />
+                <Bar dataKey="p" name="Proteína" radius={[2,2,0,0]} barSize={16}>
+                  {last7.map((d,i)=><Cell key={i} fill={d.p>=goals.p?T.green:T.border}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ):<Placeholder msg="Registra Cal Out en Daily Log" T={T}/>}
+          ):<Placeholder msg="INSUFFICIENT TELEMETRY" T={T}/>}
+        </div>
+        
+        <div style={st.card}>
+          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.accent }}>⚖️ CALORIC DELTA (BALANCE)</div>
+          {last7.filter(d=>d.calOut>0).length>=2?(
+            <ResponsiveContainer width="100%" height={160}>
+              <LineChart data={last7.filter(d=>d.calOut>0)} margin={{top:15,right:4,bottom:0,left:-22}}>
+                <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+                <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
+                <Tooltip content={tip}/>
+                <ReferenceLine y={0} stroke={T.text} strokeWidth={1} />
+                <Line type="step" dataKey="balance" name="Balance" stroke={T.accent} strokeWidth={2} dot={{fill:T.card,stroke:T.accent,r:4,strokeWidth:2}} activeDot={{r:6,fill:T.accent}} />
+              </LineChart>
+            </ResponsiveContainer>
+          ):<Placeholder msg="INSUFFICIENT TELEMETRY" T={T}/>}
         </div>
       </div>
 
       <div style={st.card}>
-        <SH title={<>🗓️ Plan Semanal · <span style={{color:T.accent}}>{program}</span></>}
-          right={<span style={{fontSize:11, color:T.muted}}>Click para editar</span>}/>
+        <SH title={<>🗓️ WEEKLY SETUP · <span style={{color:T.accent}}>{program}</span></>}
+          right={<span style={{fontSize:10, color:T.muted, fontFamily:T.font}}>CLICK TO EDIT</span>}/>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))", gap:8 }}>
           {PLAN_KEYS.map(day=>{
             const label=plans[program]?.[day]||"—", isT=day===actDayDow, isR=label.includes("Descanso");
             return (
-              <div key={day} onClick={() => setEditDay(day)} style={{ background:isT?T.accentDim:T.card2, border:`1.5px solid ${isT?T.accent:T.border}`, borderRadius:18, padding:"14px 10px", textAlign:"center", cursor:"pointer",
-                boxShadow:isT?`0 0 0 1px ${T.accent}40,0 4px 20px ${T.accent}15`:"none" }}>
-                <div style={{ fontSize:9, fontWeight:800, color:isT?T.accent:T.muted, letterSpacing:"0.1em", marginBottom:6 }}>{day.toUpperCase()}</div>
+              <div key={day} onClick={() => setEditDay(day)} style={{ background:isT?T.accentDim:T.card2, border:`1px solid ${isT?T.accent:T.border}`, borderRadius:6, padding:"12px 10px", textAlign:"center", cursor:"pointer", transition:"all 0.2s" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:isT?T.accent:T.muted, letterSpacing:"0.15em", marginBottom:8, fontFamily:T.font }}>{day.toUpperCase()}</div>
                 {editDay === day ? (
                   <input autoFocus value={plans[program]?.[day] || ""}
                     onChange={e => setPlans(p => ({...p, [program]: {...p[program], [day]: e.target.value}}))}
                     onBlur={() => setEditDay(null)}
                     onKeyDown={e => e.key === 'Enter' && setEditDay(null)}
-                    style={{ background:"transparent", border:"none", outline:"none", fontSize:11, textAlign:"center", color:T.text, width:"100%", fontFamily:"system-ui", fontWeight:600 }} />
+                    style={{ background:"transparent", border:"none", outline:"none", fontSize:11, textAlign:"center", color:T.text, width:"100%", fontFamily:T.font, textTransform:"uppercase" }} />
                 ) : (
-                  <div style={{ fontSize:11, fontWeight:700, color:isR?T.muted:T.text, lineHeight:1.4 }}>{label}</div>
+                  <div style={{ fontSize:11, fontWeight:700, color:isR?T.muted:T.text, lineHeight:1.4, textTransform:"uppercase" }}>{label}</div>
                 )}
               </div>
             );
@@ -690,18 +651,18 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <div style={{ display: "flex", background: T.card2, borderRadius: 999, padding: 4 }}>
+        <div style={{ display: "flex", background: T.card2, borderRadius: 6, padding: 4, border:`1px solid ${T.border}` }}>
           {["semana", "mes", "año"].map(v => {
             const val = v === "semana" ? "week" : v === "mes" ? "month" : "year";
             return (
               <button key={v} onClick={() => setView(val)}
                 style={{
                   background: view === val ? T.card : "transparent",
-                  color: view === val ? T.text : T.muted,
-                  borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
-                  boxShadow: view === val ? T.shadow : "none", transition: "all 0.2s"
+                  color: view === val ? T.accent : T.muted,
+                  borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
+                  fontFamily: T.font, textTransform:"uppercase", transition: "all 0.2s"
                 }}>
-                {v.charAt(0).toUpperCase() + v.slice(1)}
+                {v}
               </button>
             )
           })}
@@ -709,11 +670,11 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
 
         {(view === "month" || view === "year") && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", borderRadius: 999, boxShadow: T.shadow, transition: "all 0.15s" }} onClick={prevPeriod}>◀</button>
-            <div style={{ fontSize: 16, fontWeight: 900, textTransform: "uppercase", letterSpacing: "1px", color: T.text, minWidth: 120, textAlign: "center" }}>
+            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}`, transition: "all 0.15s" }} onClick={prevPeriod}>◀</button>
+            <div style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", color: T.text, minWidth: 120, textAlign: "center", fontFamily:T.font }}>
               {view === "year" ? year : new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
             </div>
-            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", borderRadius: 999, boxShadow: T.shadow, transition: "all 0.15s" }} onClick={nextPeriod}>▶</button>
+            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}`, transition: "all 0.15s" }} onClick={nextPeriod}>▶</button>
           </div>
         )}
       </div>
@@ -722,7 +683,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
         <div style={{ ...st.card, padding: "24px 20px" }}>
           
           {view === "year" && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
               {Array.from({ length: 12 }, (_, i) => {
                 const mDate = new Date(year, i, 1);
                 const isCurrentMonth = mDate.getMonth() === new Date().getMonth() && mDate.getFullYear() === new Date().getFullYear();
@@ -730,10 +691,10 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                   <button key={i} onClick={() => { setNavDate(mDate); setView("month"); }}
                     style={{
                       background: isCurrentMonth ? T.accentDim : T.card2,
-                      border: `1.5px solid ${isCurrentMonth ? T.accent : "transparent"}`,
-                      borderRadius: 16, padding: "20px 10px",
+                      border: `1px solid ${isCurrentMonth ? T.accent : T.border}`,
+                      borderRadius: 6, padding: "20px 10px",
                       color: isCurrentMonth ? T.accent : T.text,
-                      fontWeight: 800, fontSize: 13, textTransform: "capitalize", cursor: "pointer", transition: "all 0.15s"
+                      fontWeight: 700, fontSize: 12, textTransform: "uppercase", cursor: "pointer", fontFamily:T.font, transition: "all 0.15s"
                     }}>
                     {mDate.toLocaleDateString("es-ES", { month: "short" })}
                   </button>
@@ -743,9 +704,9 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           )}
 
           {view === "month" && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8, textAlign: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, textAlign: "center" }}>
               {["L", "M", "X", "J", "V", "S", "D"].map(d => (
-                <div key={d} style={{ fontSize: 10, fontWeight: 800, color: T.muted, marginBottom: 8 }}>{d}</div>
+                <div key={d} style={{ fontSize: 10, fontWeight: 700, color: T.muted, marginBottom: 8, fontFamily:T.font }}>{d}</div>
               ))}
               {daysGrid.map((day, i) => {
                 if (!day) return <div key={`pad-${i}`} />;
@@ -759,12 +720,12 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                     onClick={() => setActiveDate(day.dateStr)}
                     style={{
                       background: isSelected ? T.accent : recoveryColor ? `${recoveryColor}18` : hasData ? T.card2 : "transparent",
-                      border: `1.5px solid ${isSelected ? T.accent : recoveryColor ? recoveryColor : isToday ? T.muted : "transparent"}`,
-                      borderRadius: 14, aspectRatio: "1/1", display: "flex", flexDirection: "column",
+                      border: `1px solid ${isSelected ? T.accent : recoveryColor ? recoveryColor : isToday ? T.muted : "transparent"}`,
+                      borderRadius: 6, aspectRatio: "1/1", display: "flex", flexDirection: "column",
                       alignItems: "center", justifyContent: "center", cursor: "pointer",
-                      color: isSelected ? "#fff" : recoveryColor ? recoveryColor : T.text, transition: "all 0.15s", padding: 0
+                      color: isSelected ? "#000" : recoveryColor ? recoveryColor : T.text, fontFamily:T.font, transition: "all 0.15s", padding: 0
                     }}>
-                    <span style={{ fontSize: 14, fontWeight: isToday || isSelected ? 900 : 600 }}>{day.d}</span>
+                    <span style={{ fontSize: 13, fontWeight: isToday || isSelected ? 700 : 400 }}>{day.d}</span>
                   </button>
                 );
               })}
@@ -782,15 +743,15 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                     style={{
                       flex: 1, margin: "0 4px", padding: "16px 0",
                       background: isSelected ? T.accent : T.card2,
-                      border: `1.5px solid ${isSelected ? T.accent : isToday ? T.muted : "transparent"}`,
-                      borderRadius: 20, display: "flex", flexDirection: "column",
-                      alignItems: "center", cursor: "pointer", color: isSelected ? "#fff" : T.text,
-                      transition: "all 0.15s"
+                      border: `1px solid ${isSelected ? T.accent : isToday ? T.muted : T.border}`,
+                      borderRadius: 6, display: "flex", flexDirection: "column",
+                      alignItems: "center", cursor: "pointer", color: isSelected ? "#000" : T.text,
+                      fontFamily:T.font, transition: "all 0.15s"
                     }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.8, textTransform: "uppercase" }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.8, textTransform: "uppercase" }}>
                         {mDate.toLocaleDateString("es-ES", { weekday: "short" })}
                       </span>
-                      <span style={{ fontSize: 20, fontWeight: 900, marginTop: 4 }}>
+                      <span style={{ fontSize: 20, fontWeight: 700, marginTop: 4 }}>
                         {mDate.getDate()}
                       </span>
                    </button>
@@ -804,42 +765,42 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           
           {(isSelectedDayInMonth || view === "week") && (
-            <div style={{ ...st.card2, border: `1.5px solid ${T.accentDim}`, padding: 20, boxShadow: `0 8px 24px ${T.accent}15` }}>
-              <SH title={`📌 Info del ${activeDate === TODAY ? "Día (Hoy)" : activeDate}`} />
+            <div style={{ ...st.card2, border: `1px solid ${T.accentDim}`, padding: 20 }}>
+              <SH title={`📌 TELEMETRY: ${activeDate === TODAY ? "TODAY" : activeDate}`} />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL OUT</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.blue }}>
-                    {selectedDayData.calOut ? `${selectedDayData.calOut} kcal` : "—"}
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>CAL OUT</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: T.blue, fontFamily:T.font }}>
+                    {selectedDayData.calOut ? `${selectedDayData.calOut}` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>CAL IN</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.accent }}>
-                    {selectedDayData.calIn ? `${selectedDayData.calIn} kcal` : "—"}
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>CAL IN</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily:T.font }}>
+                    {selectedDayData.calIn ? `${selectedDayData.calIn}` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>WHOOP RECOVERY</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: getRecoveryColor(selectedDayData.recovery, T) }}>
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>RECOVERY</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: getRecoveryColor(selectedDayData.recovery, T), fontFamily:T.font }}>
                     {selectedDayData.recovery ? `${selectedDayData.recovery}%` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>HRV / RHR</div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: T.text, paddingTop: 2 }}>
-                    {selectedDayData.hrv ? `${selectedDayData.hrv}ms` : "—"} / {selectedDayData.rhr ? `${selectedDayData.rhr}bpm` : "—"}
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>HRV / RHR</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: T.text, paddingTop: 2, fontFamily:T.font }}>
+                    {selectedDayData.hrv ? `${selectedDayData.hrv}` : "—"} / {selectedDayData.rhr ? `${selectedDayData.rhr}` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SUEÑO</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.purple }}>
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>SLEEP</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: T.purple, fontFamily:T.font }}>
                     {selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.muted, fontWeight: 800 }}>SCORE DE SUEÑO</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.teal }}>
+                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>SCORE</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: T.teal, fontFamily:T.font }}>
                     {selectedDayData.score ? `${selectedDayData.score}%` : "—"}
                   </div>
                 </div>
@@ -848,23 +809,23 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           )}
 
           <div style={{ ...st.card, padding: 20, flex: 1 }}>
-            <SH title={`📊 Recap: ${new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long" })}`} />
+            <SH title={`📊 RECAP: ${new Date(year, month, 1).toLocaleDateString("es-ES", { month: "short" }).toUpperCase()}`} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
-                <span style={st.lbl}>Promedio Cal In</span>
-                <div style={{ fontSize: 22, fontWeight: 900, color: T.accent }}>{Math.round(avgCalIn)}<span style={{fontSize:11, color:T.muted}}> kcal</span></div>
+                <span style={st.lbl}>AVG CAL IN</span>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.accent, fontFamily:T.font }}>{Math.round(avgCalIn)}</div>
               </div>
               <div>
-                <span style={st.lbl}>Promedio Cal Out</span>
-                <div style={{ fontSize: 22, fontWeight: 900, color: T.blue }}>{Math.round(avgCalOut)}<span style={{fontSize:11, color:T.muted}}> kcal</span></div>
+                <span style={st.lbl}>AVG CAL OUT</span>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.blue, fontFamily:T.font }}>{Math.round(avgCalOut)}</div>
               </div>
               <div>
-                <span style={st.lbl}>Sueño Promedio</span>
-                <div style={{ fontSize: 22, fontWeight: 900, color: T.purple }}>{avgSleep > 0 ? avgSleep.toFixed(1) : "—"}<span style={{fontSize:11, color:T.muted}}> h</span></div>
+                <span style={st.lbl}>AVG SLEEP</span>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.purple, fontFamily:T.font }}>{avgSleep > 0 ? avgSleep.toFixed(1) : "—"}<span style={{fontSize:12, color:T.muted}}>h</span></div>
               </div>
               <div>
-                <span style={st.lbl}>Score Promedio</span>
-                <div style={{ fontSize: 22, fontWeight: 900, color: T.teal }}>{avgScore > 0 ? Math.round(avgScore) : "—"}<span style={{fontSize:11, color:T.muted}}> %</span></div>
+                <span style={st.lbl}>AVG SCORE</span>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.teal, fontFamily:T.font }}>{avgScore > 0 ? Math.round(avgScore) : "—"}<span style={{fontSize:12, color:T.muted}}>%</span></div>
               </div>
             </div>
           </div>
@@ -899,8 +860,6 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
   
   const save=()=>{
     if(!form.date) return;
-    
-    // Calcula el Recovery si hay métricas, prioriza el Recovery Manual si el usuario lo ingresó
     const calcRec = calculateWhoopRecovery(+form.hrv, +form.rhr, +form.score);
     const finalRecovery = form.recovery ? +form.recovery : calcRec;
 
@@ -939,78 +898,77 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ ...st.card, padding:"14px 18px" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-          <div style={{ display:"flex", gap:18, flexWrap:"wrap" }}>
-            {[["🔥","Cal",goals.cal,"kcal",T.accent],["🥩","P",goals.p,"g",T.green],["🍞","C",goals.c,"g",T.blue],["🧈","G",goals.g,"g",T.purple]].map(([ico,l,v,u,c])=>(
+          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+            {[["CAL",goals.cal,T.accent],["PROT",goals.p,T.green],["CARB",goals.c,T.blue],["FAT",goals.g,T.purple]].map(([l,v,c])=>(
               editG?(
-                <div key={l} style={{ display:"flex", flexDirection:"column", gap:2, minWidth:80 }}>
-                  <span style={st.lbl}>{ico} {l}</span>
-                  <input style={{ ...st.inp, padding:"5px 8px", fontSize:12 }} type="number" value={v}
-                    onChange={e=>setGoals(p=>({...p,[l.toLowerCase().replace("cal","cal")]:+e.target.value}))}/>
+                <div key={l} style={{ display:"flex", flexDirection:"column", gap:4, minWidth:80 }}>
+                  <span style={st.lbl}>{l}</span>
+                  <input style={{ ...st.inp, padding:"6px 10px", fontSize:12 }} type="number" value={v}
+                    onChange={e=>setGoals(p=>({...p,[l.toLowerCase()]:+e.target.value}))}/>
                 </div>
               ):(
-                <div key={l} style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:9, color:T.muted, fontWeight:800 }}>{ico} {l}</div>
-                  <div style={{ fontSize:22, fontWeight:900, color:c, letterSpacing:"-0.5px" }}>{v}<span style={{fontSize:10}}>{u}</span></div>
+                <div key={l} style={{ textAlign:"left" }}>
+                  <div style={{ fontSize:10, color:T.muted, fontWeight:700, fontFamily:T.font }}>{l}</div>
+                  <div style={{ fontSize:20, fontWeight:700, color:c, fontFamily:T.font }}>{v}</div>
                 </div>
               )
             ))}
           </div>
-          <button style={st.btnSm} onClick={()=>setEG(o=>!o)}>{editG?"✓ Listo":"✏️ Objetivos"}</button>
+          <button style={st.btnSm} onClick={()=>setEG(o=>!o)}>{editG?"✓ SAVE TGT":"✏️ EDIT TGT"}</button>
         </div>
-        {editG&&<div style={{ fontSize:10, color:T.muted, marginTop:8 }}>Los cambios de objetivos no alteran el historial pasado.</div>}
       </div>
 
       <div style={st.g2}>
         <div style={st.card}>
-          <SH title="📋 Registrar Día (Whoop-Style Biometrics)"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Fecha</span>
+          <SH title="📋 LOG BIOMETRICS"/>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>DATE</span>
               <input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
             
             <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4}}>
-              <span style={{...st.lbl, color:T.accent}}>⚡ Recovery & Sueño</span>
+              <span style={{...st.lbl, color:T.accent}}>⚡ ERS & SLEEP</span>
             </div>
             
-            {[["HRV (ms)","hrv"],["RHR (bpm)","rhr"],["Horas de Sueño","sleep"],["Sleep Score %","score"]].map(([l,k])=>(
+            {[["HRV (ms)","hrv"],["RHR (bpm)","rhr"],["SLEEP (hrs)","sleep"],["SCORE (%)","score"]].map(([l,k])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder="Whoop metric"
+                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder="—"
                   value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
 
-            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Manual Recovery % (Opcional — Auto si dejas vacío)</span>
+            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>MANUAL RECOVERY % (AUTO IF EMPTY)</span>
               <input style={{...st.inp, borderColor:T.green+"50"}} type="number" max="100" placeholder="Ej: 85" value={form.recovery} onChange={e=>setForm(p=>({...p,recovery:e.target.value}))}/></div>
 
             <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:8}}>
-              <span style={{...st.lbl, color:T.blue}}>🏃 Actividad & Rendimiento</span>
+              <span style={{...st.lbl, color:T.blue}}>🏃 AERO & DYNAMICS</span>
             </div>
 
-            {[["Cal Quemadas","calOut"],["Pasos","steps"]].map(([l,k])=>(
+            {[["CAL OUT","calOut"],["STEPS","steps"]].map(([l,k])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
                 <input style={st.inp} type="number" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
           </div>
-          <button style={st.btn} onClick={save}>💾 Guardar Registro</button>
+          <button style={st.btn} onClick={save}>💾 UPLOAD TELEMETRY</button>
         </div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {grouped.length===0&&<div style={{ ...st.card2, color:T.muted, fontSize:12 }}>Sin registros aún.</div>}
+          {grouped.length===0&&<div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
           {grouped.map(({ mk, weeks })=>(
             <div key={mk} style={st.card}>
               <button onClick={()=>toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
-                <div style={{ fontSize:14, fontWeight:800, textTransform:"capitalize" }}>{fmtMonth(mk)}</div>
-                <div style={{ fontSize:11, color:T.muted }}>{openMonths.has(mk)?"▲":"▼"} {weeks.reduce((s,w)=>s+w.days.length,0)} días</div>
+                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
+                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk)?"▲":"▼"} {weeks.reduce((s,w)=>s+w.days.length,0)} LOGS</div>
               </button>
               {openMonths.has(mk)&&weeks.map(({ wk, days })=>{
                 const projName=projects[wk];
                 return (
-                  <div key={wk} style={{ marginTop:10 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                  <div key={wk} style={{ marginTop:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
                       <button onClick={()=>toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
                         <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk)?"▼":"▶"}</span>
-                        <span style={{ fontSize:12, fontWeight:700 }}>{fmtWeek(wk)}</span>
+                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
                       </button>
                       {editProjKey===wk?(
-                        <input autoFocus style={{ ...st.inp, width:160, padding:"5px 10px", fontSize:11 }}
+                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
                           value={projTemp}
                           onChange={e=>setProjTemp(e.target.value)}
                           onBlur={()=>{ setProjects(p=>({...p,[wk]:projTemp||undefined})); setEPK(null); }}
@@ -1019,16 +977,15 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                       ):(
                         <button onClick={()=>{ setEPK(wk); setProjTemp(projects[wk]||""); }}
                           style={{ background:projName?T.accentDim:"transparent", border:`1px dashed ${projName?T.accent:T.border}`,
-                            borderRadius:999, padding:"3px 12px", fontSize:11, color:projName?T.accent:T.muted,
-                            cursor:"pointer", fontWeight:projName?700:400, whiteSpace:"nowrap" }}>
-                          {projName||"+ Proyecto"}
+                            borderRadius:4, padding:"2px 8px", fontSize:10, color:projName?T.accent:T.muted,
+                            cursor:"pointer", fontWeight:projName?700:400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
+                          {projName||"+ TAG"}
                         </button>
                       )}
                     </div>
                     {openWeeks.has(wk)&&(
                       <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
                         {days.map(d=>{
-                          // Tarjeta de Historial Limpiada a tus especificaciones
                           const dayMetrics = [
                             { l:"IN", v:d.calIn||"—", c:T.accent },
                             { l:"OUT", v:d.calOut||"—", c:T.blue },
@@ -1036,32 +993,32 @@ function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, a
                             { l:"PASOS", v:d.steps?d.steps.toLocaleString():"—", c:T.purple },
                             { l:"SUEÑO", v:d.sleep?`${d.sleep}h`:"—", c:T.purple },
                             { l:"SCORE", v:d.score?`${d.score}%`:"—", c:d.score>=85?T.green:d.score>=70?T.accent:T.red },
-                            { l:"RECOVERY", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) }
+                            { l:"REC", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) }
                           ];
 
                           return (
                             <div key={d.date}>
                               {editId===d.date?(
-                                <EditRow fields={[{k:"recovery",l:"Recovery %"},{k:"hrv",l:"HRV ms"},{k:"rhr",l:"RHR bpm"},{k:"calOut",l:"Cal Out"},{k:"steps",l:"Pasos",t:"number"},{k:"sleep",l:"Sueño h",step:"0.01"},{k:"score",l:"Score %"}]}
+                                <EditRow fields={[{k:"recovery",l:"Rec %"},{k:"hrv",l:"HRV"},{k:"rhr",l:"RHR"},{k:"calOut",l:"Cal Out"},{k:"steps",l:"Steps",t:"number"},{k:"sleep",l:"Sleep h",step:"0.01"},{k:"score",l:"Score %"}]}
                                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))}
                                   onSave={()=>{ upsert({date:d.date,recovery:+editRow.recovery||null,hrv:+editRow.hrv||null,rhr:+editRow.rhr||null,calOut:+editRow.calOut||0,steps:+editRow.steps||null,sleep:+editRow.sleep||null,score:+editRow.score||null}); setEId(null); }}
                                   onCancel={()=>setEId(null)} T={T}/>
                               ):(
-                                <div style={{ ...st.card2, padding:"12px 14px", borderLeft:`3px solid ${d.date===activeDate?T.accent:T.border}`, borderRadius:16 }}>
+                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date===activeDate?T.accent:T.border}`, borderRadius:4 }}>
                                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                                    <span style={{ fontWeight:800, fontSize:13, color:d.date===activeDate?T.accent:T.text }}>
-                                      {d.date===TODAY?"● Hoy":d.date.slice(5)}
+                                    <span style={{ fontWeight:700, fontSize:12, color:d.date===activeDate?T.accent:T.text, fontFamily:T.font }}>
+                                      {d.date===TODAY?"> TODAY":d.date.slice(5)}
                                     </span>
                                     <div style={{ display:"flex", gap:4 }}>
                                       <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",hrv:d.hrv||"",rhr:d.rhr||"",calOut:d.calOut||"",steps:d.steps||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
                                       <button style={st.icon(T.red)} onClick={()=>setHL(p=>p.filter(x=>x.date!==d.date))}>🗑</button>
                                     </div>
                                   </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(60px,1fr))", gap:8, marginTop:10 }}>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
                                     {dayMetrics.map(m => (
-                                      <div key={m.l} style={{ background:T.card, padding:"8px 6px", borderRadius:12, textAlign:"center", boxShadow:T.shadow }}>
-                                        <div style={{ fontSize:9, color:T.muted, fontWeight:800, marginBottom:4, letterSpacing:"0.05em" }}>{m.l}</div>
-                                        <div style={{ fontSize:13, fontWeight:900, color:m.c }}>{m.v}</div>
+                                      <div key={m.l} style={{ background:T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
+                                        <div style={{ fontSize:9, color:T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
+                                        <div style={{ fontSize:11, fontWeight:700, color:m.c, fontFamily:T.font }}>{m.v}</div>
                                       </div>
                                     ))}
                                   </div>
@@ -1118,7 +1075,7 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-        {[["search","🔍 Buscar DB"],["manual","✏️ Manual"],["adddb","➕ Añadir"],["editdb","🛠 Editar DB"]].map(([id,label])=>(
+        {[["search","🔍 SEARCH DB"],["manual","✏️ MANUAL IN"],["adddb","➕ ADD NEW"],["editdb","🛠 EDIT DB"]].map(([id,label])=>(
           <button key={id} style={st.ghost(mode===id)} onClick={()=>{setMode(id);setDbEId(null);}}>{label}</button>
         ))}
       </div>
@@ -1126,73 +1083,73 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
       <div style={{ display:"grid", gridTemplateColumns:"minmax(260px,1.15fr) minmax(260px,1fr)", gap:16, alignItems:"start" }}>
         <div style={{ ...st.card, display:"flex", flexDirection:"column", minHeight:460 }}>
           {mode==="search"&&(<>
-            <SH title={`🔍 Base de Datos (${db.length})`}/>
-            <input style={{ ...st.inp, marginBottom:12 }} placeholder="" value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
+            <SH title={`🔍 DB SEARCH (${db.length})`}/>
+            <input style={{ ...st.inp, marginBottom:12 }} placeholder="Type to search..." value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
             
             {sel&&(
-              <div style={{ ...st.card2, marginBottom:16, border:`1.5px solid ${T.accent}`, position:"sticky", top:0, zIndex:10, boxShadow:`0 4px 16px ${T.accent}30` }}>
+              <div style={{ ...st.card2, marginBottom:16, border:`1px solid ${T.accent}`, position:"sticky", top:0, zIndex:10 }}>
                 <div style={{ display:"flex", justifyContent:"space-between" }}>
-                  <div style={{ fontSize:13, fontWeight:900, color:T.accent, marginBottom:10 }}>{sel.name}</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:T.accent, marginBottom:10, textTransform:"uppercase" }}>{sel.name}</div>
                   <button onClick={()=>setSel(null)} style={{background:"none", border:"none", color:T.muted, cursor:"pointer"}}>✕</button>
                 </div>
                 <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10 }}>
-                  <div style={{ flex:1 }}><span style={st.lbl}>Cantidad</span>
+                  <div style={{ flex:1 }}><span style={st.lbl}>QTY</span>
                     <input style={st.inp} type="number" value={qty} min="0.25" step="0.25" onChange={e=>setQty(+e.target.value)}/></div>
-                  <div style={{ fontSize:12, color:T.muted, paddingTop:16 }}>× {sel.unit}</div>
+                  <div style={{ fontSize:12, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {sel.unit}</div>
                 </div>
-                <div style={{ fontSize:11, color:T.muted, marginBottom:10, fontWeight:700 }}>{Math.round(sel.cal*qty)} kcal · {r1(sel.p*qty)}P · {r1(sel.c*qty)}C · {r1(sel.g*qty)}G</div>
-                <button style={st.btn} onClick={addDB}>+ Agregar al Día</button>
+                <div style={{ fontSize:11, color:T.muted, marginBottom:10, fontWeight:700, fontFamily:T.font }}>{Math.round(sel.cal*qty)} KCAL · {r1(sel.p*qty)}P · {r1(sel.c*qty)}C · {r1(sel.g*qty)}G</div>
+                <button style={st.btn} onClick={addDB}>INJECT TO TANK</button>
               </div>
             )}
 
             <div style={{ flex:1, overflowY:"auto", marginBottom:10, minHeight:0 }}>
               {filtered.map(f=>(
-                <div key={f.id} onClick={()=>setSel(f)} style={{ padding:"10px 14px", borderRadius:16, cursor:"pointer", marginBottom:6,
-                  border:`1.5px solid ${sel?.id===f.id?T.accent+"60":"transparent"}`,
+                <div key={f.id} onClick={()=>setSel(f)} style={{ padding:"10px 14px", borderRadius:6, cursor:"pointer", marginBottom:6,
+                  border:`1px solid ${sel?.id===f.id?T.accent+"60":"transparent"}`,
                   background:sel?.id===f.id?T.accentDim:"transparent", transition:"all 0.12s" }}>
-                  <div style={{ fontWeight:800, fontSize:13 }}>{f.name}</div>
-                  <div style={{ fontSize:11, color:T.muted, marginTop:2 }}>{f.cal} kcal · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div>
+                  <div style={{ fontWeight:700, fontSize:13, textTransform:"uppercase" }}>{f.name}</div>
+                  <div style={{ fontSize:11, color:T.muted, marginTop:4, fontFamily:T.font }}>{f.cal} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div>
                 </div>
               ))}
             </div>
           </>)}
           {mode==="manual"&&(<>
-            <SH title="✏️ Entrada Manual"/>
+            <SH title="✏️ MANUAL INJECTION"/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Descripción</span>
+              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>DESC</span>
                 <input style={st.inp} placeholder="" value={mf.name} onChange={e=>setMF(p=>({...p,name:e.target.value}))}/></div>
-              {[["Calorías *","cal"],["Proteína","p"],["Carbos","c"],["Grasas","g"]].map(([l,k])=>(
+              {[["KCAL *","cal"],["PROT (g)","p"],["CARB (g)","c"],["FAT (g)","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
                   <input style={st.inp} type="number" placeholder="" value={mf[k]} onChange={e=>setMF(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
-            {mf.cal&&<div style={{fontSize:11,color:T.muted,marginBottom:10}}>Preview: {mf.cal} kcal · {mf.p||0}P · {mf.c||0}C · {mf.g||0}G</div>}
-            <button style={st.btn} onClick={addMan}>+ Añadir al Día</button>
+            {mf.cal&&<div style={{fontSize:10,color:T.muted,marginBottom:10, fontFamily:T.font}}>PREVIEW: {mf.cal} KCAL · {mf.p||0}P · {mf.c||0}C · {mf.g||0}G</div>}
+            <button style={st.btn} onClick={addMan}>INJECT TO TANK</button>
           </>)}
           {mode==="adddb"&&(<>
-            <SH title="➕ Nuevo Alimento"/>
+            <SH title="➕ NEW DB ENTRY"/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Nombre</span>
+              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>ITEM</span>
                 <input style={st.inp} placeholder="" value={adb.name} onChange={e=>setAdb(p=>({...p,name:e.target.value}))}/></div>
-              <div><span style={st.lbl}>Unidad</span><input style={st.inp} placeholder="" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
-              {[["Kcal","cal"],["Proteína","p"],["Carbos","c"],["Grasas","g"]].map(([l,k])=>(
+              <div><span style={st.lbl}>UNIT</span><input style={st.inp} placeholder="" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
+              {[["KCAL","cal"],["PROT","p"],["CARB","c"],["FAT","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
                   <input style={st.inp} type="number" placeholder="" value={adb[k]} onChange={e=>setAdb(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
-            <button style={st.btn} onClick={addToDb}>💾 Guardar en DB</button>
+            <button style={st.btn} onClick={addToDb}>💾 SAVE TO DB</button>
           </>)}
           {mode==="editdb"&&(<>
-            <SH title={`🛠 Editar DB (${db.length})`}/>
+            <SH title={`🛠 EDIT DB (${db.length})`}/>
             <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8 }}>
               {db.map(f=>dbEId===f.id?(
                 <EditRow key={f.id}
-                  fields={[{k:"name",l:"Nombre"},{k:"unit",l:"Unidad"},{k:"cal",l:"Kcal",t:"number"},{k:"p",l:"P",t:"number"},{k:"c",l:"C",t:"number"},{k:"g",l:"G",t:"number"}]}
+                  fields={[{k:"name",l:"Name"},{k:"unit",l:"Unit"},{k:"cal",l:"Kcal",t:"number"},{k:"p",l:"P",t:"number"},{k:"c",l:"C",t:"number"},{k:"g",l:"G",t:"number"}]}
                   vals={dbER} onChange={(k,v)=>setDbER(p=>({...p,[k]:v}))} onSave={saveDbEd} onCancel={()=>setDbEId(null)} T={T}/>
               ):(
                 <div key={f.id} style={{ ...st.card2, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <div><div style={{fontWeight:700,fontSize:13}}>{f.name}</div>
-                    <div style={{fontSize:11,color:T.muted}}>{f.cal} kcal · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div></div>
+                  <div><div style={{fontWeight:700,fontSize:12,textTransform:"uppercase"}}>{f.name}</div>
+                    <div style={{fontSize:10,color:T.muted, fontFamily:T.font, marginTop:4}}>{f.cal} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div></div>
                   <div style={{display:"flex",gap:4}}>
                     <button style={st.icon(T.accent)} onClick={()=>{setDbEId(f.id);setDbER({...f});}}>✏️</button>
                     <button style={st.icon(T.red)}    onClick={()=>setDb(p=>p.filter(x=>x.id!==f.id))}>🗑</button>
@@ -1207,53 +1164,55 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
           <div style={st.card}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
               <div>
-                <span style={st.lbl}>{isToday ? "Calorías hoy" : "Calorías del día"}</span>
-                <div style={{ fontSize:48, fontWeight:900, color:T.accent, lineHeight:1, letterSpacing:"-2px" }}>{activeDayData.calIn}</div>
-                <div style={{ fontSize:10, color:T.muted, marginTop:2 }}>meta: {goals.cal} kcal</div>
+                <span style={st.lbl}>{isToday ? "LIVE INJECTION" : "INJECTION REC."}</span>
+                <div style={{ fontSize:42, fontWeight:700, color:T.accent, lineHeight:1, fontFamily:T.font }}>{activeDayData.calIn}</div>
+                <div style={{ fontSize:10, color:T.muted, marginTop:4, fontFamily:T.font }}>TGT: {goals.cal} KCAL</div>
                 <ProgBar value={activeDayData.calIn} max={goals.cal} color={activeDayData.calIn>goals.cal?T.red:T.accent} h={4}/>
               </div>
               {macros.length>0&&(
-                <div style={{width:72,height:72}}>
+                <div style={{width:64,height:64}}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart><Pie data={macros} cx="50%" cy="50%" innerRadius={18} outerRadius={32} dataKey="v" strokeWidth={0} paddingAngle={2}>
+                    <PieChart><Pie data={macros} cx="50%" cy="50%" innerRadius={18} outerRadius={30} dataKey="v" strokeWidth={0} paddingAngle={2}>
                       {macros.map((e,i)=><Cell key={i} fill={e.c}/>)}
                     </Pie></PieChart>
                   </ResponsiveContainer>
                 </div>
               )}
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginTop:14 }}>
-              {[{n:"Proteína",v:activeDayData.p,g:goals.p,c:pCol(activeDayData.p,goals.p)},{n:"Carbos",v:activeDayData.c,g:goals.c,c:cCol(activeDayData.c,goals.c)},{n:"Grasas",v:activeDayData.g,g:gGoal,c:T.purple}].map(m=>(
-                <div key={m.n} style={{ background:T.card2, borderRadius:16, padding:10, textAlign:"center" }}>
-                  <div style={{ fontSize:26, fontWeight:900, color:m.c, letterSpacing:"-0.5px" }}>{Math.round(m.v)}</div>
-                  <div style={{ fontSize:10, color:T.muted }}>{m.n} / {m.g}g</div>
-                  <ProgBar value={m.v} max={m.g} color={m.c} h={3}/>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginTop:16 }}>
+              {[{n:"PROT",v:activeDayData.p,g:goals.p,c:pCol(activeDayData.p,goals.p)},{n:"CARB",v:activeDayData.c,g:goals.c,c:cCol(activeDayData.c,goals.c)},{n:"FAT",v:activeDayData.g,g:gGoal,c:T.purple}].map(m=>(
+                <div key={m.n} style={{ background:T.card2, borderRadius:6, padding:10, textAlign:"center", border:`1px solid ${T.border}` }}>
+                  <div style={{ fontSize:22, fontWeight:700, color:m.c, fontFamily:T.font }}>{Math.round(m.v)}</div>
+                  <div style={{ fontSize:9, color:T.muted, fontFamily:T.font, marginTop:2 }}>{m.n} / {m.g}G</div>
+                  <ProgBar value={m.v} max={m.g} color={m.c} h={2}/>
                 </div>
               ))}
             </div>
           </div>
           <div style={{ ...st.card, flex:1 }}>
-            <SH title={`📋 Log del ${isToday ? "Día (Hoy)" : activeDate}`} right={<span style={{fontSize:11,color:T.muted}}>{activeFood.length} entradas</span>}/>
+            <SH title={`📋 LOG (${isToday ? "TODAY" : activeDate})`} right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{activeFood.length} ENTRIES</span>}/>
             {activeFood.length===0?(
-              <div style={{color:T.muted,fontSize:12,textAlign:"center",padding:16}}>Sin entradas</div>
+              <div style={{color:T.muted,fontSize:11,textAlign:"center",padding:16,fontFamily:T.font}}>[NO FUEL LOADED]</div>
             ):(
-              <div style={{ maxHeight:300, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
+              <div style={{ maxHeight:300, overflowY:"auto", display:"flex", flexDirection:"column", gap:6 }}>
                 {activeFood.map(f=>lgEId===f.id?(
                   <FoodEditRow key={f.id} entry={f}
                     onSave={saved=>{setFL(p=>p.map(x=>x.id===f.id?saved:x));setLgEId(null);}}
                     onCancel={()=>setLgEId(null)} T={T}/>
                 ):(
-                  <div key={f.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${T.border}` }}>
+                  <div key={f.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 10px", background:T.card2, borderRadius:4, border:`1px solid ${T.border}` }}>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:12, fontWeight:700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      <div style={{ fontSize:11, fontWeight:700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", textTransform:"uppercase" }}>
                         {f.name}{f.unit?` (${f.qty} × ${f.unit})`:""}
                       </div>
-                      <div style={{ fontSize:10, color:T.muted }}>{f.p}P · {f.c}C · {f.g}G</div>
+                      <div style={{ fontSize:10, color:T.muted, fontFamily:T.font, marginTop:2 }}>{f.p}P · {f.c}C · {f.g}G</div>
                     </div>
-                    <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-                      <span style={{ fontSize:18, fontWeight:900, color:T.accent }}>{f.cal}</span>
-                      <button style={st.icon(T.accent)} onClick={()=>setLgEId(f.id)}>✏️</button>
-                      <button style={st.icon(T.red)}    onClick={()=>setFL(p=>p.filter(x=>x.id!==f.id))}>🗑</button>
+                    <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                      <span style={{ fontSize:16, fontWeight:700, color:T.accent, fontFamily:T.font }}>{f.cal}</span>
+                      <div style={{ display:"flex", gap:2 }}>
+                        <button style={st.icon(T.accent)} onClick={()=>setLgEId(f.id)}>✏️</button>
+                        <button style={st.icon(T.red)}    onClick={()=>setFL(p=>p.filter(x=>x.id!==f.id))}>🗑</button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1296,54 +1255,80 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
     const lines = quickLoad.split("\n");
     const newSets = [];
     lines.forEach(line => {
-      const txt = line.trim();
+      let txt = line.trim();
       if(!txt) return;
-      const m = txt.match(/^(.+?)(?:\s+(\d+)\s*[xX]\s*(\d+))?(?:\s*@\s*(\d*\.?\d+))?$/);
-      if(m) {
-         newSets.push({ id:uid(), exercise:m[1].trim(), sets:m[2]?+m[2]:"", reps:m[3]?+m[3]:"", weight:m[4]?+m[4]:"", rpe:"", date:activeDate, program });
-      } else {
-         newSets.push({ id:uid(), exercise:txt, sets:"", reps:"", weight:"", rpe:"", date:activeDate, program });
+      // Clean markdown bold (**), list formats like "- ", "* ", "1. "
+      txt = txt.replace(/\*\*/g, '').replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim();
+      if(!txt) return;
+
+      const matchObj = { exercise: "", sets: "", reps: "", weight: "", rpe: "" };
+
+      // Match sets and reps: "4x10" or "4 X 10" or " 4 x 10"
+      const srMatch = txt.match(/\s+(\d+)\s*[xX]\s*(\d+)/);
+      if (srMatch) {
+          matchObj.sets = +srMatch[1];
+          matchObj.reps = +srMatch[2];
+          txt = txt.replace(srMatch[0], '');
       }
+
+      // Match weight: "@ 60kg", "con 60", " @ 60.5"
+      const wMatch = txt.match(/(?:@\s*|con\s*)?(\d*\.?\d+)\s*(?:kg|lbs)/i) || txt.match(/@\s*(\d*\.?\d+)/);
+      if (wMatch) {
+          matchObj.weight = +wMatch[1];
+          txt = txt.replace(wMatch[0], '');
+      }
+
+      // Match RPE: "RPE 8", "rpe 8.5"
+      const rpeMatch = txt.match(/(?:RPE|rpe)[:\s]*(\d*\.?\d+)/i);
+      if (rpeMatch) {
+          matchObj.rpe = +rpeMatch[1];
+          txt = txt.replace(rpeMatch[0], '');
+      }
+
+      // Remaining is exercise name
+      matchObj.exercise = txt.replace(/[-@]+$/, '').trim() || "EJERCICIO DESCONOCIDO";
+
+      newSets.push({ id:uid(), ...matchObj, date:activeDate, program });
     });
-    if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} ejercicios cargados al ${activeDate}.`); }
+    if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} RECORDS INJECTED.`); }
   };
 
   const saveEd=()=>{ setStr(p=>p.map(l=>l.id===editId?{...l,...editRow,weight:+editRow.weight,reps:+editRow.reps,sets:+editRow.sets,rpe:+editRow.rpe}:l)); setEId(null); };
 
   const tabStyle = (id) => ({
     background: strView===id ? T.accent : T.card2,
-    color: strView===id ? "#fff" : T.muted,
-    border:"none", borderRadius:999, padding:"9px 20px",
-    fontWeight:800, fontSize:12, cursor:"pointer", fontFamily:"system-ui",
-    transition:"all 0.15s", letterSpacing:"0.02em"
+    color: strView===id ? "#000" : T.muted,
+    border:`1px solid ${strView===id ? T.accent : T.border}`, borderRadius:6, padding:"8px 16px",
+    fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font, textTransform:"uppercase",
+    transition:"all 0.15s", letterSpacing:"0.05em"
   });
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <div style={st.card}>
-        <SH title={<>🗓 Programa · <span style={{color:T.accent,fontWeight:900}}>{program}</span></>}
+        <SH title={<>🗓 CHASSIS PROGRAM · <span style={{color:T.accent,fontWeight:900}}>{program}</span></>}
           right={<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{Object.keys(PLANS).map(p=><button key={p} style={st.ghost(program===p)} onClick={()=>setProg(p)}>{p}</button>)}</div>}/>
         <button onClick={()=>setPlanO(o=>!o)} style={{ ...st.ghost(planOpen), marginBottom:planOpen?14:0 }}>
-          {planOpen?"✕ Cerrar Editor":"⚙️ Configurar Plan Semanal"}
+          {planOpen?"✕ CLOSE EDITOR":"⚙️ CONFIG"}
         </button>
         {planOpen&&(
           <div style={{ marginTop:14 }}>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
-              <div style={{fontSize:12,color:T.muted}}>Los cambios se reflejan en el Dashboard.</div>
-              <button onClick={()=>setPlans(p=>({...p,[program]:{...PLANS[program]}}))} style={{...st.ghost(false),fontSize:11,padding:"4px 12px"}}>↺ Restaurar</button>
+              <div style={{fontSize:11,color:T.muted, fontFamily:T.font}}>SYNCED WITH DASHBOARD.</div>
+              <button onClick={()=>setPlans(p=>({...p,[program]:{...PLANS[program]}}))} style={{...st.ghost(false),fontSize:10,padding:"4px 12px"}}>↺ RESTORE</button>
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:8 }}>
               {PLAN_KEYS.map(day=>{ 
                 const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
                 const isT=day===actDayDow; 
                 return (
-                <div key={day} style={{ background:isT?T.accentDim:T.card2, border:`1.5px solid ${isT?T.accent:T.border}`, borderRadius:18, padding:10 }}>
+                <div key={day} style={{ background:isT?T.accentDim:T.card2, border:`1px solid ${isT?T.accent:T.border}`, borderRadius:6, padding:10 }}>
                   <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                    <span style={{fontSize:9,fontWeight:800,color:isT?T.accent:T.muted,letterSpacing:"0.1em"}}>{day.toUpperCase()}</span>
-                    {isT&&<span style={{fontSize:8,background:T.accent,color:"#fff",borderRadius:999,padding:"2px 7px",fontWeight:800}}>SEL</span>}
+                    <span style={{fontSize:9,fontWeight:700,color:isT?T.accent:T.muted,letterSpacing:"0.1em"}}>{day.toUpperCase()}</span>
+                    {isT&&<span style={{fontSize:8,background:T.accent,color:"#000",borderRadius:2,padding:"2px 4px",fontWeight:800}}>ACT</span>}
                   </div>
                   <input value={plans[program]?.[day]||""} onChange={e=>setPlans(p=>({...p,[program]:{...p[program],[day]:e.target.value}}))}
-                    style={{...st.inp,fontSize:12,padding:"7px 10px"}} placeholder=""/>
+                    style={{...st.inp,fontSize:11,padding:"6px 10px"}} placeholder=""/>
                 </div>
               );})}
             </div>
@@ -1352,9 +1337,9 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
       </div>
 
       <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-        <button style={tabStyle("weekly")} onClick={()=>setStrView("weekly")}>📅 Vista Semanal</button>
-        <button style={tabStyle("register")} onClick={()=>setStrView("register")}>🏋️ Registrar Set</button>
-        <button style={tabStyle("history")} onClick={()=>setStrView("history")}>📊 Historial ({strLog.length})</button>
+        <button style={tabStyle("weekly")} onClick={()=>setStrView("weekly")}>📅 WEEKLY VIEW</button>
+        <button style={tabStyle("register")} onClick={()=>setStrView("register")}>🏋️ MANUAL IN</button>
+        <button style={tabStyle("history")} onClick={()=>setStrView("history")}>📊 TELEMETRY ({strLog.length})</button>
       </div>
 
       {strView==="weekly" && (
@@ -1365,33 +1350,33 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
         <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
           <div style={st.g2}>
             <div style={st.card}>
-              <SH title={`🏋️ Registrar Set (${activeDate === TODAY ? "Hoy" : activeDate})`}/>
+              <SH title={`🏋️ SINGLE LOG (${activeDate === TODAY ? "TODAY" : activeDate})`}/>
               <div style={{marginBottom:10}}>
-                <span style={st.lbl}>Ejercicio</span>
+                <span style={st.lbl}>EXERCISE</span>
                 <select value={exSel} onChange={e=>setExSel(e.target.value)} style={st.sel}>
-                  <option value="" disabled>— Selecciona un ejercicio —</option>
+                  <option value="" disabled>— SELECT —</option>
                   {Object.entries(EXERCISE_LIB).map(([cat,exs])=>(
                     <optgroup key={cat} label={cat}>{exs.map(ex=><option key={ex} value={ex}>{ex}</option>)}</optgroup>
                   ))}
-                  <option value="__custom__">✏️ Otro / Personalizado</option>
+                  <option value="__custom__">✏️ CUSTOM</option>
                 </select>
               </div>
-              {isCustom&&<div style={{marginBottom:10}}><span style={st.lbl}>Nombre</span>
+              {isCustom&&<div style={{marginBottom:10}}><span style={st.lbl}>NAME</span>
                 <input style={{...st.inp,borderColor:T.accent+"60"}} placeholder="" value={exCust} onChange={e=>setExCust(e.target.value)}/></div>}
-              {(exSel&&!isCustom)&&<div style={{background:T.accentDim,border:`1px solid ${T.accent}40`,borderRadius:12,padding:"8px 14px",marginBottom:12,fontSize:12,color:T.accent,fontWeight:700}}>✓ {exSel}</div>}
+              {(exSel&&!isCustom)&&<div style={{background:T.accentDim,border:`1px solid ${T.accent}`,borderRadius:6,padding:"8px 14px",marginBottom:12,fontSize:11,color:T.accent,fontWeight:700}}>✓ {exSel.toUpperCase()}</div>}
 
               <div style={{marginBottom:18}}>
-                <span style={st.lbl}>Peso (kg)</span>
+                <span style={st.lbl}>WEIGHT (KG)</span>
                 <input style={st.inp} type="number" placeholder="" step="0.5"
                   value={form.weight} onChange={e=>setForm(p=>({...p,weight:e.target.value}))}/>
               </div>
 
               <div style={{
                 display:"flex", gap:12, justifyContent:"center",
-                background:T.card2, borderRadius:20, padding:"18px 12px", marginBottom:16
+                background:T.card2, borderRadius:8, border:`1px solid ${T.border}`, padding:"16px 12px", marginBottom:16
               }}>
                 <NumberPicker value={form.sets} onChange={v=>setForm(p=>({...p,sets:v}))}
-                  options={SETS_OPTIONS} label="SERIES" T={T}/>
+                  options={SETS_OPTIONS} label="SETS" T={T}/>
                 <div style={{ width:1, background:T.border, alignSelf:"stretch" }}/>
                 <NumberPicker value={form.reps} onChange={v=>setForm(p=>({...p,reps:v}))}
                   options={REPS_OPTIONS} label="REPS" T={T}/>
@@ -1401,27 +1386,27 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
               </div>
 
               {(form.sets && form.reps) && (
-                <div style={{ background:T.accentDim, borderRadius:12, padding:"8px 14px", marginBottom:12, fontSize:12, color:T.accent, fontWeight:700, textAlign:"center" }}>
+                <div style={{ background:T.accentDim, border:`1px solid ${T.accent}`, borderRadius:6, padding:"8px 14px", marginBottom:12, fontSize:12, color:T.accent, fontWeight:700, textAlign:"center", fontFamily:T.font }}>
                   {form.sets}×{form.reps}{form.weight?` @ ${form.weight}kg`:""}{form.rpe?` · RPE ${form.rpe}`:""}
                 </div>
               )}
 
               <button style={{...st.btn, opacity:(exSel&&!(isCustom&&!exCust))?1:0.4}}
-                onClick={addSet}>+ Registrar Set</button>
+                onClick={addSet}>INJECT SET</button>
             </div>
 
             <div style={st.card}>
-              <SH title="⚡ Carga Rápida Flexible"/>
-              <span style={st.lbl}>Pega tu rutina aquí</span>
+              <SH title="⚡ FAST INJECTOR (AI PARSER)"/>
+              <span style={st.lbl}>PASTE RAW TEXT (AI OUTPUT COMPATIBLE)</span>
               <textarea
-                style={{ ...st.inp, minHeight:140, resize:"vertical", marginBottom:12, lineHeight:1.6 }}
-                placeholder="Ejemplos válidos:&#10;Press Banca&#10;Sentadilla 4x10&#10;Curl Bicep 3x12 @ 15"
+                style={{ ...st.inp, minHeight:160, resize:"vertical", marginBottom:12, lineHeight:1.6 }}
+                placeholder="Paste AI output directly:&#10;**1. Press Banca** 4x10 @ 60kg RPE 8&#10;- Sentadilla 4 x 10 con 100kg&#10;Curl Bicep 3x12"
                 value={quickLoad}
                 onChange={e=>setQuickLoad(e.target.value)}
               />
-              <button style={st.btn} onClick={parseAndLoad}>⚡ Cargar al Día</button>
-              <div style={{ fontSize:11, color:T.muted, marginTop:10, lineHeight:1.5 }}>
-                El algoritmo de lectura es flexible. Puedes poner solo el nombre, o nombre + series x reps, o nombre + series x reps @ peso.
+              <button style={st.btn} onClick={parseAndLoad}>⚡ PARSE & INJECT</button>
+              <div style={{ fontSize:10, color:T.muted, marginTop:12, lineHeight:1.5, fontFamily:T.font }}>
+                [SYS MSG: Engine optimized to clean markdown (**), bullet points (-), numbers (1.), and auto-detect SetsxReps, Weight (@ / con), and RPE].
               </div>
             </div>
           </div>
@@ -1430,23 +1415,23 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 
       {strView==="history" && (
         <div style={st.card}>
-          <SH title="📊 Historial" right={<span style={{fontSize:11,color:T.muted}}>{strLog.length} sets</span>}/>
+          <SH title="📊 TELEMETRY DATA" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{strLog.length} SETS</span>}/>
           {strLog.length===0 ? (
-            <div style={{color:T.muted,fontSize:12,textAlign:"center",padding:30}}>Sin registros</div>
+            <div style={{color:T.muted,fontSize:11,textAlign:"center",padding:30,fontFamily:T.font}}>[NO RECORDS]</div>
           ) : (<>
-            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"6px 0", borderBottom:`1px solid ${T.border}`, fontSize:9, color:T.muted, fontWeight:800, letterSpacing:"0.07em" }}>
-              {["EJERCICIO","KG","REPS","SER","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
+            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"8px 0", borderBottom:`1px solid ${T.border}`, fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.1em", fontFamily:T.font }}>
+              {["EXERCISE","KG","REPS","SET","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
             </div>
             <div style={{ maxHeight:420, overflowY:"auto" }}>
               {[...strLog].reverse().map(l=>editId===l.id?(
                 <div key={l.id} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}>
-                  <EditRow fields={[{k:"exercise",l:"Ejercicio"},{k:"weight",l:"Peso kg",t:"number"},{k:"reps",l:"Reps",t:"number"},{k:"sets",l:"Series",t:"number"},{k:"rpe",l:"RPE",t:"number"}]}
+                  <EditRow fields={[{k:"exercise",l:"Ex"},{k:"weight",l:"Kg",t:"number"},{k:"reps",l:"Reps",t:"number"},{k:"sets",l:"Sets",t:"number"},{k:"rpe",l:"RPE",t:"number"}]}
                     vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
                 </div>
               ):(
-                <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"10px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:l.date===activeDate?T.accentDim:"transparent" }}>
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:700,color:l.date===activeDate?T.accent:T.text}}>{l.exercise}</span>
-                  <span style={{color:T.accent,fontWeight:800}}>{l.weight||"—"}</span>
+                <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"12px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:l.date===activeDate?T.accentDim:"transparent", fontFamily:T.font }}>
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:700,color:l.date===activeDate?T.accent:T.text,textTransform:"uppercase"}}>{l.exercise}</span>
+                  <span style={{color:T.accent,fontWeight:700}}>{l.weight||"—"}</span>
                   <span>{l.reps||"—"}</span><span>{l.sets||"—"}</span>
                   <span style={{color:l.rpe>=9?T.red:l.rpe>=7?T.accent:T.green,fontWeight:700}}>{l.rpe||"—"}</span>
                   <div style={{display:"flex",gap:2}}>
@@ -1505,105 +1490,102 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       
-      <div style={{...st.card2, background: T.accentDim, border:`1px solid ${T.accent}50`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
+      <div style={{...st.card2, background: T.accentDim, border:`1px solid ${T.accent}`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: T.accent, marginBottom: 4 }}>🏁 Objetivo de Carrera ({runGoal} km)</div>
-          <div style={{ fontSize: 11, color: T.muted }}>Edita tu meta de tiempo. El anillo de progreso de abajo evaluará cómo se compara tu ritmo de entrenamiento vs el requerido.</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T.accent, marginBottom: 4, letterSpacing:"0.05em" }}>🏁 TGT: {runGoal} KM</div>
+          <div style={{ fontSize: 10, color: T.muted, fontFamily:T.font }}>[SYS] EVALUATING CURRENT PACE VS REQUIRED TO ACHIEVE {targetTime}</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div>
-            <span style={{ fontSize: 9, fontWeight: 800, color: T.accent, display: "block", marginBottom: 3 }}>TIEMPO META (HH:MM:SS)</span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: T.accent, display: "block", marginBottom: 4, fontFamily:T.font }}>TGT TIME (HH:MM:SS)</span>
             <input style={{...st.inp, width: 120, padding: "6px 10px"}} type="text" value={targetTime} onChange={e=>setTargetTime(e.target.value)} />
           </div>
-          <div style={{ background: T.card, padding: "6px 14px", borderRadius: 12, boxShadow: T.shadow, textAlign: "center" }}>
-            <span style={{ fontSize: 9, fontWeight: 800, color: T.muted, display: "block" }}>PACE REQUERIDO</span>
-            <span style={{ fontSize: 18, fontWeight: 900, color: T.accent }}>{requiredPace}</span>
+          <div style={{ background: T.card, border:`1px solid ${T.border}`, padding: "6px 14px", borderRadius: 6, textAlign: "center" }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: T.muted, display: "block", fontFamily:T.font }}>REQ PACE</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily:T.font }}>{requiredPace}</span>
           </div>
         </div>
       </div>
 
       <div style={st.g2}>
         <div style={{ ...st.card, display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
-          <SH title="🏃 Progreso de Pace"
+          <SH title="🏃 PACE TELEMETRY"
             right={
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={st.lbl}>Meta (km):</span>
-                <input style={{ ...st.inp, width:88, padding:"6px 10px", fontSize:13 }} type="number" step="0.1"
+                <span style={st.lbl}>DIST TGT:</span>
+                <input style={{ ...st.inp, width:70, padding:"4px 8px", fontSize:12 }} type="number" step="0.1"
                   value={runGoal} onChange={e=>setRunGoal(+e.target.value||21.1)}/>
               </div>
             }/>
           <PaceRing currentPaceSecs={avgPaceSecs} targetPaceSecs={reqSecs} isDark={isDark} T={T}/>
           
-          <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center", marginTop: 8 }}>
-            {[{l:"Pace Requerido",v:requiredPace,c:T.muted},{l:"Pace Promedio",v:avgPaceSecs?secsToPace(avgPaceSecs):"—",c:T.blue},{l:"Mejor Pace",v:bestPaceSecs?secsToPace(bestPaceSecs):"—",c:T.green}].map(m=>(
-              <div key={m.l} style={{ textAlign:"center" }}>
-                <div style={{fontSize:9,color:T.muted,fontWeight:800,letterSpacing:"0.09em"}}>{m.l.toUpperCase()}</div>
-                <div style={{fontSize:22,fontWeight:900,color:m.c,letterSpacing:"-0.5px"}}>{m.v}</div>
+          <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center", marginTop: 12 }}>
+            {[{l:"REQ",v:requiredPace,c:T.muted},{l:"AVG",v:avgPaceSecs?secsToPace(avgPaceSecs):"—",c:T.blue},{l:"BEST",v:bestPaceSecs?secsToPace(bestPaceSecs):"—",c:T.green}].map(m=>(
+              <div key={m.l} style={{ textAlign:"center", background:T.card2, border:`1px solid ${T.border}`, padding:"6px 14px", borderRadius:4 }}>
+                <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:"0.1em",fontFamily:T.font}}>{m.l}</div>
+                <div style={{fontSize:18,fontWeight:700,color:m.c,fontFamily:T.font}}>{m.v}</div>
               </div>
             ))}
           </div>
         </div>
         <div style={st.card}>
-          <SH title="➕ Registrar Carrera"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
-            {[["Fecha","date","date"],["Distancia (km)","km","number"],["Tiempo (hh:mm:ss)","time","text"],["LPM (FC media)","lpm","number"],["PPM (Cadencia)","ppm","number"]].map(([l,k,t])=>(
+          <SH title="➕ INJECT RUN LOG"/>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+            {[["DATE","date","date"],["DIST (KM)","km","number"],["TIME (HH:MM:SS)","time","text"],["HR AVG","lpm","number"],["CADENCE","ppm","number"]].map(([l,k,t])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
                 <input style={st.inp} type={t} placeholder="" step={k==="km"?"0.1":undefined} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div>
-              <span style={st.lbl}>Tenis Utilizados</span>
+              <span style={st.lbl}>SHOES</span>
               <select style={st.sel} value={form.shoe} onChange={handleShoeChange}>
-                <option value="" disabled>-- Seleccionar --</option>
-                {shoes.map(s => <option key={s} value={s}>{s}</option>)}
-                <option value="__new__">+ Añadir nuevos tenis</option>
+                <option value="" disabled>-- SEL --</option>
+                {shoes.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+                <option value="__new__">+ ADD NEW</option>
               </select>
             </div>
-            <div style={{ gridColumn: "span 2", marginTop: 6 }}>
-              <span style={st.lbl}>Pace calculado</span>
-              <div style={{ fontSize:26, fontWeight:900, color:T.accent, paddingTop:2, letterSpacing:"-0.5px" }}>{calcPace(+form.km,form.time)}</div>
+            <div style={{ gridColumn: "span 2", marginTop: 8, background:T.card2, border:`1px solid ${T.border}`, padding:"10px", borderRadius:6 }}>
+              <span style={st.lbl}>COMPUTED PACE</span>
+              <div style={{ fontSize:22, fontWeight:700, color:T.accent, fontFamily:T.font }}>{calcPace(+form.km,form.time)}</div>
             </div>
           </div>
-          <button style={st.btn} onClick={add}>+ Registrar Carrera</button>
+          <button style={st.btn} onClick={add}>SAVE RUN DATA</button>
         </div>
       </div>
 
       <div style={st.card}>
-        <SH title="📈 Evolución de Distancia por Sesión" right={<span style={{fontSize:11,color:T.muted}}>{runs.length} carreras registradas</span>}/>
-        {runs.length<2?<Placeholder msg="Registra más de una carrera para visualizar la gráfica" T={T}/>:(
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={runs} margin={{top:10,right:10,bottom:0,left:-22}}>
-              <defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={T.accent} stopOpacity={0.3}/><stop offset="95%" stopColor={T.accent} stopOpacity={0}/>
-              </linearGradient></defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border}/>
-              <XAxis dataKey="date" tick={{fill:T.muted,fontSize:11}} tickFormatter={d=>d.slice(5)}/>
-              <YAxis tick={{fill:T.muted,fontSize:11}}/>
+        <SH title="📈 DISTANCE EVOLUTION" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{runs.length} LOGS</span>}/>
+        {runs.length<2?<Placeholder msg="NEED MORE DATA FOR TELEMETRY" T={T}/>:(
+          <ResponsiveContainer width="100%" height={240}>
+            <LineChart data={runs} margin={{top:10,right:10,bottom:0,left:-22}}>
+              <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+              <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+              <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
               <Tooltip content={tip}/>
-              <Area type="monotone" dataKey="km" stroke={T.accent} fill="url(#rg)" strokeWidth={3} dot={{fill:T.accent,r:5, strokeWidth:2, stroke:T.card}} activeDot={{r:8}} name="KM"/>
-            </AreaChart>
+              <Line type="linear" dataKey="km" stroke={T.accent} strokeWidth={2} dot={{fill:T.card,stroke:T.accent,strokeWidth:2,r:4}} activeDot={{r:6,fill:T.accent}} name="KM"/>
+            </LineChart>
           </ResponsiveContainer>
         )}
       </div>
 
       <div style={st.card}>
-        <SH title="📋 Historial de Carreras" />
-        {runs.length===0?<Placeholder msg="Aún no hay carreras registradas" T={T}/>:(
+        <SH title="📋 LOG HISTORY" />
+        {runs.length===0?<Placeholder msg="[EMPTY LOG]" T={T}/>:(
           <div style={{ maxHeight:250, overflowY:"auto", paddingRight:10 }}>
             {[...runs].reverse().map(r=>editId===r.id?(
               <div key={r.id} style={{marginBottom:8}}>
-                <EditRow fields={[{k:"date",l:"Fecha",t:"date"},{k:"km",l:"KM",t:"number",step:"0.1"},{k:"time",l:"Tiempo"},{k:"shoe",l:"Tenis"},{k:"lpm",l:"LPM",t:"number"},{k:"ppm",l:"PPM",t:"number"}]}
+                <EditRow fields={[{k:"date",l:"Date",t:"date"},{k:"km",l:"KM",t:"number",step:"0.1"},{k:"time",l:"Time"},{k:"shoe",l:"Shoe"},{k:"lpm",l:"HR",t:"number"},{k:"ppm",l:"Cad",t:"number"}]}
                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
               </div>
             ):(
-              <div key={r.id} style={{ display:"flex", justifyContent:"space-between", padding:"12px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:r.date===activeDate?T.accentDim:"transparent" }}>
-                <span style={{color:T.muted,minWidth:45}}>{r.date.slice(5)}</span>
-                <span style={{color:T.accent,fontWeight:800,fontSize:14}}>{r.km} km</span>
-                <span style={{color:T.text}}>{r.time}</span>
+              <div key={r.id} style={{ display:"flex", justifyContent:"space-between", padding:"12px 10px", borderBottom:`1px solid ${T.border}`, fontSize:11, alignItems:"center", background:r.date===activeDate?T.accentDim:"transparent", fontFamily:T.font }}>
+                <span style={{color:T.text,minWidth:45}}>{r.date.slice(5)}</span>
+                <span style={{color:T.accent,fontWeight:700,fontSize:13}}>{r.km} KM</span>
+                <span style={{color:T.muted}}>{r.time}</span>
                 <span style={{color:T.teal,fontWeight:700}}>{r.pace}</span>
-                <span style={{color:T.purple}}>{r.shoe||"—"}</span>
-                <span style={{color:T.muted}}>{r.lpm?`${r.lpm} lpm`:"—"}</span>
-                <span style={{color:T.muted}}>{r.ppm?`${r.ppm} ppm`:"—"}</span>
-                <div style={{display:"flex",gap:6}}>
+                <span style={{color:T.purple}}>{r.shoe?.toUpperCase()||"—"}</span>
+                <span style={{color:T.muted}}>{r.lpm?`${r.lpm} HR`:"—"}</span>
+                <span style={{color:T.muted}}>{r.ppm?`${r.ppm} CAD`:"—"}</span>
+                <div style={{display:"flex",gap:4}}>
                   <button style={st.icon(T.accent)} onClick={()=>{setEId(r.id);setER({date:r.date,km:r.km,time:r.time,shoe:r.shoe||"",lpm:r.lpm||"",ppm:r.ppm||""});}}>✏️</button>
                   <button style={st.icon(T.red)} onClick={()=>setRuns(p=>p.filter(x=>x.id!==r.id))}>🗑</button>
                 </div>
@@ -1644,60 +1626,56 @@ function Biometria({ bios, setBios, activeDate, T }) {
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <div style={st.g2}>
         <div style={st.card}>
-          <SH title="⚖️ Registro Steren"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-            <div><span style={st.lbl}>Fecha</span><input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            <div><span style={st.lbl}>Estatura (cm)</span><input style={st.inp} type="number" placeholder="" value={form.height} onChange={e=>setForm(p=>({...p,height:e.target.value}))}/></div>
-            {[["Peso (kg) *","weight",T.accent],["% Grasa","fat",T.red],["Masa Muscular kg","muscle",T.green],["Agua %","water",T.blue],["Proteína %","protein",T.purple],["DMR/TMB kcal","dmr",T.muted]].map(([l,k,c])=>(
+          <SH title="⚖️ INPUT TELEMETRY"/>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+            <div><span style={st.lbl}>DATE</span><input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
+            <div><span style={st.lbl}>HEIGHT (CM)</span><input style={st.inp} type="number" placeholder="" value={form.height} onChange={e=>setForm(p=>({...p,height:e.target.value}))}/></div>
+            {[["WEIGHT (KG) *","weight",T.accent],["FAT %","fat",T.red],["MUSCLE (KG)","muscle",T.green],["WATER %","water",T.blue],["PROT %","protein",T.purple],["BMR KCAL","dmr",T.muted]].map(([l,k,c])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
                 <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div>
-              <span style={st.lbl}>IMC (auto)</span>
-              <div style={{...st.inp,color:(form.height&&form.weight)?T.accent:T.muted,fontWeight:800,pointerEvents:"none"}}>
+              <span style={st.lbl}>BMI (AUTO)</span>
+              <div style={{...st.inp,color:(form.height&&form.weight)?T.accent:T.muted,fontWeight:700,pointerEvents:"none", fontFamily:T.font}}>
                 {(form.height&&form.weight)?calcIMC(+form.weight,+form.height):"—"}
               </div>
             </div>
           </div>
           
-          <div style={{ background:T.card2, borderRadius:20, padding:"16px 12px", marginBottom:16, display:"flex", justifyContent:"center" }}>
-            <NumberPicker value={form.visceral} onChange={v=>setForm(p=>({...p,visceral:v}))} options={VISCERAL_OPTIONS} label="NIVEL VISCERAL" T={T}/>
+          <div style={{ background:T.card2, border:`1px solid ${T.border}`, borderRadius:6, padding:"16px 12px", marginBottom:16, display:"flex", justifyContent:"center" }}>
+            <NumberPicker value={form.visceral} onChange={v=>setForm(p=>({...p,visceral:v}))} options={VISCERAL_OPTIONS} label="VISCERAL LEVEL" T={T}/>
           </div>
 
-          <button style={st.btn} onClick={add}>+ Registrar Medición</button>
+          <button style={st.btn} onClick={add}>SAVE BIO DATA</button>
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {last&&(
             <div style={st.card}>
-              <SH title={`📊 Última · ${last.date.slice(5)}`}/>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(88px,1fr))", gap:8 }}>
-                {[{l:"Peso",v:`${last.weight}kg`,c:T.accent},{l:"IMC",v:last.imc??"—",c:last.imc?(last.imc<25?T.green:last.imc<30?T.accent:T.red):T.muted},{l:"% Grasa",v:last.fat?`${last.fat}%`:"—",c:T.red},{l:"Músculo",v:last.muscle?`${last.muscle}kg`:"—",c:T.green},{l:"Visceral",v:last.visceral?`Nv${last.visceral}`:"—",c:last.visceral?(last.visceral<=9?T.green:last.visceral<=14?T.accent:T.red):T.muted},{l:"Agua",v:last.water?`${last.water}%`:"—",c:T.blue},{l:"Proteína",v:last.protein?`${last.protein}%`:"—",c:T.purple},{l:"DMR/TMB",v:last.dmr||"—",c:T.orange},{l:"Δ Peso",v:delta?`${delta>0?"+":""}${delta}kg`:"—",c:delta?(parseFloat(delta)<=0?T.green:T.red):T.muted}].map(m=>(
-                  <div key={m.l} style={{background:T.card2,borderRadius:14,padding:10,textAlign:"center"}}>
-                    <div style={{fontSize:9,color:T.muted,fontWeight:800}}>{m.l.toUpperCase()}</div>
-                    <div style={{fontSize:16,fontWeight:900,color:m.c,marginTop:3,letterSpacing:"-0.3px"}}>{m.v}</div>
+              <SH title={`📊 LAST READING · ${last.date.slice(5)}`}/>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(80px,1fr))", gap:8 }}>
+                {[{l:"WGT",v:`${last.weight}KG`,c:T.accent},{l:"BMI",v:last.imc??"—",c:last.imc?(last.imc<25?T.green:last.imc<30?T.accent:T.red):T.muted},{l:"FAT",v:last.fat?`${last.fat}%`:"—",c:T.red},{l:"MUSC",v:last.muscle?`${last.muscle}KG`:"—",c:T.green},{l:"VISC",v:last.visceral?`LV${last.visceral}`:"—",c:last.visceral?(last.visceral<=9?T.green:last.visceral<=14?T.accent:T.red):T.muted},{l:"H2O",v:last.water?`${last.water}%`:"—",c:T.blue},{l:"PROT",v:last.protein?`${last.protein}%`:"—",c:T.purple},{l:"BMR",v:last.dmr||"—",c:T.orange},{l:"ΔWGT",v:delta?`${delta>0?"+":""}${delta}KG`:"—",c:delta?(parseFloat(delta)<=0?T.green:T.red):T.muted}].map(m=>(
+                  <div key={m.l} style={{background:T.card2,border:`1px solid ${T.border}`,borderRadius:6,padding:"10px 4px",textAlign:"center"}}>
+                    <div style={{fontSize:9,color:T.muted,fontWeight:700,fontFamily:T.font}}>{m.l}</div>
+                    <div style={{fontSize:14,fontWeight:700,color:m.c,marginTop:4,fontFamily:T.font}}>{m.v}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
           <div style={{...st.card,flex:1}}>
-            <SH title="📈 Evolución"/>
-            {bios.length<2?<Placeholder msg="Registra 2+ mediciones" T={T}/>:(
+            <SH title="📈 METRIC TRENDS"/>
+            {bios.length<2?<Placeholder msg="NEED 2+ RECORDS" T={T}/>:(
               <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={trend} margin={{top:4,right:4,bottom:0,left:-22}}>
-                  <defs>{[["wg",T.accent],["gg",T.red],["mg",T.green],["ag",T.blue]].map(([id,c])=>(
-                    <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={c} stopOpacity={0.28}/><stop offset="95%" stopColor={c} stopOpacity={0}/>
-                    </linearGradient>
-                  ))}</defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={T.border}/>
-                  <XAxis dataKey="date" tick={{fill:T.muted,fontSize:9}} tickFormatter={d=>d.slice(5)}/>
-                  <YAxis tick={{fill:T.muted,fontSize:9}} domain={["auto","auto"]}/><Tooltip content={tip}/>
-                  <Area type="monotone" dataKey="Peso"    stroke={T.accent} fill="url(#wg)" strokeWidth={2.5} dot={{fill:T.accent,r:4}}/>
-                  <Area type="monotone" dataKey="Grasa"   stroke={T.red}    fill="url(#gg)" strokeWidth={2}   dot={{fill:T.red,   r:3}}/>
-                  <Area type="monotone" dataKey="Músculo" stroke={T.green}  fill="url(#mg)" strokeWidth={2}   dot={{fill:T.green, r:3}}/>
-                  <Area type="monotone" dataKey="Agua"    stroke={T.blue}   fill="url(#ag)" strokeWidth={2}   dot={{fill:T.blue,  r:3}}/>
-                </AreaChart>
+                <LineChart data={trend} margin={{top:10,right:10,bottom:0,left:-22}}>
+                  <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                  <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+                  <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} domain={["auto","auto"]}/>
+                  <Tooltip content={tip}/>
+                  <Line type="linear" dataKey="Peso"    stroke={T.accent} strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.accent,strokeWidth:2}} activeDot={{r:6}}/>
+                  <Line type="linear" dataKey="Grasa"   stroke={T.red}    strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.red,strokeWidth:2}}/>
+                  <Line type="linear" dataKey="Músculo" stroke={T.green}  strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.green,strokeWidth:2}}/>
+                  <Line type="linear" dataKey="Agua"    stroke={T.blue}   strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.blue,strokeWidth:2}}/>
+                </LineChart>
               </ResponsiveContainer>
             )}
           </div>
@@ -1705,24 +1683,24 @@ function Biometria({ bios, setBios, activeDate, T }) {
       </div>
       {bios.length>0&&(
         <div style={{...st.card,overflowX:"auto"}}>
-          <SH title="📋 Historial Biométrico" right={<span style={{fontSize:11,color:T.muted}}>{bios.length} registros</span>}/>
-          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12, minWidth:700 }}>
-            <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
-              {["Fecha","Peso","IMC","% Grasa","Músculo","Visceral","Agua %","Prot %","DMR",""].map(h=>(
-                <th key={h} style={{padding:"7px 8px",color:T.muted,fontWeight:800,fontSize:9,textAlign:h===""?"center":"right",letterSpacing:"0.07em"}}>{h.toUpperCase()}</th>
+          <SH title="📋 LOG HISTORY" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{bios.length} RECORDS</span>}/>
+          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:700, fontFamily:T.font }}>
+            <thead><tr style={{borderBottom:`1px solid ${T.border}`, background:T.card2}}>
+              {["DATE","WEIGHT","BMI","FAT %","MUSC","VISC","WATER","PROT","BMR",""].map(h=>(
+                <th key={h} style={{padding:"10px 8px",color:T.muted,fontWeight:700,textAlign:h===""?"center":"right",letterSpacing:"0.1em"}}>{h}</th>
               ))}
             </tr></thead>
             <tbody>{[...bios].reverse().map(b=>editId===b.id?(
               <tr key={b.id}><td colSpan={10} style={{padding:"8px 0"}}>
-                <EditRow fields={[{k:"date",l:"Fecha",t:"date"},{k:"weight",l:"Peso",t:"number",step:"0.1"},{k:"fat",l:"Grasa %",t:"number",step:"0.1"},{k:"muscle",l:"Músculo",t:"number",step:"0.1"},{k:"visceral",l:"Visceral",t:"number"},{k:"water",l:"Agua %",t:"number",step:"0.1"},{k:"protein",l:"Prot %",t:"number",step:"0.1"},{k:"dmr",l:"DMR",t:"number"}]}
+                <EditRow fields={[{k:"date",l:"Date",t:"date"},{k:"weight",l:"Kg",t:"number",step:"0.1"},{k:"fat",l:"Fat%",t:"number",step:"0.1"},{k:"muscle",l:"Musc",t:"number",step:"0.1"},{k:"visceral",l:"Visc",t:"number"},{k:"water",l:"H2o%",t:"number",step:"0.1"},{k:"protein",l:"Prot%",t:"number",step:"0.1"},{k:"dmr",l:"BMR",t:"number"}]}
                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
               </td></tr>
             ):(
               <tr key={b.id} style={{borderBottom:`1px solid ${T.border}`,background:b.date===activeDate?T.accentDim:"transparent"}}>
-                {[b.date.slice(5),`${b.weight}kg`,b.imc??"—",b.fat?`${b.fat}%`:"—",b.muscle?`${b.muscle}kg`:"—",b.visceral?`Nv${b.visceral}`:"—",b.water?`${b.water}%`:"—",b.protein?`${b.protein}%`:"—",b.dmr||"—"].map((v,i)=>(
-                  <td key={i} style={{padding:"9px 8px",textAlign:i===0?"left":"right",color:i===0?T.text:T.muted,fontWeight:i===0?700:400}}>{v}</td>
+                {[b.date.slice(5),`${b.weight}KG`,b.imc??"—",b.fat?`${b.fat}%`:"—",b.muscle?`${b.muscle}KG`:"—",b.visceral?`LV${b.visceral}`:"—",b.water?`${b.water}%`:"—",b.protein?`${b.protein}%`:"—",b.dmr||"—"].map((v,i)=>(
+                  <td key={i} style={{padding:"12px 8px",textAlign:i===0?"left":"right",color:i===0?T.text:T.muted,fontWeight:i===0?700:400}}>{v}</td>
                 ))}
-                <td style={{padding:"9px 8px",textAlign:"center"}}>
+                <td style={{padding:"12px 8px",textAlign:"center"}}>
                   <button style={st.icon(T.accent)} onClick={()=>{setEId(b.id);setER({date:b.date,weight:b.weight,fat:b.fat||"",muscle:b.muscle||"",visceral:b.visceral||"",water:b.water||"",protein:b.protein||"",dmr:b.dmr||""});}}>✏️</button>
                   <button style={st.icon(T.red)}    onClick={()=>setBios(p=>p.filter(x=>x.id!==b.id))}>🗑</button>
                 </td>
@@ -1736,7 +1714,7 @@ function Biometria({ bios, setBios, activeDate, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: SUEÑO (Whoop-style & Semanal/Mensual/Anual)
+// TAB: SUEÑO 
 // ─────────────────────────────────────────────────────────────────────────────
 function Sueno({ healthLog, T }) {
   const st = mkS(T);
@@ -1785,19 +1763,19 @@ function Sueno({ healthLog, T }) {
 
   const formatPeriod = (k, type) => {
     if (type === "week") return fmtWeek(k);
-    if (type === "month") return fmtMonth(k);
+    if (type === "month") return fmtMonth(k).toUpperCase();
     return k;
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {lastNight && (
-        <div style={{ display: "flex", alignItems: "center", gap: 16, background: T.card, borderRadius: 24, padding: "12px 20px", boxShadow: T.shadow, border: `1px solid ${T.border}` }}>
-          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={46} sw={5}/>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, background: T.card2, borderRadius: 8, padding: "16px 20px", border: `1px solid ${T.border}` }}>
+          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={46} sw={4}/>
           <div>
-            <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>SLEEP PERFORMANCE (ANOCHE)</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginTop: 2 }}>
-              Score: <span style={{ color: scCol(lastNight.score) }}>{lastNight.score}%</span> • {fmt(lastNight.sleep, 1)} hrs
+            <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.15em", fontFamily:T.font }}>SLEEP PERFORMANCE (LAST)</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginTop: 4, fontFamily:T.font }}>
+              SCORE: <span style={{ color: scCol(lastNight.score) }}>{lastNight.score}%</span> • {fmt(lastNight.sleep, 1)} HRS
             </div>
           </div>
         </div>
@@ -1805,27 +1783,28 @@ function Sueno({ healthLog, T }) {
 
       {sleepData.length === 0 ? (
         <div style={st.card}>
-          <Placeholder msg="No hay datos registrados en el Daily Log." T={T} />
+          <Placeholder msg="NO SLEEP TELEMETRY FOUND" T={T} />
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", gap: 12, marginBottom: 4 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
             {["week", "month", "year"].map(type => (
               <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
                 style={{
                   background: filterType === type ? T.accent : T.card2,
-                  color: filterType === type ? "#fff" : T.muted,
-                  borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
-                  transition: "all 0.2s"
+                  color: filterType === type ? "#000" : T.muted,
+                  border: `1px solid ${filterType === type ? T.accent : T.border}`,
+                  borderRadius: 6, padding: "6px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  fontFamily:T.font, textTransform:"uppercase", transition: "all 0.2s"
                 }}>
-                {type === "week" ? "Semana" : type === "month" ? "Mes" : "Año"}
+                {type}
               </button>
             ))}
           </div>
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
             <div style={{ ...st.card, flex: 1, minWidth: 260 }}>
-              <SH title={`🗓 Selector de ${filterType === "week" ? "Semana" : filterType === "month" ? "Mes" : "Año"}`} />
+              <SH title={`🗓 PERIOD SELECTOR`} />
               <select style={st.sel} value={selKey} onChange={e => setSelKey(e.target.value)}>
                 {groupKeys.map(k => <option key={k} value={k}>{formatPeriod(k, filterType)}</option>)}
               </select>
@@ -1833,22 +1812,22 @@ function Sueno({ healthLog, T }) {
             
             <div style={{ ...st.card, flex: 2, minWidth: 260, display: "flex", justifyContent: "space-around", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. HORAS</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG HOURS</div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
                   {avgSleep ? `${fmt(avgSleep, 1)}h` : "—"}
                 </div>
               </div>
               <div style={{ width: 1, height: 40, background: T.border }} />
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. SCORE</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 4 }}>
+                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG SCORE</div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
                   {avgScore ? `${Math.round(avgScore)}%` : "—"}
                 </div>
               </div>
               <div style={{ width: 1, height: 40, background: T.border }} />
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 800, letterSpacing: "0.1em" }}>PROM. RECOVERY</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 4 }}>
+                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG REC</div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
                   {avgRec ? `${Math.round(avgRec)}%` : "—"}
                 </div>
               </div>
@@ -1857,60 +1836,54 @@ function Sueno({ healthLog, T }) {
 
           <div style={st.g2}>
             <div style={st.card}>
-              <SH title="⏱️ Horas (Meta: 8h)" />
-              {currentData.length < 2 ? <Placeholder msg="Registra más días en este periodo" T={T} /> : (
+              <SH title="⏱️ HOURS (TGT: 8H)" />
+              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
                 <ResponsiveContainer width="100%" height={160}>
-                  <LineChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 9 }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 9 }} domain={[4, 10]} />
+                  <LineChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
+                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[4, 10]} />
                     <Tooltip content={tip} />
                     <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" />
-                    <Line type="monotone" dataKey="sleep" stroke={T.blue} strokeWidth={3} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} name="Horas" />
+                    <Line type="step" dataKey="sleep" stroke={T.blue} strokeWidth={2} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.blue}} name="Horas" />
                   </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
 
             <div style={st.card}>
-              <SH title="🔋 Sleep Score (Meta: 85%)" />
-              {currentData.length < 2 ? <Placeholder msg="Registra más días en este periodo" T={T} /> : (
+              <SH title="🔋 SCORE (TGT: 85%)" />
+              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
                 <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={currentData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                  <AreaChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
                     <defs>
                       <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={T.purple} stopOpacity={0.4} />
+                        <stop offset="5%" stopColor={T.purple} stopOpacity={0.3} />
                         <stop offset="95%" stopColor={T.purple} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10 }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 10 }} domain={[40, 100]} />
+                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[40, 100]} />
                     <Tooltip content={tip} />
                     <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
-                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={3} dot={{ fill: T.purple, r: 4 }} name="Score %" />
+                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: T.card, stroke: T.purple, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.purple}} name="Score %" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
             </div>
 
             <div style={{ ...st.card, gridColumn: "1 / -1" }}>
-              <SH title="🔥 Recovery Trend" />
-              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="Registra más días de recovery en este periodo" T={T} /> : (
+              <SH title="🔥 RECOVERY TREND" />
+              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
                 <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                    <defs>
-                      <linearGradient id="recGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={T.green} stopOpacity={0.4} />
-                        <stop offset="95%" stopColor={T.green} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10 }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 10 }} domain={[0, 100]} />
+                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
+                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[0, 100]} />
                     <Tooltip content={tip} />
-                    <Area type="monotone" dataKey="recovery" stroke={T.green} fill="url(#recGrad)" strokeWidth={3} dot={{ fill: T.green, r: 4 }} name="Recovery %" />
-                  </AreaChart>
+                    <Line type="linear" dataKey="recovery" stroke={T.green} strokeWidth={2} dot={{ fill: T.card, stroke: T.green, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.green}} name="Recovery %" />
+                  </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
@@ -1927,11 +1900,12 @@ function Sueno({ healthLog, T }) {
 export default function App() {
   useEffect(()=>{
     const l=document.createElement("link");
-    l.href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap";
+    l.href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500;700&display=swap";
     l.rel="stylesheet"; document.head.appendChild(l);
     return()=>{try{document.head.removeChild(l);}catch(_){}};
   },[]);
 
+  // Siempre se fuerza el modo dark porque es el estándar para telemetría
   const [isDark,setDark]=useState(()=>lsGet("dark",true));
   const T=isDark?DARK:LIGHT;
 
@@ -2001,7 +1975,6 @@ export default function App() {
     a.download=`aristeia_v7_${TODAY}.json`; a.click();
   },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,projects,runGoal,targetTime]);
 
-  // Extrae hrv, rhr y recovery
   const getDayData=useCallback((date)=>{
     const h=healthLog.find(d=>d.date===date)||{};
     const fs=foodLog.filter(f=>f.date===date), hasF=fs.length>0;
@@ -2025,26 +1998,25 @@ export default function App() {
   const allDayData = useMemo(()=>allDates.map(d=>getDayData(d)), [allDates, getDayData]);
 
   const TABS=[
-    {id:"dashboard",l:"📊 Dashboard"},
-    {id:"calendario",l:"📅 Calendario"},
-    {id:"dailylog",l:"📋 Daily Log"},
-    {id:"nutricion",l:"🥗 Nutrición"},
-    {id:"fuerza",l:"🏋️ Fuerza"},
-    {id:"running",l:"🏃 Running"},
-    {id:"bio",l:"⚖️ Biometría"},
-    {id:"sleep",l:"😴 Sueño"},
+    {id:"dashboard",l:"SYS DASHBOARD"},
+    {id:"calendario",l:"CALENDAR"},
+    {id:"dailylog",l:"INPUT LOG"},
+    {id:"nutricion",l:"FUEL"},
+    {id:"fuerza",l:"CHASSIS"},
+    {id:"running",l:"AERO"},
+    {id:"bio",l:"WEIGHT"},
+    {id:"sleep",l:"RECOVERY"},
   ];
 
   const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
   const currentHour=new Date().getHours();
-  const greeting=currentHour<12?"Buenos días":currentHour<18?"Buenas tardes":"Buenas noches";
-  const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
-  const formattedDate = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
+  const greeting=currentHour<12?"MORNING":currentHour<18?"AFTERNOON":"EVENING";
+  const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
 
   return (
     <div style={{
       background:T.bg, minHeight:"100vh", position: "relative", overflow: "hidden",
-      fontFamily:"system-ui,-apple-system,'Segoe UI',sans-serif",
+      fontFamily:T.font,
       color:T.text, padding:"16px 18px",
       transition:"background 0.3s,color 0.3s"
     }}>
@@ -2053,18 +2025,18 @@ export default function App() {
       {/* ── Header ── */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
         <div>
-          <div style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.8px", lineHeight:1.1, color:T.text }}>
-            {greeting}, <span style={{color:T.accent}}>Rafa</span> 👊
+          <div style={{ fontSize:20, fontWeight:700, letterSpacing:"0.1em", lineHeight:1.1, color:T.text }}>
+            {greeting}, <span style={{color:T.accent}}>RAFA</span>
           </div>
           
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
             <div style={{ 
               position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
-              background: T.card2, padding: "8px 14px", borderRadius: 14, border: `1.5px solid ${T.border}`,
+              background: T.card, padding: "6px 12px", borderRadius: 4, border: `1px solid ${T.border}`,
               transition: "all 0.15s"
             }}>
-              <span style={{ fontSize:13, color:T.text, fontWeight:700 }}>{formattedDate}</span>
-              <span style={{ fontSize:10, color:T.accent }}>▼</span>
+              <span style={{ fontSize:12, color:T.text, fontWeight:700, letterSpacing:"0.1em" }}>{rawDate}</span>
+              <span style={{ fontSize:9, color:T.accent }}>▼</span>
               <input 
                 type="date" 
                 value={activeDate} 
@@ -2075,20 +2047,18 @@ export default function App() {
             </div>
 
             {activeDate !== TODAY && (
-              <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accent, color: "#fff", border: "none", borderRadius: 14, padding: "8px 14px", fontSize: 12, cursor: "pointer", fontWeight: 800 }}>
-                ↺ Hoy
+              <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accentDim, color: T.accent, border: `1px solid ${T.accent}`, borderRadius: 4, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontWeight: 700, fontFamily:T.font }}>
+                ↺ LIVE
               </button>
             )}
           </div>
         </div>
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:999, padding:"7px 16px", fontSize:12, color:T.accent, fontWeight:800, boxShadow:T.shadow }}>{activeDayData.calIn} kcal in</div>}
-          {activeDayData.calOut>0&&<div style={{ background:T.card, borderRadius:999, padding:"7px 16px", fontSize:12, fontWeight:800, color:bCol(activeDayData.balance), boxShadow:T.shadow }}>{activeDayData.balance>0?"+":""}{activeDayData.balance} bal</div>}
-          <button onClick={()=>setDark(d=>!d)} style={{ background:T.card, border:`1.5px solid ${T.border}`, borderRadius:999, padding:"8px 16px", cursor:"pointer", fontSize:12, color:T.text, fontWeight:700 }}>{isDark?"☀️ Light":"🌙 Dark"}</button>
-          <button onClick={()=>importRef.current?.click()} style={{ background:T.card2, color:T.text, border:`1.5px solid ${T.border}`, borderRadius:999, padding:"8px 16px", fontWeight:700, fontSize:12, cursor:"pointer" }}>↑ Importar</button>
-          <button onClick={exportJSON} style={{ background:T.accent, color:"#fff", border:"none", borderRadius:999, padding:"9px 20px", fontWeight:800, fontSize:12, cursor:"pointer" }}>↓ JSON</button>
-          <button onClick={()=>{if(window.confirm("¿Borrar TODOS los datos?")){lsClear();window.location.reload();}}} style={{ background:"none", color:T.red, border:`1px solid ${T.red}40`, borderRadius:999, padding:"7px 12px", fontSize:11, cursor:"pointer", fontWeight:700 }}>🗑</button>
+          {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, color:T.accent, fontWeight:700, border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.calIn} IN</div>}
+          {activeDayData.calOut>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, fontWeight:700, color:bCol(activeDayData.balance), border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.balance>0?"+":""}{activeDayData.balance} BAL</div>}
+          <button onClick={()=>importRef.current?.click()} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 12px", fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font }}>↑ IMP</button>
+          <button onClick={exportJSON} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 12px", fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font }}>↓ EXP</button>
         </div>
       </div>
 
@@ -2096,12 +2066,11 @@ export default function App() {
       <div style={{ display:"flex", gap:6, marginBottom:18, flexWrap:"wrap", position:"relative", zIndex:1 }}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{
-            background:tab===t.id?T.accent:T.card,
-            color:tab===t.id?"#fff":T.muted,
-            border:`1.5px solid ${tab===t.id?T.accent:T.border}`,
-            borderRadius:999, padding:"9px 18px", fontWeight:700, fontSize:12,
-            cursor:"pointer", transition:"all 0.2s",
-            boxShadow:tab===t.id?`0 4px 16px ${T.accent}40`:T.shadow
+            background:tab===t.id?T.accentDim:"transparent",
+            color:tab===t.id?T.accent:T.muted,
+            border:`1px solid ${tab===t.id?T.accent:T.border}`,
+            borderRadius:4, padding:"8px 16px", fontWeight:700, fontSize:11,
+            cursor:"pointer", transition:"all 0.2s", fontFamily:T.font, textTransform:"uppercase", letterSpacing:"0.1em"
           }}>{t.l}</button>
         ))}
       </div>
