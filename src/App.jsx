@@ -543,17 +543,23 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
         </div>
         
         <div style={st.card}>
-          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.accent }}>⚖️ CALORIC DELTA (BALANCE)</div>
+          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.accent }}>
+            ⚖️ CALORIC DELTA <span style={{color:T.green}}>[↓ QUEMADO {'>'} CONSUMIDO]</span>
+          </div>
           {last7.filter(d=>d.calOut>0).length>=2?(
             <ResponsiveContainer width="100%" height={160}>
-              <LineChart data={last7.filter(d=>d.calOut>0)} margin={{top:15,right:4,bottom:0,left:-22}}>
+              <BarChart data={last7.filter(d=>d.calOut>0)} margin={{top:15,right:4,bottom:0,left:-22}}>
                 <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
                 <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
                 <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
                 <Tooltip content={tip}/>
                 <ReferenceLine y={0} stroke={T.text} strokeWidth={1} />
-                <Line type="step" dataKey="balance" name="Balance" stroke={T.accent} strokeWidth={2} dot={{fill:T.card,stroke:T.accent,r:4,strokeWidth:2}} activeDot={{r:6,fill:T.accent}} />
-              </LineChart>
+                <Bar dataKey="balance" name="Balance" radius={[2,2,0,0]} barSize={16}>
+                  {last7.filter(d=>d.calOut>0).map((d,i)=>(
+                    <Cell key={i} fill={d.balance < 0 ? T.green : T.red}/>
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           ):<Placeholder msg="INSUFFICIENT TELEMETRY" T={T}/>}
         </div>
@@ -1605,7 +1611,7 @@ const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
 
 function Biometria({ bios, setBios, activeDate, T }) {
   const st=mkS(T);
-  const [form,setForm]=useState({ date:activeDate,height:"",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"" });
+  const [form,setForm]=useState({ date:activeDate,height:"",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:"" });
   const [editId,setEId]=useState(null), [editRow,setER]=useState({});
   
   useEffect(() => { setForm(p => ({ ...p, date: activeDate })); }, [activeDate]);
@@ -1616,11 +1622,15 @@ function Biometria({ bios, setBios, activeDate, T }) {
   const trend=bios.map(b=>({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
   
   const add=()=>{ if(!form.weight) return;
+    const finalImc = form.imc ? +form.imc : ((form.height&&form.weight) ? calcIMC(+form.weight,+form.height) : null);
     setBios(p=>[...p,{ ...form, id:uid(), weight:+form.weight, fat:+form.fat||null, muscle:+form.muscle||null,
       visceral:+form.visceral||null, water:+form.water||null, protein:+form.protein||null, dmr:+form.dmr||null,
-      imc:form.height?calcIMC(+form.weight,+form.height):null }]);
-    setForm(p=>({date:activeDate,height:p.height,weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:""})); };
-  const saveEd=()=>{ setBios(p=>p.map(b=>b.id===editId?{...b,...editRow,weight:+editRow.weight,fat:+editRow.fat||null,muscle:+editRow.muscle||null,visceral:+editRow.visceral||null,water:+editRow.water||null,protein:+editRow.protein||null,dmr:+editRow.dmr||null,imc:editRow.height?calcIMC(+editRow.weight,+editRow.height):b.imc}:b)); setEId(null); };
+      imc:finalImc }]);
+    setForm(p=>({date:activeDate,height:p.height,weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:""})); 
+  };
+  const saveEd=()=>{ setBios(p=>p.map(b=>b.id===editId?{...b,...editRow,weight:+editRow.weight,fat:+editRow.fat||null,muscle:+editRow.muscle||null,visceral:+editRow.visceral||null,water:+editRow.water||null,protein:+editRow.protein||null,dmr:+editRow.dmr||null,imc:+editRow.imc||(editRow.height?calcIMC(+editRow.weight,+editRow.height):b.imc)}:b)); setEId(null); };
+
+  const autoImc = (form.height && form.weight) ? calcIMC(+form.weight, +form.height) : "";
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -1635,10 +1645,8 @@ function Biometria({ bios, setBios, activeDate, T }) {
                 <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div>
-              <span style={st.lbl}>BMI (AUTO)</span>
-              <div style={{...st.inp,color:(form.height&&form.weight)?T.accent:T.muted,fontWeight:700,pointerEvents:"none", fontFamily:T.font}}>
-                {(form.height&&form.weight)?calcIMC(+form.weight,+form.height):"—"}
-              </div>
+              <span style={st.lbl}>BMI (AUTO / MAN)</span>
+              <input style={{...st.inp, color:form.imc ? T.text : T.accent, fontWeight:700}} type="number" step="0.1" placeholder={autoImc || "Auto..."} value={form.imc} onChange={e=>setForm(p=>({...p,imc:e.target.value}))}/>
             </div>
           </div>
           
@@ -1692,7 +1700,7 @@ function Biometria({ bios, setBios, activeDate, T }) {
             </tr></thead>
             <tbody>{[...bios].reverse().map(b=>editId===b.id?(
               <tr key={b.id}><td colSpan={10} style={{padding:"8px 0"}}>
-                <EditRow fields={[{k:"date",l:"Date",t:"date"},{k:"weight",l:"Kg",t:"number",step:"0.1"},{k:"fat",l:"Fat%",t:"number",step:"0.1"},{k:"muscle",l:"Musc",t:"number",step:"0.1"},{k:"visceral",l:"Visc",t:"number"},{k:"water",l:"H2o%",t:"number",step:"0.1"},{k:"protein",l:"Prot%",t:"number",step:"0.1"},{k:"dmr",l:"BMR",t:"number"}]}
+                <EditRow fields={[{k:"date",l:"Date",t:"date"},{k:"weight",l:"Kg",t:"number",step:"0.1"},{k:"imc",l:"BMI",t:"number",step:"0.1"},{k:"fat",l:"Fat%",t:"number",step:"0.1"},{k:"muscle",l:"Musc",t:"number",step:"0.1"},{k:"visceral",l:"Visc",t:"number"},{k:"water",l:"H2o%",t:"number",step:"0.1"},{k:"protein",l:"Prot%",t:"number",step:"0.1"},{k:"dmr",l:"BMR",t:"number"}]}
                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
               </td></tr>
             ):(
@@ -1701,7 +1709,7 @@ function Biometria({ bios, setBios, activeDate, T }) {
                   <td key={i} style={{padding:"12px 8px",textAlign:i===0?"left":"right",color:i===0?T.text:T.muted,fontWeight:i===0?700:400}}>{v}</td>
                 ))}
                 <td style={{padding:"12px 8px",textAlign:"center"}}>
-                  <button style={st.icon(T.accent)} onClick={()=>{setEId(b.id);setER({date:b.date,weight:b.weight,fat:b.fat||"",muscle:b.muscle||"",visceral:b.visceral||"",water:b.water||"",protein:b.protein||"",dmr:b.dmr||""});}}>✏️</button>
+                  <button style={st.icon(T.accent)} onClick={()=>{setEId(b.id);setER({date:b.date,weight:b.weight,imc:b.imc||"",fat:b.fat||"",muscle:b.muscle||"",visceral:b.visceral||"",water:b.water||"",protein:b.protein||"",dmr:b.dmr||""});}}>✏️</button>
                   <button style={st.icon(T.red)}    onClick={()=>setBios(p=>p.filter(x=>x.id!==b.id))}>🗑</button>
                 </td>
               </tr>
@@ -1838,7 +1846,7 @@ function Sueno({ healthLog, T }) {
             <div style={st.card}>
               <SH title="⏱️ HOURS (TGT: 8H)" />
               {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={160}>
+                <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
                     <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
@@ -1854,7 +1862,7 @@ function Sueno({ healthLog, T }) {
             <div style={st.card}>
               <SH title="🔋 SCORE (TGT: 85%)" />
               {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={160}>
+                <ResponsiveContainer width="100%" height={260}>
                   <AreaChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
                     <defs>
                       <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1876,7 +1884,7 @@ function Sueno({ healthLog, T }) {
             <div style={{ ...st.card, gridColumn: "1 / -1" }}>
               <SH title="🔥 RECOVERY TREND" />
               {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={160}>
+                <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
                     <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
