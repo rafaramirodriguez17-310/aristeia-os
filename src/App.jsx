@@ -478,6 +478,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
     { id:"MAC", label:"Carbs",   value:activeDayData.c?`${Math.round(activeDayData.c)}g`:"—", sub:`MAX: ${goals.c}g`,  color:cCol(activeDayData.c,goals.c) },
     { id:"AER", label:"Cal Out", value:activeDayData.calOut||"—", sub:"BURNED",        color:T.blue },
     { id:"AER", label:"Steps",   value:activeDayData.steps?activeDayData.steps.toLocaleString():"—", sub:"TGT: 10K", color:T.purple },
+    { id:"REC", label:"Recovery",value:activeDayData.recovery?`${activeDayData.recovery}%`:"—", sub:`Zz: ${activeDayData.sleep||"—"}h · SCR: ${activeDayData.score||"—"}%`, color:getRecoveryColor(activeDayData.recovery, T) || T.purple },
   ];
 
   return (
@@ -1846,11 +1847,11 @@ function Sueno({ healthLog, T }) {
             <div style={st.card}>
               <SH title="⏱️ HOURS (TGT: 8H)" />
               {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={currentData} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[4, 10]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[4, 10]} />
                     <Tooltip content={tip} />
                     <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" />
                     <Line type="step" dataKey="sleep" stroke={T.blue} strokeWidth={2} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.blue}} name="Horas" />
@@ -1862,8 +1863,8 @@ function Sueno({ healthLog, T }) {
             <div style={st.card}>
               <SH title="🔋 SCORE (TGT: 85%)" />
               {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <AreaChart data={currentData} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <AreaChart data={currentData} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
                     <defs>
                       <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={T.purple} stopOpacity={0.3} />
@@ -1871,8 +1872,8 @@ function Sueno({ healthLog, T }) {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[40, 100]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[40, 100]} />
                     <Tooltip content={tip} />
                     <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
                     <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: T.card, stroke: T.purple, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.purple}} name="Score %" />
@@ -1884,11 +1885,11 @@ function Sueno({ healthLog, T }) {
             <div style={{ ...st.card, gridColumn: "1 / -1" }}>
               <SH title="🔥 RECOVERY TREND" />
               {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 15, right: 10, bottom: 0, left: -20 }}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily:T.font }} domain={[0, 100]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[0, 100]} />
                     <Tooltip content={tip} />
                     <Line type="linear" dataKey="recovery" stroke={T.green} strokeWidth={2} dot={{ fill: T.card, stroke: T.green, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.green}} name="Recovery %" />
                   </LineChart>
