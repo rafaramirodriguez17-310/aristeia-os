@@ -1612,7 +1612,7 @@ const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
 
 function Biometria({ bios, setBios, activeDate, T }) {
   const st=mkS(T);
-  const [form,setForm]=useState({ date:activeDate,height:"",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:"" });
+  const [form,setForm]=useState({ date:activeDate,height:"181",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:"" });
   const [editId,setEId]=useState(null), [editRow,setER]=useState({});
   
   useEffect(() => { setForm(p => ({ ...p, date: activeDate })); }, [activeDate]);
@@ -1621,17 +1621,40 @@ function Biometria({ bios, setBios, activeDate, T }) {
   const last=bios[bios.length-1], first=bios[0];
   const delta=last&&first?(last.weight-first.weight).toFixed(1):null;
   const trend=bios.map(b=>({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
+
+  const weeklyBios = useMemo(() => {
+    const groups = {};
+    bios.forEach(b => {
+      const wk = getWeekStart(b.date);
+      if (!groups[wk]) groups[wk] = { count: 0, weight: 0, fat: 0, muscle: 0, water: 0, imc: 0 };
+      groups[wk].count++;
+      groups[wk].weight += b.weight || 0;
+      if(b.fat) groups[wk].fat += b.fat;
+      if(b.muscle) groups[wk].muscle += b.muscle;
+      if(b.water) groups[wk].water += b.water;
+      if(b.imc) groups[wk].imc += b.imc;
+    });
+    return Object.keys(groups).sort().reverse().map(wk => ({
+      week: wk,
+      count: groups[wk].count,
+      weight: groups[wk].weight / groups[wk].count,
+      fat: groups[wk].fat ? groups[wk].fat / groups[wk].count : null,
+      muscle: groups[wk].muscle ? groups[wk].muscle / groups[wk].count : null,
+      water: groups[wk].water ? groups[wk].water / groups[wk].count : null,
+      imc: groups[wk].imc ? groups[wk].imc / groups[wk].count : null,
+    }));
+  }, [bios]);
   
   const add=()=>{ if(!form.weight) return;
-    const finalImc = form.imc ? +form.imc : ((form.height&&form.weight) ? calcIMC(+form.weight,+form.height) : null);
-    setBios(p=>[...p,{ ...form, id:uid(), weight:+form.weight, fat:+form.fat||null, muscle:+form.muscle||null,
+    const finalImc = form.imc ? +form.imc : calcIMC(+form.weight, 181);
+    setBios(p=>[...p,{ ...form, id:uid(), height: 181, weight:+form.weight, fat:+form.fat||null, muscle:+form.muscle||null,
       visceral:+form.visceral||null, water:+form.water||null, protein:+form.protein||null, dmr:+form.dmr||null,
       imc:finalImc }]);
-    setForm(p=>({date:activeDate,height:p.height,weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:""})); 
+    setForm(p=>({date:activeDate,height:"181",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:""})); 
   };
-  const saveEd=()=>{ setBios(p=>p.map(b=>b.id===editId?{...b,...editRow,weight:+editRow.weight,fat:+editRow.fat||null,muscle:+editRow.muscle||null,visceral:+editRow.visceral||null,water:+editRow.water||null,protein:+editRow.protein||null,dmr:+editRow.dmr||null,imc:+editRow.imc||(editRow.height?calcIMC(+editRow.weight,+editRow.height):b.imc)}:b)); setEId(null); };
+  const saveEd=()=>{ setBios(p=>p.map(b=>b.id===editId?{...b,...editRow,weight:+editRow.weight,fat:+editRow.fat||null,muscle:+editRow.muscle||null,visceral:+editRow.visceral||null,water:+editRow.water||null,protein:+editRow.protein||null,dmr:+editRow.dmr||null,imc:+editRow.imc||calcIMC(+editRow.weight, 181)}:b)); setEId(null); };
 
-  const autoImc = (form.height && form.weight) ? calcIMC(+form.weight, +form.height) : "";
+  const autoImc = form.weight ? calcIMC(+form.weight, 181) : "";
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -1640,7 +1663,10 @@ function Biometria({ bios, setBios, activeDate, T }) {
           <SH title="⚖️ INPUT TELEMETRY"/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
             <div><span style={st.lbl}>DATE</span><input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            <div><span style={st.lbl}>HEIGHT (CM)</span><input style={st.inp} type="number" placeholder="" value={form.height} onChange={e=>setForm(p=>({...p,height:e.target.value}))}/></div>
+            <div>
+              <span style={st.lbl}>HEIGHT (CM)</span>
+              <input style={{...st.inp, opacity:0.5, cursor:"not-allowed"}} type="number" readOnly value="181" />
+            </div>
             {[["WEIGHT (KG) *","weight",T.accent],["FAT %","fat",T.red],["MUSCLE (KG)","muscle",T.green],["WATER %","water",T.blue],["PROT %","protein",T.purple],["BMR KCAL","dmr",T.muted]].map(([l,k,c])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
                 <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
@@ -1690,6 +1716,35 @@ function Biometria({ bios, setBios, activeDate, T }) {
           </div>
         </div>
       </div>
+
+      {weeklyBios.length > 0 && (
+        <div style={{ ...st.card, overflowX: "auto" }}>
+          <SH title="🗓️ PROMEDIOS SEMANALES (AXIOMA)" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>EVOLUCIÓN</span>}/>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 700, fontFamily: T.font }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.card2 }}>
+                {["SEMANA", "PESO", "IMC", "GRASA", "MÚSCULO", "AGUA", "DÍAS LOG"].map(h => (
+                  <th key={h} style={{ padding: "10px 8px", color: T.muted, fontWeight: 700, textAlign: h === "SEMANA" ? "left" : "right", letterSpacing: "0.1em" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {weeklyBios.map((w) => (
+                <tr key={w.week} style={{ borderBottom: `1px solid ${T.border}` }}>
+                  <td style={{ padding: "12px 8px", textAlign: "left", fontWeight: 700 }}>{fmtWeek(w.week)}</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.accent, fontWeight: 700 }}>{w.weight.toFixed(1)} KG</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right" }}>{w.imc ? w.imc.toFixed(1) : "—"}</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.red }}>{w.fat ? w.fat.toFixed(1) + "%" : "—"}</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.green }}>{w.muscle ? w.muscle.toFixed(1) + " KG" : "—"}</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.blue }}>{w.water ? w.water.toFixed(1) + "%" : "—"}</td>
+                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.muted }}>{w.count}/7</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {bios.length>0&&(
         <div style={{...st.card,overflowX:"auto"}}>
           <SH title="📋 LOG HISTORY" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{bios.length} RECORDS</span>}/>
@@ -1914,7 +1969,7 @@ export default function App() {
     return()=>{try{document.head.removeChild(l);}catch(_){}};
   },[]);
 
-  // Siempre se fuerza el modo dark porque es el estándar para telemetría
+  // Telemetría con soporte liberado de Dark/Light mode
   const [isDark,setDark]=useState(()=>lsGet("dark",true));
   const T=isDark?DARK:LIGHT;
 
@@ -2064,6 +2119,28 @@ export default function App() {
         </div>
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+          {/* NUEVO BOTÓN DARK/LIGHT */}
+          <button 
+            onClick={() => setDark(!isDark)} 
+            style={{ 
+              background: isDark ? T.card2 : T.accent, 
+              color: isDark ? T.text : "#000", 
+              border: `1px solid ${T.border}`, 
+              borderRadius: 20, 
+              padding: "6px 14px", 
+              fontWeight: 800, 
+              fontSize: 11, 
+              cursor: "pointer", 
+              fontFamily: T.font, 
+              display: "flex", 
+              alignItems: "center", 
+              gap: 6, 
+              boxShadow: isDark ? "none" : T.shadow,
+              transition: "all 0.2s"
+            }}>
+            {isDark ? "🌙 DARK" : "☀️ LIGHT"}
+          </button>
+
           {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, color:T.accent, fontWeight:700, border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.calIn} IN</div>}
           {activeDayData.calOut>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, fontWeight:700, color:bCol(activeDayData.balance), border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.balance>0?"+":""}{activeDayData.balance} BAL</div>}
           <button onClick={()=>importRef.current?.click()} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 12px", fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font }}>↑ IMP</button>
