@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, LineChart, Line,
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine
@@ -594,62 +594,68 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: RECAP (WEEKLY AGGREGATES)
+// TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS)
 // ─────────────────────────────────────────────────────────────────────────────
 function Recap({ allDayData, bios, T }) {
   const st = mkS(T);
+  const [expanded, setExpanded] = useState(new Set());
+
+  const toggle = wk => setExpanded(prev => {
+    const s = new Set(prev);
+    s.has(wk) ? s.delete(wk) : s.add(wk);
+    return s;
+  });
   
   const weeklyStats = useMemo(() => {
+    const combined = {};
+    
+    // Merge Health/Food data
+    allDayData.forEach(d => {
+      combined[d.date] = { ...d };
+    });
+    
+    // Merge Biometrics
+    bios.forEach(b => {
+      if (!combined[b.date]) combined[b.date] = { date: b.date };
+      combined[b.date].weight = b.weight;
+      combined[b.date].fat = b.fat;
+      combined[b.date].muscle = b.muscle;
+    });
+
     const groups = {};
     
-    // Process Health & Food Data
-    allDayData.forEach(d => {
+    Object.values(combined).forEach(d => {
       const wk = getWeekStart(d.date);
       if (!groups[wk]) {
         groups[wk] = { 
-          week: wk,
-          days: 0,
+          week: wk, 
+          days: [],
           calInSum: 0, calInDays: 0,
           calOutSum: 0, calOutDays: 0,
           pSum: 0, cSum: 0, gSum: 0, macroDays: 0,
           recSum: 0, recDays: 0,
-          weightSum: 0, weightDays: 0
+          sleepSum: 0, sleepDays: 0,
+          weightSum: 0, weightDays: 0,
+          fatSum: 0, fatDays: 0,
+          muscleSum: 0, muscleDays: 0
         };
       }
-      groups[wk].days++;
+      
+      groups[wk].days.push(d);
+
       if (d.calIn > 0) {
-        groups[wk].calInSum += d.calIn;
-        groups[wk].calInDays++;
-        groups[wk].pSum += d.p;
-        groups[wk].cSum += d.c;
-        groups[wk].gSum += d.g;
+        groups[wk].calInSum += d.calIn; groups[wk].calInDays++;
+        groups[wk].pSum += d.p || 0; 
+        groups[wk].cSum += d.c || 0; 
+        groups[wk].gSum += d.g || 0; 
         groups[wk].macroDays++;
       }
-      if (d.calOut > 0) {
-        groups[wk].calOutSum += d.calOut;
-        groups[wk].calOutDays++;
-      }
-      if (d.recovery > 0) {
-        groups[wk].recSum += d.recovery;
-        groups[wk].recDays++;
-      }
-    });
-
-    // Process Biometrics (Weight)
-    bios.forEach(b => {
-      const wk = getWeekStart(b.date);
-      if (!groups[wk]) {
-        groups[wk] = { 
-          week: wk, days: 0,
-          calInSum: 0, calInDays: 0, calOutSum: 0, calOutDays: 0,
-          pSum: 0, cSum: 0, gSum: 0, macroDays: 0, recSum: 0, recDays: 0,
-          weightSum: 0, weightDays: 0
-        };
-      }
-      if (b.weight > 0) {
-        groups[wk].weightSum += b.weight;
-        groups[wk].weightDays++;
-      }
+      if (d.calOut > 0) { groups[wk].calOutSum += d.calOut; groups[wk].calOutDays++; }
+      if (d.recovery > 0) { groups[wk].recSum += d.recovery; groups[wk].recDays++; }
+      if (d.sleep > 0) { groups[wk].sleepSum += d.sleep; groups[wk].sleepDays++; }
+      if (d.weight > 0) { groups[wk].weightSum += d.weight; groups[wk].weightDays++; }
+      if (d.fat > 0) { groups[wk].fatSum += d.fat; groups[wk].fatDays++; }
+      if (d.muscle > 0) { groups[wk].muscleSum += d.muscle; groups[wk].muscleDays++; }
     });
 
     // Compute Averages
@@ -658,7 +664,11 @@ function Recap({ allDayData, bios, T }) {
       const avgCalOut = g.calOutDays ? g.calOutSum / g.calOutDays : 0;
       return {
         week: g.week,
+        days: g.days.sort((a,b) => b.date.localeCompare(a.date)),
         weight: g.weightDays ? g.weightSum / g.weightDays : null,
+        fat: g.fatDays ? g.fatSum / g.fatDays : null,
+        muscle: g.muscleDays ? g.muscleSum / g.muscleDays : null,
+        sleep: g.sleepDays ? g.sleepSum / g.sleepDays : null,
         recovery: g.recDays ? g.recSum / g.recDays : null,
         calIn: avgCalIn,
         calOut: avgCalOut,
@@ -670,33 +680,62 @@ function Recap({ allDayData, bios, T }) {
     });
   }, [allDayData, bios]);
 
+  const bCol = b => b < 0 ? T.green : b < 300 ? T.accent : T.red;
+
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <div style={{ ...st.card, overflowX:"auto" }}>
-        <SH title="📊 WEEKLY RECAP (AVERAGES)" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{weeklyStats.length} WEEKS</span>}/>
-        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:800, fontFamily:T.font }}>
+        <SH title="📊 WEEKLY RECAP & DAILY LOGS" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{weeklyStats.length} WEEKS</span>}/>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:1000, fontFamily:T.font }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
-              {["WEEK", "WEIGHT", "RECOVERY", "CAL IN", "CAL OUT", "BALANCE", "PROT", "CARB", "FAT"].map(h => (
-                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign:h==="WEEK"?"left":"right", letterSpacing:"0.1em" }}>{h}</th>
+              {["WEEK / DAY", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)"].map((h, i) => (
+                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: i===0 ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {weeklyStats.map((w) => {
-              const bCol = b => b < 0 ? T.green : b < 300 ? T.accent : T.red;
+              const isOpen = expanded.has(w.week);
               return (
-                <tr key={w.week} style={{ borderBottom:`1px solid ${T.border}` }}>
-                  <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700 }}>{fmtWeek(w.week)}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:getRecoveryColor(w.recovery, T) }}>{w.recovery ? Math.round(w.recovery) + "%" : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent }}>{w.calIn ? Math.round(w.calIn) : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.calOut ? Math.round(w.calOut) : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:w.balance ? bCol(w.balance) : T.muted, fontWeight:700 }}>{w.balance ? (w.balance > 0 ? "+" : "") + Math.round(w.balance) : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.p ? Math.round(w.p) + "g" : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.c ? Math.round(w.c) + "g" : "—"}</td>
-                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
-                </tr>
+                <React.Fragment key={w.week}>
+                  {/* Fila del Promedio Semanal */}
+                  <tr onClick={() => toggle(w.week)} style={{ borderBottom:`1px solid ${T.border}`, background: isOpen ? T.card3 : "transparent", cursor: "pointer", transition: "background 0.2s" }}>
+                    <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700, color:T.accent }}>{isOpen ? "▼" : "▶"} {fmtWeek(w.week)}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.red }}>{w.fat ? w.fat.toFixed(1) + "%" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.muscle ? w.muscle.toFixed(1) + " KG" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.sleep ? w.sleep.toFixed(1) + "H" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:getRecoveryColor(w.recovery, T) }}>{w.recovery ? Math.round(w.recovery) + "%" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent }}>{w.calIn ? Math.round(w.calIn) : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.calOut ? Math.round(w.calOut) : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:w.balance ? bCol(w.balance) : T.muted, fontWeight:700 }}>{w.balance ? (w.balance > 0 ? "+" : "") + Math.round(w.balance) : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.p ? Math.round(w.p) + "g" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.c ? Math.round(w.c) + "g" : "—"}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
+                  </tr>
+                  
+                  {/* Filas Diarias (Visibles solo si la semana está expandida) */}
+                  {isOpen && w.days.map(d => {
+                    const dBal = (d.calIn > 0 && d.calOut > 0) ? d.calIn - d.calOut : null;
+                    return (
+                      <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background: T.card2, fontSize: 10 }}>
+                        <td style={{ padding:"8px 8px 8px 24px", textAlign:"left", color:T.text }}>{d.date}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.weight ? d.weight.toFixed(1) : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.fat ? d.fat.toFixed(1) + "%" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.muscle ? d.muscle.toFixed(1) : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.sleep ? d.sleep.toFixed(1) + "H" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:getRecoveryColor(d.recovery, T) }}>{d.recovery ? Math.round(d.recovery) + "%" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.calIn ? Math.round(d.calIn) : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.calOut ? Math.round(d.calOut) : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:dBal ? bCol(dBal) : T.muted }}>{dBal ? (dBal > 0 ? "+" : "") + Math.round(dBal) : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.p ? Math.round(d.p) + "g" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.c ? Math.round(d.c) + "g" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.g ? Math.round(d.g) + "g" : "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
               );
             })}
           </tbody>
