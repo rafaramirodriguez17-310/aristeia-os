@@ -34,7 +34,7 @@ const LIGHT = { // Fallback, though telemetry is meant for dark mode
 // STATIC DATA & WHOOP LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
-  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
+  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",        Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
   Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",             Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
   Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
@@ -588,6 +588,119 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB: RECAP (WEEKLY AGGREGATES)
+// ─────────────────────────────────────────────────────────────────────────────
+function Recap({ allDayData, bios, T }) {
+  const st = mkS(T);
+  
+  const weeklyStats = useMemo(() => {
+    const groups = {};
+    
+    // Process Health & Food Data
+    allDayData.forEach(d => {
+      const wk = getWeekStart(d.date);
+      if (!groups[wk]) {
+        groups[wk] = { 
+          week: wk,
+          days: 0,
+          calInSum: 0, calInDays: 0,
+          calOutSum: 0, calOutDays: 0,
+          pSum: 0, cSum: 0, gSum: 0, macroDays: 0,
+          recSum: 0, recDays: 0,
+          weightSum: 0, weightDays: 0
+        };
+      }
+      groups[wk].days++;
+      if (d.calIn > 0) {
+        groups[wk].calInSum += d.calIn;
+        groups[wk].calInDays++;
+        groups[wk].pSum += d.p;
+        groups[wk].cSum += d.c;
+        groups[wk].gSum += d.g;
+        groups[wk].macroDays++;
+      }
+      if (d.calOut > 0) {
+        groups[wk].calOutSum += d.calOut;
+        groups[wk].calOutDays++;
+      }
+      if (d.recovery > 0) {
+        groups[wk].recSum += d.recovery;
+        groups[wk].recDays++;
+      }
+    });
+
+    // Process Biometrics (Weight)
+    bios.forEach(b => {
+      const wk = getWeekStart(b.date);
+      if (!groups[wk]) {
+        groups[wk] = { 
+          week: wk, days: 0,
+          calInSum: 0, calInDays: 0, calOutSum: 0, calOutDays: 0,
+          pSum: 0, cSum: 0, gSum: 0, macroDays: 0, recSum: 0, recDays: 0,
+          weightSum: 0, weightDays: 0
+        };
+      }
+      if (b.weight > 0) {
+        groups[wk].weightSum += b.weight;
+        groups[wk].weightDays++;
+      }
+    });
+
+    // Compute Averages
+    return Object.values(groups).sort((a,b) => b.week.localeCompare(a.week)).map(g => {
+      const avgCalIn = g.calInDays ? g.calInSum / g.calInDays : 0;
+      const avgCalOut = g.calOutDays ? g.calOutSum / g.calOutDays : 0;
+      return {
+        week: g.week,
+        weight: g.weightDays ? g.weightSum / g.weightDays : null,
+        recovery: g.recDays ? g.recSum / g.recDays : null,
+        calIn: avgCalIn,
+        calOut: avgCalOut,
+        balance: (avgCalIn > 0 && avgCalOut > 0) ? avgCalIn - avgCalOut : null,
+        p: g.macroDays ? g.pSum / g.macroDays : 0,
+        c: g.macroDays ? g.cSum / g.macroDays : 0,
+        g: g.macroDays ? g.gSum / g.macroDays : 0,
+      };
+    });
+  }, [allDayData, bios]);
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={{ ...st.card, overflowX:"auto" }}>
+        <SH title="📊 WEEKLY RECAP (AVERAGES)" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{weeklyStats.length} WEEKS</span>}/>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:800, fontFamily:T.font }}>
+          <thead>
+            <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
+              {["WEEK", "WEIGHT", "RECOVERY", "CAL IN", "CAL OUT", "BALANCE", "PROT", "CARB", "FAT"].map(h => (
+                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign:h==="WEEK"?"left":"right", letterSpacing:"0.1em" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {weeklyStats.map((w) => {
+              const bCol = b => b < 0 ? T.green : b < 300 ? T.accent : T.red;
+              return (
+                <tr key={w.week} style={{ borderBottom:`1px solid ${T.border}` }}>
+                  <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700 }}>{fmtWeek(w.week)}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:getRecoveryColor(w.recovery, T) }}>{w.recovery ? Math.round(w.recovery) + "%" : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent }}>{w.calIn ? Math.round(w.calIn) : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.calOut ? Math.round(w.calOut) : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:w.balance ? bCol(w.balance) : T.muted, fontWeight:700 }}>{w.balance ? (w.balance > 0 ? "+" : "") + Math.round(w.balance) : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.p ? Math.round(w.p) + "g" : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.c ? Math.round(w.c) + "g" : "—"}</td>
+                  <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -2063,6 +2176,7 @@ export default function App() {
 
   const TABS=[
     {id:"dashboard",l:"SYS DASHBOARD"},
+    {id:"recap",l:"RECAP"},
     {id:"calendario",l:"CALENDAR"},
     {id:"dailylog",l:"INPUT LOG"},
     {id:"nutricion",l:"FUEL"},
@@ -2164,6 +2278,7 @@ export default function App() {
       {/* ── Content ── */}
       <div style={{ position:"relative", zIndex:1 }}>
         {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} T={T}/>}
         {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} isDark={isDark} T={T}/>}
         {tab==="dailylog"   && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
