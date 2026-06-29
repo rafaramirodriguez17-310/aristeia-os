@@ -57,6 +57,7 @@ const getLocalYYYYMMDD = () => {
 const TODAY = getLocalYYYYMMDD();
 const DEFAULT_GOALS = { cal:2400, p:180, c:280, g:60 };
 
+// Lógica para calcular Recovery tipo Whoop
 const calculateWhoopRecovery = (hrv, rhr, sleepScore) => {
   if (!hrv && !rhr && !sleepScore) return null;
   let factors = 0;
@@ -93,6 +94,10 @@ function lsGet(key, fallback) {
   catch { return fallback; }
 }
 function lsSet(key, val) { try { localStorage.setItem(LS+key, JSON.stringify(val)); } catch {} }
+function lsClear() {
+  try { Object.keys(localStorage).filter(k=>k.startsWith(LS)).forEach(k=>localStorage.removeItem(k)); }
+  catch {}
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PURE UTILITIES
@@ -100,6 +105,7 @@ function lsSet(key, val) { try { localStorage.setItem(LS+key, JSON.stringify(val
 const uid      = () => Date.now() + Math.random();
 const r1       = n => Math.round(n*10)/10;
 const fmt      = (n,d=1) => (n==null||isNaN(n))?"—":Number(n).toFixed(d);
+const clamp1   = (v,g) => Math.min(v/g, 1);
 const calcPace = (km,t) => {
   if (!km||!t) return "--:--";
   const p=t.split(":").map(Number);
@@ -603,10 +609,12 @@ function Recap({ allDayData, bios, T }) {
   const weeklyStats = useMemo(() => {
     const combined = {};
     
+    // Merge Health/Food data
     allDayData.forEach(d => {
       combined[d.date] = { ...d };
     });
     
+    // Merge Biometrics
     bios.forEach(b => {
       if (!combined[b.date]) combined[b.date] = { date: b.date };
       combined[b.date].weight = b.weight;
@@ -650,6 +658,7 @@ function Recap({ allDayData, bios, T }) {
       if (d.muscle > 0) { groups[wk].muscleSum += d.muscle; groups[wk].muscleDays++; }
     });
 
+    // Compute Averages
     return Object.values(groups).sort((a,b) => b.week.localeCompare(a.week)).map(g => {
       const avgCalIn = g.calInDays ? g.calInSum / g.calInDays : 0;
       const avgCalOut = g.calOutDays ? g.calOutSum / g.calOutDays : 0;
@@ -690,6 +699,7 @@ function Recap({ allDayData, bios, T }) {
               const isOpen = expanded.has(w.week);
               return (
                 <React.Fragment key={w.week}>
+                  {/* Fila del Promedio Semanal */}
                   <tr onClick={() => toggle(w.week)} style={{ borderBottom:`1px solid ${T.border}`, background: isOpen ? T.card3 : "transparent", cursor: "pointer", transition: "background 0.2s" }}>
                     <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700, color:T.accent }}>{isOpen ? "▼" : "▶"} {fmtWeek(w.week)}</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
@@ -705,6 +715,7 @@ function Recap({ allDayData, bios, T }) {
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
                   </tr>
                   
+                  {/* Filas Diarias (Visibles solo si la semana está expandida) */}
                   {isOpen && w.days.map(d => {
                     const dBal = (d.calIn > 0 && d.calOut > 0) ? d.calIn - d.calOut : null;
                     return (
@@ -799,13 +810,12 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <div style={{ display: "flex", background: T.card2, borderRadius: 6, padding: 4, border:`1px solid ${T.border}`, width: "100%" }}>
+        <div style={{ display: "flex", background: T.card2, borderRadius: 6, padding: 4, border:`1px solid ${T.border}` }}>
           {["semana", "mes", "año"].map(v => {
             const val = v === "semana" ? "week" : v === "mes" ? "month" : "year";
             return (
               <button key={v} onClick={() => setView(val)}
                 style={{
-                  flex: 1, // <--- TAB EXTENDIDO
                   background: view === val ? T.card : "transparent",
                   color: view === val ? T.accent : T.muted,
                   borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
@@ -818,7 +828,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
         </div>
 
         {(view === "month" || view === "year") && (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}`, transition: "all 0.15s" }} onClick={prevPeriod}>◀</button>
             <div style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", color: T.text, minWidth: 120, textAlign: "center", fontFamily:T.font }}>
               {view === "year" ? year : new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
@@ -882,14 +892,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
           )}
 
           {view === "week" && (
-            <div style={{ 
-              display: "flex", 
-              overflowX: "auto",  /* <--- SCROLL HORIZONTAL */
-              paddingBottom: 8, 
-              gap: 8,
-              scrollbarWidth: "none", 
-              msOverflowStyle: "none" 
-            }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                {weekDates.map(dateStr => {
                  const mDate = new Date(dateStr + "T12:00:00");
                  const isSelected = dateStr === activeDate;
@@ -897,9 +900,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
                  return (
                    <button key={dateStr} onClick={() => setActiveDate(dateStr)}
                     style={{
-                      flexShrink: 0, /* <--- PREVIENE AMONTONAMIENTO */
-                      minWidth: "max(65px, calc(100% / 7 - 8px))", /* <--- TAMAÑO FLEXIBLE PERO SEGURO */
-                      padding: "16px 0",
+                      flex: 1, margin: "0 4px", padding: "16px 0",
                       background: isSelected ? T.accent : T.card2,
                       border: `1px solid ${isSelected ? T.accent : isToday ? T.muted : T.border}`,
                       borderRadius: 6, display: "flex", flexDirection: "column",
@@ -1232,9 +1233,9 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      <div style={{ display:"flex", gap:8, flexWrap:"wrap", width: "100%" }}>
-        {["search","manual","adddb","editdb"].map(([id,label])=>(
-          <button key={id} style={{ ...st.ghost(mode===id), flex: 1 }} onClick={()=>{setMode(id);setDbEId(null);}}>{label}</button>
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        {[["search","🔍 SEARCH DB"],["manual","✏️ MANUAL IN"],["adddb","➕ ADD NEW"],["editdb","🛠 EDIT DB"]].map(([id,label])=>(
+          <button key={id} style={st.ghost(mode===id)} onClick={()=>{setMode(id);setDbEId(null);}}>{label}</button>
         ))}
       </div>
 
@@ -1458,7 +1459,7 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
     color: strView===id ? "#000" : T.muted,
     border:`1px solid ${strView===id ? T.accent : T.border}`, borderRadius:6, padding:"8px 16px",
     fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font, textTransform:"uppercase",
-    transition:"all 0.15s", letterSpacing:"0.05em", flex: 1 // <--- TAB EXTENDIDO
+    transition:"all 0.15s", letterSpacing:"0.05em"
   });
 
   return (
@@ -1494,7 +1495,7 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
         )}
       </div>
 
-      <div style={{ display:"flex", gap:8, flexWrap:"wrap", width: "100%" }}>
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
         <button style={tabStyle("weekly")} onClick={()=>setStrView("weekly")}>📅 WEEKLY VIEW</button>
         <button style={tabStyle("register")} onClick={()=>setStrView("register")}>🏋️ MANUAL IN</button>
         <button style={tabStyle("history")} onClick={()=>setStrView("history")}>📊 TELEMETRY ({strLog.length})</button>
@@ -2002,11 +2003,10 @@ function Sueno({ healthLog, T }) {
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", gap: 8, marginBottom: 4, width: "100%" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
             {["week", "month", "year"].map(type => (
               <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
                 style={{
-                  flex: 1, // <--- TAB EXTENDIDO
                   background: filterType === type ? T.accent : T.card2,
                   color: filterType === type ? "#000" : T.muted,
                   border: `1px solid ${filterType === type ? T.accent : T.border}`,
@@ -2302,11 +2302,9 @@ export default function App() {
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ display:"flex", gap:6, marginBottom:18, flexWrap:"wrap", position:"relative", zIndex:1, width:"100%" }}>
+      <div style={{ display:"flex", gap:6, marginBottom:18, flexWrap:"wrap", position:"relative", zIndex:1 }}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{
-            flex: 1, // <--- TAB EXTENDIDO
-            minWidth: 100, // <--- Evita que se amontonen en móviles pequeños
             background:tab===t.id?T.accentDim:"transparent",
             color:tab===t.id?T.accent:T.muted,
             border:`1px solid ${tab===t.id?T.accent:T.border}`,
