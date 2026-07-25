@@ -1546,39 +1546,25 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: BIOMETRÍA & WEIGHT TELEMETRY (UNIFICADO)
+// GLOBALS PARA BIOMETRÍA & DAILY DATA
 // ─────────────────────────────────────────────────────────────────────────────
 const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
 
-function Biometria({ bios, setBios, allDayData, setHL, goals, setGoals, projects, setProjects, activeDate, T }) {
-  const st=mkS(T);
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB: DAILY DATA (LOG DIARIO & BODY COMP INPUTS)
+// ─────────────────────────────────────────────────────────────────────────────
+function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
+  const st = mkS(T);
   
-  // Biometrics Form
   const [bioForm, setBioForm] = useState({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" });
-  const [bioEditId, setBioEId] = useState(null);
-  const [bioEditRow, setBioER] = useState({});
-
-  // Daily Biometrics Log Form
   const [dailyForm, setDailyForm] = useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
   const [editG, setEG] = useState(false);
-  const [dailyEditId, setDailyEId] = useState(null);
-  const [dailyEditRow, setDailyER] = useState({});
-  const [editProjKey, setEPK] = useState(null);
-  const [projTemp, setProjTemp] = useState("");
-  const [openMonths, setOM] = useState(() => new Set([getMonthKey(activeDate)]));
-  const [openWeeks, setOW] = useState(() => new Set([getWeekStart(activeDate)]));
 
   useEffect(() => {
     setBioForm(p => ({ ...p, date: activeDate }));
     setDailyForm(p => ({ ...p, date: activeDate }));
   }, [activeDate]);
 
-  const tip = p => <ChartTip {...p} T={T}/>;
-  const last = bios[bios.length-1], first = bios[0];
-  const delta = last && first ? (last.weight - first.weight).toFixed(1) : null;
-  const trend = bios.map(b => ({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
-
-  // Upsert Daily Log
   const upsertDaily = entry => setHL(prev => {
     const i = prev.findIndex(d => d.date === entry.date);
     if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
@@ -1615,56 +1601,7 @@ function Biometria({ bios, setBios, allDayData, setHL, goals, setGoals, projects
     setBioForm({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" }); 
   };
 
-  const saveBioEd = () => {
-    setBios(p => p.map(b => b.id === bioEditId ? {
-      ...b, ...bioEditRow, weight: +bioEditRow.weight, fat: +bioEditRow.fat || null, muscle: +bioEditRow.muscle || null,
-      visceral: +bioEditRow.visceral || null, water: +bioEditRow.water || null, protein: +bioEditRow.protein || null, dmr: +bioEditRow.dmr || null,
-      imc: +bioEditRow.imc || calcIMC(+bioEditRow.weight, 181)
-    } : b));
-    setBioEId(null);
-  };
-
   const autoImc = bioForm.weight ? calcIMC(+bioForm.weight, 181) : "";
-
-  const rows = allDayData.filter(d => d.calOut > 0 || d.sleep || d.steps || d.calIn > 0 || d.recovery > 0);
-  const groupedDaily = useMemo(() => {
-    const byMonth = {};
-    rows.forEach(d => {
-      const mk = getMonthKey(d.date), wk = getWeekStart(d.date);
-      if (!byMonth[mk]) byMonth[mk] = {};
-      if (!byMonth[mk][wk]) byMonth[mk][wk] = [];
-      byMonth[mk][wk].push(d);
-    });
-    return Object.entries(byMonth).sort(([a],[b]) => b.localeCompare(a)).map(([mk,weeks]) => ({
-      mk, weeks: Object.entries(weeks).sort(([a],[b]) => b.localeCompare(a)).map(([wk,days]) => ({wk,days}))
-    }));
-  }, [rows]);
-
-  const toggleMonth = mk => setOM(prev => { const s = new Set(prev); s.has(mk) ? s.delete(mk) : s.add(mk); return s; });
-  const toggleWeek = wk => setOW(prev => { const s = new Set(prev); s.has(wk) ? s.delete(wk) : s.add(wk); return s; });
-
-  const weeklyBios = useMemo(() => {
-    const groups = {};
-    bios.forEach(b => {
-      const wk = getWeekStart(b.date);
-      if (!groups[wk]) groups[wk] = { count: 0, weight: 0, fat: 0, muscle: 0, water: 0, imc: 0 };
-      groups[wk].count++;
-      groups[wk].weight += b.weight || 0;
-      if (b.fat) groups[wk].fat += b.fat;
-      if (b.muscle) groups[wk].muscle += b.muscle;
-      if (b.water) groups[wk].water += b.water;
-      if (b.imc) groups[wk].imc += b.imc;
-    });
-    return Object.keys(groups).sort().reverse().map(wk => ({
-      week: wk,
-      count: groups[wk].count,
-      weight: groups[wk].weight / groups[wk].count,
-      fat: groups[wk].fat ? groups[wk].fat / groups[wk].count : null,
-      muscle: groups[wk].muscle ? groups[wk].muscle / groups[wk].count : null,
-      water: groups[wk].water ? groups[wk].water / groups[wk].count : null,
-      imc: groups[wk].imc ? groups[wk].imc / groups[wk].count : null,
-    }));
-  }, [bios]);
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -1768,7 +1705,189 @@ function Biometria({ bios, setBios, allDayData, setHL, goals, setGoals, projects
           <button style={st.btn} onClick={addBio}>SAVE BIO DATA</button>
         </div>
       </div>
+    </div>
+  );
+}
 
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB: TELEMETRY LOGS (HISTORIAL DIARIO)
+// ─────────────────────────────────────────────────────────────────────────────
+function TelemetryLogs({ allDayData, setHL, projects, setProjects, activeDate, T }) {
+  const st = mkS(T);
+  const [dailyEditId, setDailyEId] = useState(null);
+  const [dailyEditRow, setDailyER] = useState({});
+  const [editProjKey, setEPK] = useState(null);
+  const [projTemp, setProjTemp] = useState("");
+  const [openMonths, setOM] = useState(() => new Set([getMonthKey(activeDate)]));
+  const [openWeeks, setOW] = useState(() => new Set([getWeekStart(activeDate)]));
+
+  const rows = allDayData.filter(d => d.calOut > 0 || d.sleep || d.steps || d.calIn > 0 || d.recovery > 0);
+  
+  const groupedDaily = useMemo(() => {
+    const byMonth = {};
+    rows.forEach(d => {
+      const mk = getMonthKey(d.date), wk = getWeekStart(d.date);
+      if (!byMonth[mk]) byMonth[mk] = {};
+      if (!byMonth[mk][wk]) byMonth[mk][wk] = [];
+      byMonth[mk][wk].push(d);
+    });
+    return Object.entries(byMonth).sort(([a],[b]) => b.localeCompare(a)).map(([mk,weeks]) => ({
+      mk, weeks: Object.entries(weeks).sort(([a],[b]) => b.localeCompare(a)).map(([wk,days]) => ({wk,days}))
+    }));
+  }, [rows]);
+
+  const toggleMonth = mk => setOM(prev => { const s = new Set(prev); s.has(mk) ? s.delete(mk) : s.add(mk); return s; });
+  const toggleWeek = wk => setOW(prev => { const s = new Set(prev); s.has(wk) ? s.delete(wk) : s.add(wk); return s; });
+
+  const upsertDaily = entry => setHL(prev => {
+    const i = prev.findIndex(d => d.date === entry.date);
+    if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
+    return [...prev, entry];
+  });
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={st.card}>
+        <SH title="📋 DAILY TELEMETRY LOGS" />
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          {groupedDaily.length === 0 && <div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
+          {groupedDaily.map(({ mk, weeks }) => (
+            <div key={mk} style={{ border:`1px solid ${T.border}`, borderRadius:6, padding:12, background:T.card2 }}>
+              <button onClick={() => toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
+                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
+                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk) ? "▲" : "▼"} {weeks.reduce((s,w) => s + w.days.length, 0)} LOGS</div>
+              </button>
+              {openMonths.has(mk) && weeks.map(({ wk, days }) => {
+                const projName = projects[wk];
+                return (
+                  <div key={wk} style={{ marginTop:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                      <button onClick={() => toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
+                        <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk) ? "▼" : "▶"}</span>
+                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
+                      </button>
+                      {editProjKey === wk ? (
+                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
+                          value={projTemp}
+                          onChange={e => setProjTemp(e.target.value)}
+                          onBlur={() => { setProjects(p => ({ ...p, [wk]: projTemp || undefined })); setEPK(null); }}
+                          onKeyDown={e => { if (e.key === "Enter") e.target.blur(); if (e.key === "Escape") setEPK(null); }}
+                          placeholder=""/>
+                      ) : (
+                        <button onClick={() => { setEPK(wk); setProjTemp(projects[wk] || ""); }}
+                          style={{ background: projName ? T.accentDim : "transparent", border: `1px dashed ${projName ? T.accent : T.border}`,
+                            borderRadius:4, padding:"2px 8px", fontSize:10, color: projName ? T.accent : T.muted,
+                            cursor:"pointer", fontWeight: projName ? 700 : 400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
+                          {projName || "+ TAG"}
+                        </button>
+                      )}
+                    </div>
+                    {openWeeks.has(wk) && (
+                      <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
+                        {days.map(d => {
+                          const dayMetrics = [
+                            { l:"IN", v: d.calIn || "—", c: T.accent },
+                            { l:"OUT", v: d.calOut || "—", c: T.blue },
+                            { l:"PROT", v: d.p ? `${Math.round(d.p)}g` : "—", c: T.green },
+                            { l:"PASOS", v: d.steps ? d.steps.toLocaleString() : "—", c: T.purple },
+                            { l:"SUEÑO", v: d.sleep ? `${d.sleep}h` : "—", c: T.purple },
+                            { l:"SCORE", v: d.score ? `${d.score}%` : "—", c: d.score >= 85 ? T.green : d.score >= 70 ? T.accent : T.red },
+                            { l:"REC", v: d.recovery ? `${d.recovery}%` : "—", c: getRecoveryColor(d.recovery, T) }
+                          ];
+
+                          return (
+                            <div key={d.date}>
+                              {dailyEditId === d.date ? (
+                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"hrv", l:"HRV" }, { k:"rhr", l:"RHR" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
+                                  vals={dailyEditRow} onChange={(k,v) => setDailyER(p => ({ ...p, [k]: v }))}
+                                  onSave={() => { upsertDaily({ date: d.date, recovery: +dailyEditRow.recovery || null, hrv: +dailyEditRow.hrv || null, rhr: +dailyEditRow.rhr || null, calOut: +dailyEditRow.calOut || 0, steps: +dailyEditRow.steps || null, sleep: +dailyEditRow.sleep || null, score: +dailyEditRow.score || null }); setDailyEId(null); }}
+                                  onCancel={() => setDailyEId(null)} T={T}/>
+                              ) : (
+                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date === activeDate ? T.accent : T.border}`, borderRadius:4 }}>
+                                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                                    <span style={{ fontWeight:700, fontSize:12, color: d.date === activeDate ? T.accent : T.text, fontFamily:T.font }}>
+                                      {d.date === TODAY ? "> TODAY" : d.date.slice(5)}
+                                    </span>
+                                    <div style={{ display:"flex", gap:4 }}>
+                                      <button style={st.icon(T.accent)} onClick={() => { setDailyEId(d.date); setDailyER({ recovery: d.recovery || "", hrv: d.hrv || "", rhr: d.rhr || "", calOut: d.calOut || "", steps: d.steps || "", sleep: d.sleep || "", score: d.score || "" }); }}>✏️</button>
+                                      <button style={st.icon(T.red)} onClick={() => setHL(p => p.filter(x => x.date !== d.date))}>🗑</button>
+                                    </div>
+                                  </div>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
+                                    {dayMetrics.map(m => (
+                                      <div key={m.l} style={{ background: T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
+                                        <div style={{ fontSize:9, color: T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
+                                        <div style={{ fontSize:11, fontWeight:700, color: m.c, fontFamily:T.font }}>{m.v}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB: BIOMETRÍA & WEIGHT TELEMETRY (TRENDS & HISTORY)
+// ─────────────────────────────────────────────────────────────────────────────
+function Biometria({ bios, setBios, activeDate, T }) {
+  const st=mkS(T);
+  
+  const [bioEditId, setBioEId] = useState(null);
+  const [bioEditRow, setBioER] = useState({});
+
+  const tip = p => <ChartTip {...p} T={T}/>;
+  const last = bios[bios.length-1], first = bios[0];
+  const delta = last && first ? (last.weight - first.weight).toFixed(1) : null;
+  const trend = bios.map(b => ({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
+
+  const weeklyBios = useMemo(() => {
+    const groups = {};
+    bios.forEach(b => {
+      const wk = getWeekStart(b.date);
+      if (!groups[wk]) groups[wk] = { count: 0, weight: 0, fat: 0, muscle: 0, water: 0, imc: 0 };
+      groups[wk].count++;
+      groups[wk].weight += b.weight || 0;
+      if (b.fat) groups[wk].fat += b.fat;
+      if (b.muscle) groups[wk].muscle += b.muscle;
+      if (b.water) groups[wk].water += b.water;
+      if (b.imc) groups[wk].imc += b.imc;
+    });
+    return Object.keys(groups).sort().reverse().map(wk => ({
+      week: wk,
+      count: groups[wk].count,
+      weight: groups[wk].weight / groups[wk].count,
+      fat: groups[wk].fat ? groups[wk].fat / groups[wk].count : null,
+      muscle: groups[wk].muscle ? groups[wk].muscle / groups[wk].count : null,
+      water: groups[wk].water ? groups[wk].water / groups[wk].count : null,
+      imc: groups[wk].imc ? groups[wk].imc / groups[wk].count : null,
+    }));
+  }, [bios]);
+
+  const saveBioEd = () => {
+    setBios(p => p.map(b => b.id === bioEditId ? {
+      ...b, ...bioEditRow, weight: +bioEditRow.weight, fat: +bioEditRow.fat || null, muscle: +bioEditRow.muscle || null,
+      visceral: +bioEditRow.visceral || null, water: +bioEditRow.water || null, protein: +bioEditRow.protein || null, dmr: +bioEditRow.dmr || null,
+      imc: +bioEditRow.imc || calcIMC(+bioEditRow.weight, 181)
+    } : b));
+    setBioEId(null);
+  };
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      
       {/* Trends & Overview */}
       <div style={st.g2}>
         {last && (
@@ -1867,96 +1986,6 @@ function Biometria({ bios, setBios, allDayData, setHL, goals, setGoals, projects
           </table>
         </div>
       )}
-
-      {/* Daily Metrics Log Accordion History */}
-      <div style={st.card}>
-        <SH title="📋 DAILY TELEMETRY LOGS" />
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {groupedDaily.length === 0 && <div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
-          {groupedDaily.map(({ mk, weeks }) => (
-            <div key={mk} style={{ border:`1px solid ${T.border}`, borderRadius:6, padding:12, background:T.card2 }}>
-              <button onClick={() => toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
-                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
-                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk) ? "▲" : "▼"} {weeks.reduce((s,w) => s + w.days.length, 0)} LOGS</div>
-              </button>
-              {openMonths.has(mk) && weeks.map(({ wk, days }) => {
-                const projName = projects[wk];
-                return (
-                  <div key={wk} style={{ marginTop:12 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                      <button onClick={() => toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
-                        <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk) ? "▼" : "▶"}</span>
-                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
-                      </button>
-                      {editProjKey === wk ? (
-                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
-                          value={projTemp}
-                          onChange={e => setProjTemp(e.target.value)}
-                          onBlur={() => { setProjects(p => ({ ...p, [wk]: projTemp || undefined })); setEPK(null); }}
-                          onKeyDown={e => { if (e.key === "Enter") e.target.blur(); if (e.key === "Escape") setEPK(null); }}
-                          placeholder=""/>
-                      ) : (
-                        <button onClick={() => { setEPK(wk); setProjTemp(projects[wk] || ""); }}
-                          style={{ background: projName ? T.accentDim : "transparent", border: `1px dashed ${projName ? T.accent : T.border}`,
-                            borderRadius:4, padding:"2px 8px", fontSize:10, color: projName ? T.accent : T.muted,
-                            cursor:"pointer", fontWeight: projName ? 700 : 400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
-                          {projName || "+ TAG"}
-                        </button>
-                      )}
-                    </div>
-                    {openWeeks.has(wk) && (
-                      <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
-                        {days.map(d => {
-                          const dayMetrics = [
-                            { l:"IN", v: d.calIn || "—", c: T.accent },
-                            { l:"OUT", v: d.calOut || "—", c: T.blue },
-                            { l:"PROT", v: d.p ? `${Math.round(d.p)}g` : "—", c: T.green },
-                            { l:"PASOS", v: d.steps ? d.steps.toLocaleString() : "—", c: T.purple },
-                            { l:"SUEÑO", v: d.sleep ? `${d.sleep}h` : "—", c: T.purple },
-                            { l:"SCORE", v: d.score ? `${d.score}%` : "—", c: d.score >= 85 ? T.green : d.score >= 70 ? T.accent : T.red },
-                            { l:"REC", v: d.recovery ? `${d.recovery}%` : "—", c: getRecoveryColor(d.recovery, T) }
-                          ];
-
-                          return (
-                            <div key={d.date}>
-                              {dailyEditId === d.date ? (
-                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"hrv", l:"HRV" }, { k:"rhr", l:"RHR" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
-                                  vals={dailyEditRow} onChange={(k,v) => setDailyER(p => ({ ...p, [k]: v }))}
-                                  onSave={() => { upsertDaily({ date: d.date, recovery: +dailyEditRow.recovery || null, hrv: +dailyEditRow.hrv || null, rhr: +dailyEditRow.rhr || null, calOut: +dailyEditRow.calOut || 0, steps: +dailyEditRow.steps || null, sleep: +dailyEditRow.sleep || null, score: +dailyEditRow.score || null }); setDailyEId(null); }}
-                                  onCancel={() => setDailyEId(null)} T={T}/>
-                              ) : (
-                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date === activeDate ? T.accent : T.border}`, borderRadius:4 }}>
-                                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                                    <span style={{ fontWeight:700, fontSize:12, color: d.date === activeDate ? T.accent : T.text, fontFamily:T.font }}>
-                                      {d.date === TODAY ? "> TODAY" : d.date.slice(5)}
-                                    </span>
-                                    <div style={{ display:"flex", gap:4 }}>
-                                      <button style={st.icon(T.accent)} onClick={() => { setDailyEId(d.date); setDailyER({ recovery: d.recovery || "", hrv: d.hrv || "", rhr: d.rhr || "", calOut: d.calOut || "", steps: d.steps || "", sleep: d.sleep || "", score: d.score || "" }); }}>✏️</button>
-                                      <button style={st.icon(T.red)} onClick={() => setHL(p => p.filter(x => x.date !== d.date))}>🗑</button>
-                                    </div>
-                                  </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
-                                    {dayMetrics.map(m => (
-                                      <div key={m.l} style={{ background: T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
-                                        <div style={{ fontSize:9, color: T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
-                                        <div style={{ fontSize:11, fontWeight:700, color: m.c, fontFamily:T.font }}>{m.v}</div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </div>
 
     </div>
   );
@@ -2255,12 +2284,14 @@ export default function App() {
 
   const TABS=[
     {id:"dashboard",l:"SYS DASHBOARD"},
+    {id:"daily",l:"DAILY DATA"},     // <--- NUEVO
     {id:"recap",l:"RECAP"},
     {id:"calendario",l:"CALENDAR"},
     {id:"nutricion",l:"FUEL"},
     {id:"fuerza",l:"CHASSIS"},
     {id:"running",l:"AERO"},
-    {id:"bio",l:"WEIGHT"},
+    {id:"bio",l:"WEIGHT"},           // <--- REDUCIDO A ANALÍTICA
+    {id:"telemetry",l:"DAILY LOGS"}, // <--- NUEVO
     {id:"sleep",l:"RECOVERY"},
   ];
 
@@ -2311,7 +2342,6 @@ export default function App() {
         </div>
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          {/* NUEVO BOTÓN DARK/LIGHT */}
           <button 
             onClick={() => setDark(!isDark)} 
             style={{ 
@@ -2356,12 +2386,14 @@ export default function App() {
       {/* ── Content ── */}
       <div style={{ position:"relative", zIndex:1 }}>
         {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="daily"      && <DailyData setBios={setBios} setHL={setHL} goals={goals} setGoals={setGoals} activeDate={activeDate} T={T}/>}
         {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} T={T}/>}
         {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} isDark={isDark} T={T}/>}
         {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
         {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
         {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
-        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
+        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
+        {tab==="telemetry"  && <TelemetryLogs allDayData={allDayData} setHL={setHL} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
       </div>
     </div>
