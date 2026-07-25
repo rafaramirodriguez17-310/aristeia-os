@@ -34,7 +34,7 @@ const LIGHT = { // Fallback, though telemetry is meant for dark mode
 // STATIC DATA & WHOOP LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
-  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",        Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
+  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
   Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",             Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
   Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
@@ -94,10 +94,6 @@ function lsGet(key, fallback) {
   catch { return fallback; }
 }
 function lsSet(key, val) { try { localStorage.setItem(LS+key, JSON.stringify(val)); } catch {} }
-function lsClear() {
-  try { Object.keys(localStorage).filter(k=>k.startsWith(LS)).forEach(k=>localStorage.removeItem(k)); }
-  catch {}
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PURE UTILITIES
@@ -105,7 +101,6 @@ function lsClear() {
 const uid      = () => Date.now() + Math.random();
 const r1       = n => Math.round(n*10)/10;
 const fmt      = (n,d=1) => (n==null||isNaN(n))?"—":Number(n).toFixed(d);
-const clamp1   = (v,g) => Math.min(v/g, 1);
 const calcPace = (km,t) => {
   if (!km||!t) return "--:--";
   const p=t.split(":").map(Number);
@@ -164,16 +159,16 @@ function getCurrentWeekDates(refDateStr = TODAY) {
 const SVG_ARROW=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
 function mkS(T) {
   return {
-    card:  { background:T.card, borderRadius:12, padding:18, color:T.text, boxShadow:T.shadow, fontFamily:T.font, border:`1px solid ${T.border}`, position:"relative" },
-    card2: { background:T.card2, borderRadius:8, padding:14, color:T.text, fontFamily:T.font, border:`1px solid ${T.border}` },
-    lbl:   { fontSize:10, color:T.muted, textTransform:"uppercase", letterSpacing:"0.15em", marginBottom:6, display:"block", fontWeight:700 },
-    inp:   { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, transition:"border-color 0.15s" },
-    sel:   { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 34px 10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
-    btn:   { background:T.accent, color:"#000", border:"none", borderRadius:6, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:T.font, width:"100%", textTransform:"uppercase", letterSpacing:"0.05em" },
-    btnSm: { background:T.navyBright, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
-    ghost: a=>({ background:a?T.accentDim:"transparent", color:a?T.accent:T.muted, border:`1px solid ${a?T.accent:T.border}`, borderRadius:6, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
-    icon:  c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"3px 6px", borderRadius:4, fontSize:13, lineHeight:1, display:"inline-flex", alignItems:"center" }),
-    g2:    { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:16 },
+    card:   { background:T.card, borderRadius:12, padding:18, color:T.text, boxShadow:T.shadow, fontFamily:T.font, border:`1px solid ${T.border}`, position:"relative" },
+    card2:  { background:T.card2, borderRadius:8, padding:14, color:T.text, fontFamily:T.font, border:`1px solid ${T.border}` },
+    lbl:    { fontSize:10, color:T.muted, textTransform:"uppercase", letterSpacing:"0.15em", marginBottom:6, display:"block", fontWeight:700 },
+    inp:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, transition:"border-color 0.15s" },
+    sel:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 34px 10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
+    btn:    { background:T.accent, color:"#000", border:"none", borderRadius:6, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:T.font, width:"100%", textTransform:"uppercase", letterSpacing:"0.05em" },
+    btnSm:  { background:T.navyBright, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
+    ghost:  a=>({ background:a?T.accentDim:"transparent", color:a?T.accent:T.muted, border:`1px solid ${a?T.accent:T.border}`, borderRadius:6, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
+    icon:   c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"3px 6px", borderRadius:4, fontSize:13, lineHeight:1, display:"inline-flex", alignItems:"center" }),
+    g2:     { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:16 },
   };
 }
 
@@ -406,6 +401,7 @@ function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
     </div>
   );
 }
+
 function FoodEditRow({ entry, onSave, onCancel, T }) {
   const st=mkS(T);
   const hasUnit=!!entry.unitCal;
@@ -432,7 +428,7 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
     vals={raw} onChange={(k,v)=>setRaw(p=>({...p,[k]:v}))} onSave={doSave} onCancel={onCancel} T={T}/>;
 }
 
-function KPICard({ id, label, value, sub, color, pct, isDark, T }) {
+function KPICard({ id, label, value, sub, color, isDark, T }) {
   return (
     <div style={{
       background: T.card2, border: `1px solid ${T.border}`,
@@ -453,6 +449,7 @@ function KPICard({ id, label, value, sub, color, pct, isDark, T }) {
     </div>
   );
 }
+
 function Placeholder({ msg, T }) {
   return <div style={{ height:120, display:"flex", alignItems:"center", justifyContent:"center", color:T.muted, fontSize:11, fontFamily:T.font, textTransform:"uppercase", letterSpacing:"0.05em" }}>[{msg}]</div>;
 }
@@ -472,7 +469,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
 
   const kpis=[
-    { id:"PWR", label:"Cal In",  value:activeDayData.calIn||"—", sub:`TGT: ${goals.cal}`,  color:T.accent },
+    { id:"PWR", label:"Cal In",   value:activeDayData.calIn||"—", sub:`TGT: ${goals.cal}`,  color:T.accent },
     { id:"SYS", label:"Balance", value:activeDayData.calOut>0?(activeDayData.balance>0?`+${activeDayData.balance}`:activeDayData.balance):"—", sub:activeDayData.balance<0?"DEFICIT":"SURPLUS", color:activeDayData.calOut>0?bCol(activeDayData.balance):T.muted },
     { id:"MAC", label:"Protein", value:activeDayData.p?`${Math.round(activeDayData.p)}g`:"—", sub:`TGT: ${goals.p}g`, color:pCol(activeDayData.p,goals.p) },
     { id:"MAC", label:"Carbs",   value:activeDayData.c?`${Math.round(activeDayData.c)}g`:"—", sub:`MAX: ${goals.c}g`,  color:cCol(activeDayData.c,goals.c) },
@@ -594,7 +591,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS)
+// TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS) — PESTAÑA INDEPENDIENTE
 // ─────────────────────────────────────────────────────────────────────────────
 function Recap({ allDayData, bios, T }) {
   const st = mkS(T);
@@ -996,210 +993,6 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: DAILY LOG
-// ─────────────────────────────────────────────────────────────────────────────
-function DailyLog({ allDayData, setHL, goals, setGoals, projects, setProjects, activeDate, T }) {
-  const st=mkS(T);
-  const [form,setForm]=useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
-  const [editG,setEG]=useState(false);
-  const [editId,setEId]=useState(null);
-  const [editRow,setER]=useState({});
-  const [editProjKey,setEPK]=useState(null);
-  const [projTemp,setProjTemp]=useState("");
-  const [openMonths,setOM]=useState(()=>new Set([getMonthKey(activeDate)]));
-  const [openWeeks,setOW]=useState(()=>new Set([getWeekStart(activeDate)]));
-
-  useEffect(() => { setForm(p => ({ ...p, date: activeDate })); }, [activeDate]);
-
-  const upsert=entry=>setHL(prev=>{
-    const i=prev.findIndex(d=>d.date===entry.date);
-    if(i>=0){const u=[...prev];u[i]={...u[i],...entry};return u;}
-    return [...prev,entry];
-  });
-  
-  const save=()=>{
-    if(!form.date) return;
-    const calcRec = calculateWhoopRecovery(+form.hrv, +form.rhr, +form.score);
-    const finalRecovery = form.recovery ? +form.recovery : calcRec;
-
-    upsert({ 
-      date:form.date, 
-      ...(form.calOut&&{calOut:+form.calOut}), 
-      ...(form.steps&&{steps:+form.steps}),
-      ...(form.sleep&&{sleep:+form.sleep}), 
-      ...(form.score&&{score:+form.score}),
-      ...(form.hrv&&{hrv:+form.hrv}),
-      ...(form.rhr&&{rhr:+form.rhr}),
-      ...(finalRecovery&&{recovery: finalRecovery}),
-      goals:{...goals} 
-    });
-    setForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
-  };
-
-  const rows=allDayData.filter(d=>d.calOut>0||d.sleep||d.steps||d.calIn>0||d.recovery>0);
-  const grouped=useMemo(()=>{
-    const byMonth={};
-    rows.forEach(d=>{
-      const mk=getMonthKey(d.date), wk=getWeekStart(d.date);
-      if(!byMonth[mk]) byMonth[mk]={};
-      if(!byMonth[mk][wk]) byMonth[mk][wk]=[];
-      byMonth[mk][wk].push(d);
-    });
-    return Object.entries(byMonth).sort(([a],[b])=>b.localeCompare(a)).map(([mk,weeks])=>({
-      mk, weeks:Object.entries(weeks).sort(([a],[b])=>b.localeCompare(a)).map(([wk,days])=>({wk,days}))
-    }));
-  },[rows.length]);
-
-  const toggleMonth=mk=>setOM(prev=>{const s=new Set(prev);s.has(mk)?s.delete(mk):s.add(mk);return s;});
-  const toggleWeek=wk=>setOW(prev=>{const s=new Set(prev);s.has(wk)?s.delete(wk):s.add(wk);return s;});
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      <div style={{ ...st.card, padding:"14px 18px" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
-            {[["CAL",goals.cal,T.accent],["PROT",goals.p,T.green],["CARB",goals.c,T.blue],["FAT",goals.g,T.purple]].map(([l,v,c])=>(
-              editG?(
-                <div key={l} style={{ display:"flex", flexDirection:"column", gap:4, minWidth:80 }}>
-                  <span style={st.lbl}>{l}</span>
-                  <input style={{ ...st.inp, padding:"6px 10px", fontSize:12 }} type="number" value={v}
-                    onChange={e=>setGoals(p=>({...p,[l.toLowerCase()]:+e.target.value}))}/>
-                </div>
-              ):(
-                <div key={l} style={{ textAlign:"left" }}>
-                  <div style={{ fontSize:10, color:T.muted, fontWeight:700, fontFamily:T.font }}>{l}</div>
-                  <div style={{ fontSize:20, fontWeight:700, color:c, fontFamily:T.font }}>{v}</div>
-                </div>
-              )
-            ))}
-          </div>
-          <button style={st.btnSm} onClick={()=>setEG(o=>!o)}>{editG?"✓ SAVE TGT":"✏️ EDIT TGT"}</button>
-        </div>
-      </div>
-
-      <div style={st.g2}>
-        <div style={st.card}>
-          <SH title="📋 LOG BIOMETRICS"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>DATE</span>
-              <input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            
-            <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4}}>
-              <span style={{...st.lbl, color:T.accent}}>⚡ ERS & SLEEP</span>
-            </div>
-            
-            {[["HRV (ms)","hrv"],["RHR (bpm)","rhr"],["SLEEP (hrs)","sleep"],["SCORE (%)","score"]].map(([l,k])=>(
-              <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" step={k==="sleep"?"0.01":"1"} placeholder="—"
-                  value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
-            ))}
-
-            <div style={{gridColumn:"span 2"}}><span style={st.lbl}>MANUAL RECOVERY % (AUTO IF EMPTY)</span>
-              <input style={{...st.inp, borderColor:T.green+"50"}} type="number" max="100" placeholder="Ej: 85" value={form.recovery} onChange={e=>setForm(p=>({...p,recovery:e.target.value}))}/></div>
-
-            <div style={{gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:8}}>
-              <span style={{...st.lbl, color:T.blue}}>🏃 AERO & DYNAMICS</span>
-            </div>
-
-            {[["CAL OUT","calOut"],["STEPS","steps"]].map(([l,k])=>(
-              <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
-            ))}
-          </div>
-          <button style={st.btn} onClick={save}>💾 UPLOAD TELEMETRY</button>
-        </div>
-
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {grouped.length===0&&<div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
-          {grouped.map(({ mk, weeks })=>(
-            <div key={mk} style={st.card}>
-              <button onClick={()=>toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
-                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
-                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk)?"▲":"▼"} {weeks.reduce((s,w)=>s+w.days.length,0)} LOGS</div>
-              </button>
-              {openMonths.has(mk)&&weeks.map(({ wk, days })=>{
-                const projName=projects[wk];
-                return (
-                  <div key={wk} style={{ marginTop:12 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                      <button onClick={()=>toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
-                        <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk)?"▼":"▶"}</span>
-                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
-                      </button>
-                      {editProjKey===wk?(
-                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
-                          value={projTemp}
-                          onChange={e=>setProjTemp(e.target.value)}
-                          onBlur={()=>{ setProjects(p=>({...p,[wk]:projTemp||undefined})); setEPK(null); }}
-                          onKeyDown={e=>{ if(e.key==="Enter")e.target.blur(); if(e.key==="Escape")setEPK(null); }}
-                          placeholder=""/>
-                      ):(
-                        <button onClick={()=>{ setEPK(wk); setProjTemp(projects[wk]||""); }}
-                          style={{ background:projName?T.accentDim:"transparent", border:`1px dashed ${projName?T.accent:T.border}`,
-                            borderRadius:4, padding:"2px 8px", fontSize:10, color:projName?T.accent:T.muted,
-                            cursor:"pointer", fontWeight:projName?700:400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
-                          {projName||"+ TAG"}
-                        </button>
-                      )}
-                    </div>
-                    {openWeeks.has(wk)&&(
-                      <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
-                        {days.map(d=>{
-                          const dayMetrics = [
-                            { l:"IN", v:d.calIn||"—", c:T.accent },
-                            { l:"OUT", v:d.calOut||"—", c:T.blue },
-                            { l:"PROT", v:d.p?`${Math.round(d.p)}g`:"—", c:T.green },
-                            { l:"PASOS", v:d.steps?d.steps.toLocaleString():"—", c:T.purple },
-                            { l:"SUEÑO", v:d.sleep?`${d.sleep}h`:"—", c:T.purple },
-                            { l:"SCORE", v:d.score?`${d.score}%`:"—", c:d.score>=85?T.green:d.score>=70?T.accent:T.red },
-                            { l:"REC", v:d.recovery?`${d.recovery}%`:"—", c:getRecoveryColor(d.recovery, T) }
-                          ];
-
-                          return (
-                            <div key={d.date}>
-                              {editId===d.date?(
-                                <EditRow fields={[{k:"recovery",l:"Rec %"},{k:"hrv",l:"HRV"},{k:"rhr",l:"RHR"},{k:"calOut",l:"Cal Out"},{k:"steps",l:"Steps",t:"number"},{k:"sleep",l:"Sleep h",step:"0.01"},{k:"score",l:"Score %"}]}
-                                  vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))}
-                                  onSave={()=>{ upsert({date:d.date,recovery:+editRow.recovery||null,hrv:+editRow.hrv||null,rhr:+editRow.rhr||null,calOut:+editRow.calOut||0,steps:+editRow.steps||null,sleep:+editRow.sleep||null,score:+editRow.score||null}); setEId(null); }}
-                                  onCancel={()=>setEId(null)} T={T}/>
-                              ):(
-                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date===activeDate?T.accent:T.border}`, borderRadius:4 }}>
-                                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                                    <span style={{ fontWeight:700, fontSize:12, color:d.date===activeDate?T.accent:T.text, fontFamily:T.font }}>
-                                      {d.date===TODAY?"> TODAY":d.date.slice(5)}
-                                    </span>
-                                    <div style={{ display:"flex", gap:4 }}>
-                                      <button style={st.icon(T.accent)} onClick={()=>{setEId(d.date);setER({recovery:d.recovery||"",hrv:d.hrv||"",rhr:d.rhr||"",calOut:d.calOut||"",steps:d.steps||"",sleep:d.sleep||"",score:d.score||""});}}>✏️</button>
-                                      <button style={st.icon(T.red)} onClick={()=>setHL(p=>p.filter(x=>x.date!==d.date))}>🗑</button>
-                                    </div>
-                                  </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
-                                    {dayMetrics.map(m => (
-                                      <div key={m.l} style={{ background:T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
-                                        <div style={{ fontSize:9, color:T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
-                                        <div style={{ fontSize:11, fontWeight:700, color:m.c, fontFamily:T.font }}>{m.v}</div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // TAB: NUTRICIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, goals, T }) {
@@ -1416,13 +1209,11 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
     lines.forEach(line => {
       let txt = line.trim();
       if(!txt) return;
-      // Clean markdown bold (**), list formats like "- ", "* ", "1. "
       txt = txt.replace(/\*\*/g, '').replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim();
       if(!txt) return;
 
       const matchObj = { exercise: "", sets: "", reps: "", weight: "", rpe: "" };
 
-      // Match sets and reps: "4x10" or "4 X 10" or " 4 x 10"
       const srMatch = txt.match(/\s+(\d+)\s*[xX]\s*(\d+)/);
       if (srMatch) {
           matchObj.sets = +srMatch[1];
@@ -1430,21 +1221,18 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
           txt = txt.replace(srMatch[0], '');
       }
 
-      // Match weight: "@ 60kg", "con 60", " @ 60.5"
       const wMatch = txt.match(/(?:@\s*|con\s*)?(\d*\.?\d+)\s*(?:kg|lbs)/i) || txt.match(/@\s*(\d*\.?\d+)/);
       if (wMatch) {
           matchObj.weight = +wMatch[1];
           txt = txt.replace(wMatch[0], '');
       }
 
-      // Match RPE: "RPE 8", "rpe 8.5"
       const rpeMatch = txt.match(/(?:RPE|rpe)[:\s]*(\d*\.?\d+)/i);
       if (rpeMatch) {
           matchObj.rpe = +rpeMatch[1];
           txt = txt.replace(rpeMatch[0], '');
       }
 
-      // Remaining is exercise name
       matchObj.exercise = txt.replace(/[-@]+$/, '').trim() || "EJERCICIO DESCONOCIDO";
 
       newSets.push({ id:uid(), ...matchObj, date:activeDate, program });
@@ -1758,21 +1546,102 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: BIOMETRÍA
+// TAB: BIOMETRÍA & WEIGHT TELEMETRY (UNIFICADO)
 // ─────────────────────────────────────────────────────────────────────────────
 const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
 
-function Biometria({ bios, setBios, activeDate, T }) {
+function Biometria({ bios, setBios, allDayData, setHL, goals, setGoals, projects, setProjects, activeDate, T }) {
   const st=mkS(T);
-  const [form,setForm]=useState({ date:activeDate,height:"181",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:"" });
-  const [editId,setEId]=useState(null), [editRow,setER]=useState({});
   
-  useEffect(() => { setForm(p => ({ ...p, date: activeDate })); }, [activeDate]);
+  // Biometrics Form
+  const [bioForm, setBioForm] = useState({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" });
+  const [bioEditId, setBioEId] = useState(null);
+  const [bioEditRow, setBioER] = useState({});
 
-  const tip=p=><ChartTip {...p} T={T}/>;
-  const last=bios[bios.length-1], first=bios[0];
-  const delta=last&&first?(last.weight-first.weight).toFixed(1):null;
-  const trend=bios.map(b=>({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
+  // Daily Biometrics Log Form
+  const [dailyForm, setDailyForm] = useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+  const [editG, setEG] = useState(false);
+  const [dailyEditId, setDailyEId] = useState(null);
+  const [dailyEditRow, setDailyER] = useState({});
+  const [editProjKey, setEPK] = useState(null);
+  const [projTemp, setProjTemp] = useState("");
+  const [openMonths, setOM] = useState(() => new Set([getMonthKey(activeDate)]));
+  const [openWeeks, setOW] = useState(() => new Set([getWeekStart(activeDate)]));
+
+  useEffect(() => {
+    setBioForm(p => ({ ...p, date: activeDate }));
+    setDailyForm(p => ({ ...p, date: activeDate }));
+  }, [activeDate]);
+
+  const tip = p => <ChartTip {...p} T={T}/>;
+  const last = bios[bios.length-1], first = bios[0];
+  const delta = last && first ? (last.weight - first.weight).toFixed(1) : null;
+  const trend = bios.map(b => ({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
+
+  // Upsert Daily Log
+  const upsertDaily = entry => setHL(prev => {
+    const i = prev.findIndex(d => d.date === entry.date);
+    if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
+    return [...prev, entry];
+  });
+
+  const saveDaily = () => {
+    if (!dailyForm.date) return;
+    const calcRec = calculateWhoopRecovery(+dailyForm.hrv, +dailyForm.rhr, +dailyForm.score);
+    const finalRecovery = dailyForm.recovery ? +dailyForm.recovery : calcRec;
+
+    upsertDaily({ 
+      date: dailyForm.date, 
+      ...(dailyForm.calOut && { calOut: +dailyForm.calOut }), 
+      ...(dailyForm.steps && { steps: +dailyForm.steps }),
+      ...(dailyForm.sleep && { sleep: +dailyForm.sleep }), 
+      ...(dailyForm.score && { score: +dailyForm.score }),
+      ...(dailyForm.hrv && { hrv: +dailyForm.hrv }),
+      ...(dailyForm.rhr && { rhr: +dailyForm.rhr }),
+      ...(finalRecovery && { recovery: finalRecovery }),
+      goals: { ...goals } 
+    });
+    setDailyForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+  };
+
+  const addBio = () => {
+    if (!bioForm.weight) return;
+    const finalImc = bioForm.imc ? +bioForm.imc : calcIMC(+bioForm.weight, 181);
+    setBios(p => [...p, {
+      ...bioForm, id: uid(), height: 181, weight: +bioForm.weight, fat: +bioForm.fat || null, muscle: +bioForm.muscle || null,
+      visceral: +bioForm.visceral || null, water: +bioForm.water || null, protein: +bioForm.protein || null, dmr: +bioForm.dmr || null,
+      imc: finalImc
+    }]);
+    setBioForm({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" }); 
+  };
+
+  const saveBioEd = () => {
+    setBios(p => p.map(b => b.id === bioEditId ? {
+      ...b, ...bioEditRow, weight: +bioEditRow.weight, fat: +bioEditRow.fat || null, muscle: +bioEditRow.muscle || null,
+      visceral: +bioEditRow.visceral || null, water: +bioEditRow.water || null, protein: +bioEditRow.protein || null, dmr: +bioEditRow.dmr || null,
+      imc: +bioEditRow.imc || calcIMC(+bioEditRow.weight, 181)
+    } : b));
+    setBioEId(null);
+  };
+
+  const autoImc = bioForm.weight ? calcIMC(+bioForm.weight, 181) : "";
+
+  const rows = allDayData.filter(d => d.calOut > 0 || d.sleep || d.steps || d.calIn > 0 || d.recovery > 0);
+  const groupedDaily = useMemo(() => {
+    const byMonth = {};
+    rows.forEach(d => {
+      const mk = getMonthKey(d.date), wk = getWeekStart(d.date);
+      if (!byMonth[mk]) byMonth[mk] = {};
+      if (!byMonth[mk][wk]) byMonth[mk][wk] = [];
+      byMonth[mk][wk].push(d);
+    });
+    return Object.entries(byMonth).sort(([a],[b]) => b.localeCompare(a)).map(([mk,weeks]) => ({
+      mk, weeks: Object.entries(weeks).sort(([a],[b]) => b.localeCompare(a)).map(([wk,days]) => ({wk,days}))
+    }));
+  }, [rows]);
+
+  const toggleMonth = mk => setOM(prev => { const s = new Set(prev); s.has(mk) ? s.delete(mk) : s.add(mk); return s; });
+  const toggleWeek = wk => setOW(prev => { const s = new Set(prev); s.has(wk) ? s.delete(wk) : s.add(wk); return s; });
 
   const weeklyBios = useMemo(() => {
     const groups = {};
@@ -1781,10 +1650,10 @@ function Biometria({ bios, setBios, activeDate, T }) {
       if (!groups[wk]) groups[wk] = { count: 0, weight: 0, fat: 0, muscle: 0, water: 0, imc: 0 };
       groups[wk].count++;
       groups[wk].weight += b.weight || 0;
-      if(b.fat) groups[wk].fat += b.fat;
-      if(b.muscle) groups[wk].muscle += b.muscle;
-      if(b.water) groups[wk].water += b.water;
-      if(b.imc) groups[wk].imc += b.imc;
+      if (b.fat) groups[wk].fat += b.fat;
+      if (b.muscle) groups[wk].muscle += b.muscle;
+      if (b.water) groups[wk].water += b.water;
+      if (b.imc) groups[wk].imc += b.imc;
     });
     return Object.keys(groups).sort().reverse().map(wk => ({
       week: wk,
@@ -1796,82 +1665,148 @@ function Biometria({ bios, setBios, activeDate, T }) {
       imc: groups[wk].imc ? groups[wk].imc / groups[wk].count : null,
     }));
   }, [bios]);
-  
-  const add=()=>{ if(!form.weight) return;
-    const finalImc = form.imc ? +form.imc : calcIMC(+form.weight, 181);
-    setBios(p=>[...p,{ ...form, id:uid(), height: 181, weight:+form.weight, fat:+form.fat||null, muscle:+form.muscle||null,
-      visceral:+form.visceral||null, water:+form.water||null, protein:+form.protein||null, dmr:+form.dmr||null,
-      imc:finalImc }]);
-    setForm(p=>({date:activeDate,height:"181",weight:"",fat:"",muscle:"",visceral:"",water:"",protein:"",dmr:"",imc:""})); 
-  };
-  const saveEd=()=>{ setBios(p=>p.map(b=>b.id===editId?{...b,...editRow,weight:+editRow.weight,fat:+editRow.fat||null,muscle:+editRow.muscle||null,visceral:+editRow.visceral||null,water:+editRow.water||null,protein:+editRow.protein||null,dmr:+editRow.dmr||null,imc:+editRow.imc||calcIMC(+editRow.weight, 181)}:b)); setEId(null); };
-
-  const autoImc = form.weight ? calcIMC(+form.weight, 181) : "";
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={st.g2}>
-        <div style={st.card}>
-          <SH title="⚖️ INPUT TELEMETRY"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-            <div><span style={st.lbl}>DATE</span><input style={st.inp} type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))}/></div>
-            <div>
-              <span style={st.lbl}>HEIGHT (CM)</span>
-              <input style={{...st.inp, opacity:0.5, cursor:"not-allowed"}} type="number" readOnly value="181" />
-            </div>
-            {[["WEIGHT (KG) *","weight",T.accent],["FAT %","fat",T.red],["MUSCLE (KG)","muscle",T.green],["WATER %","water",T.blue],["PROT %","protein",T.purple],["BMR KCAL","dmr",T.muted]].map(([l,k,c])=>(
-              <div key={k}><span style={st.lbl}>{l}</span>
-                <input style={{...st.inp,borderColor:`${c}55`}} type="number" step="0.1" placeholder="" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
+      
+      {/* Target Goals Banner */}
+      <div style={{ ...st.card, padding:"14px 18px" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+            {[["CAL", goals.cal, T.accent], ["PROT", goals.p, T.green], ["CARB", goals.c, T.blue], ["FAT", goals.g, T.purple]].map(([l,v,c]) => (
+              editG ? (
+                <div key={l} style={{ display:"flex", flexDirection:"column", gap:4, minWidth:80 }}>
+                  <span style={st.lbl}>{l}</span>
+                  <input style={{ ...st.inp, padding:"6px 10px", fontSize:12 }} type="number" value={v}
+                    onChange={e => setGoals(p => ({ ...p, [l.toLowerCase()]: +e.target.value }))}/>
+                </div>
+              ) : (
+                <div key={l} style={{ textAlign:"left" }}>
+                  <div style={{ fontSize:10, color:T.muted, fontWeight:700, fontFamily:T.font }}>{l}</div>
+                  <div style={{ fontSize:20, fontWeight:700, color:c, fontFamily:T.font }}>{v}</div>
+                </div>
+              )
             ))}
-            <div>
-              <span style={st.lbl}>BMI (AUTO / MAN)</span>
-              <input style={{...st.inp, color:form.imc ? T.text : T.accent, fontWeight:700}} type="number" step="0.1" placeholder={autoImc || "Auto..."} value={form.imc} onChange={e=>setForm(p=>({...p,imc:e.target.value}))}/>
-            </div>
           </div>
-          
-          <div style={{ background:T.card2, border:`1px solid ${T.border}`, borderRadius:6, padding:"16px 12px", marginBottom:16, display:"flex", justifyContent:"center" }}>
-            <NumberPicker value={form.visceral} onChange={v=>setForm(p=>({...p,visceral:v}))} options={VISCERAL_OPTIONS} label="VISCERAL LEVEL" T={T}/>
-          </div>
-
-          <button style={st.btn} onClick={add}>SAVE BIO DATA</button>
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          {last&&(
-            <div style={st.card}>
-              <SH title={`📊 LAST READING · ${last.date.slice(5)}`}/>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(80px,1fr))", gap:8 }}>
-                {[{l:"WGT",v:`${last.weight}KG`,c:T.accent},{l:"BMI",v:last.imc??"—",c:last.imc?(last.imc<25?T.green:last.imc<30?T.accent:T.red):T.muted},{l:"FAT",v:last.fat?`${last.fat}%`:"—",c:T.red},{l:"MUSC",v:last.muscle?`${last.muscle}KG`:"—",c:T.green},{l:"VISC",v:last.visceral?`LV${last.visceral}`:"—",c:last.visceral?(last.visceral<=9?T.green:last.visceral<=14?T.accent:T.red):T.muted},{l:"H2O",v:last.water?`${last.water}%`:"—",c:T.blue},{l:"PROT",v:last.protein?`${last.protein}%`:"—",c:T.purple},{l:"BMR",v:last.dmr||"—",c:T.orange},{l:"ΔWGT",v:delta?`${delta>0?"+":""}${delta}KG`:"—",c:delta?(parseFloat(delta)<=0?T.green:T.red):T.muted}].map(m=>(
-                  <div key={m.l} style={{background:T.card2,border:`1px solid ${T.border}`,borderRadius:6,padding:"10px 4px",textAlign:"center"}}>
-                    <div style={{fontSize:9,color:T.muted,fontWeight:700,fontFamily:T.font}}>{m.l}</div>
-                    <div style={{fontSize:14,fontWeight:700,color:m.c,marginTop:4,fontFamily:T.font}}>{m.v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <div style={{...st.card,flex:1}}>
-            <SH title="📈 METRIC TRENDS"/>
-            {bios.length<2?<Placeholder msg="NEED 2+ RECORDS" T={T}/>:(
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={trend} margin={{top:10,right:10,bottom:0,left:-22}}>
-                  <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                  <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
-                  <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} domain={["auto","auto"]}/>
-                  <Tooltip content={tip}/>
-                  <Line type="linear" dataKey="Peso"    stroke={T.accent} strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.accent,strokeWidth:2}} activeDot={{r:6}}/>
-                  <Line type="linear" dataKey="Grasa"   stroke={T.red}    strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.red,strokeWidth:2}}/>
-                  <Line type="linear" dataKey="Músculo" stroke={T.green}  strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.green,strokeWidth:2}}/>
-                  <Line type="linear" dataKey="Agua"    stroke={T.blue}   strokeWidth={2} dot={{r:3,fill:T.card,stroke:T.blue,strokeWidth:2}}/>
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          <button style={st.btnSm} onClick={() => setEG(o => !o)}>{editG ? "✓ SAVE TGT" : "✏️ EDIT TGT"}</button>
         </div>
       </div>
 
+      {/* Log Inputs Grid */}
+      <div style={st.g2}>
+        {/* Daily Biometrics Form */}
+        <div style={st.card}>
+          <SH title="📋 LOG DAILY BIOMETRICS"/>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+            <div style={{ gridColumn:"span 2" }}>
+              <span style={st.lbl}>DATE</span>
+              <input style={st.inp} type="date" value={dailyForm.date} onChange={e => setDailyForm(p => ({ ...p, date: e.target.value }))}/>
+            </div>
+            
+            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4 }}>
+              <span style={{ ...st.lbl, color:T.accent }}>⚡ ERS & SLEEP</span>
+            </div>
+            
+            {[["HRV (ms)","hrv"], ["RHR (bpm)","rhr"], ["SLEEP (hrs)","sleep"], ["SCORE (%)","score"]].map(([l,k]) => (
+              <div key={k}>
+                <span style={st.lbl}>{l}</span>
+                <input style={st.inp} type="number" step={k === "sleep" ? "0.01" : "1"} placeholder="—"
+                  value={dailyForm[k]} onChange={e => setDailyForm(p => ({ ...p, [k]: e.target.value }))}/>
+              </div>
+            ))}
+
+            <div style={{ gridColumn:"span 2" }}>
+              <span style={st.lbl}>MANUAL RECOVERY % (AUTO IF EMPTY)</span>
+              <input style={{ ...st.inp, borderColor: T.green + "50" }} type="number" max="100" placeholder="Ej: 85"
+                value={dailyForm.recovery} onChange={e => setDailyForm(p => ({ ...p, recovery: e.target.value }))}/>
+            </div>
+
+            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:8 }}>
+              <span style={{ ...st.lbl, color:T.blue }}>🏃 AERO & DYNAMICS</span>
+            </div>
+
+            {[["CAL OUT","calOut"], ["STEPS","steps"]].map(([l,k]) => (
+              <div key={k}>
+                <span style={st.lbl}>{l}</span>
+                <input style={st.inp} type="number" value={dailyForm[k]} onChange={e => setDailyForm(p => ({ ...p, [k]: e.target.value }))}/>
+              </div>
+            ))}
+          </div>
+          <button style={st.btn} onClick={saveDaily}>💾 UPLOAD TELEMETRY</button>
+        </div>
+
+        {/* Body Weight / Composition Form */}
+        <div style={st.card}>
+          <SH title="⚖️ INPUT BODY COMPOSITION"/>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+            <div>
+              <span style={st.lbl}>DATE</span>
+              <input style={st.inp} type="date" value={bioForm.date} onChange={e => setBioForm(p => ({ ...p, date: e.target.value }))}/>
+            </div>
+            <div>
+              <span style={st.lbl}>HEIGHT (CM)</span>
+              <input style={{ ...st.inp, opacity:0.5, cursor:"not-allowed" }} type="number" readOnly value="181" />
+            </div>
+            {[["WEIGHT (KG) *","weight",T.accent], ["FAT %","fat",T.red], ["MUSCLE (KG)","muscle",T.green], ["WATER %","water",T.blue], ["PROT %","protein",T.purple], ["BMR KCAL","dmr",T.muted]].map(([l,k,c]) => (
+              <div key={k}>
+                <span style={st.lbl}>{l}</span>
+                <input style={{ ...st.inp, borderColor:`${c}55` }} type="number" step="0.1" placeholder=""
+                  value={bioForm[k]} onChange={e => setBioForm(p => ({ ...p, [k]: e.target.value }))}/>
+              </div>
+            ))}
+            <div>
+              <span style={st.lbl}>BMI (AUTO / MAN)</span>
+              <input style={{ ...st.inp, color: bioForm.imc ? T.text : T.accent, fontWeight: 700 }} type="number" step="0.1" placeholder={autoImc || "Auto..."}
+                value={bioForm.imc} onChange={e => setBioForm(p => ({ ...p, imc: e.target.value }))}/>
+            </div>
+          </div>
+          
+          <div style={{ background: T.card2, border: `1px solid ${T.border}`, borderRadius: 6, padding: "16px 12px", marginBottom: 16, display: "flex", justifyContent: "center" }}>
+            <NumberPicker value={bioForm.visceral} onChange={v => setBioForm(p => ({ ...p, visceral: v }))} options={VISCERAL_OPTIONS} label="VISCERAL LEVEL" T={T}/>
+          </div>
+
+          <button style={st.btn} onClick={addBio}>SAVE BIO DATA</button>
+        </div>
+      </div>
+
+      {/* Trends & Overview */}
+      <div style={st.g2}>
+        {last && (
+          <div style={st.card}>
+            <SH title={`📊 LAST READING · ${last.date.slice(5)}`}/>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(80px,1fr))", gap:8 }}>
+              {[{l:"WGT",v:`${last.weight}KG`,c:T.accent},{l:"BMI",v:last.imc??"—",c:last.imc?(last.imc<25?T.green:last.imc<30?T.accent:T.red):T.muted},{l:"FAT",v:last.fat?`${last.fat}%`:"—",c:T.red},{l:"MUSC",v:last.muscle?`${last.muscle}KG`:"—",c:T.green},{l:"VISC",v:last.visceral?`LV${last.visceral}`:"—",c:last.visceral?(last.visceral<=9?T.green:last.visceral<=14?T.accent:T.red):T.muted},{l:"H2O",v:last.water?`${last.water}%`:"—",c:T.blue},{l:"PROT",v:last.protein?`${last.protein}%`:"—",c:T.purple},{l:"BMR",v:last.dmr||"—",c:T.orange},{l:"ΔWGT",v:delta?`${delta>0?"+":""}${delta}KG`:"—",c:delta?(parseFloat(delta)<=0?T.green:T.red):T.muted}].map(m=>(
+                <div key={m.l} style={{background:T.card2,border:`1px solid ${T.border}`,borderRadius:6,padding:"10px 4px",textAlign:"center"}}>
+                  <div style={{fontSize:9,color:T.muted,fontWeight:700,fontFamily:T.font}}>{m.l}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:m.c,marginTop:4,fontFamily:T.font}}>{m.v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div style={{ ...st.card, flex: 1 }}>
+          <SH title="📈 METRIC TRENDS"/>
+          {bios.length < 2 ? <Placeholder msg="NEED 2+ RECORDS" T={T}/> : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={trend} margin={{ top: 10, right: 10, bottom: 0, left: -22 }}>
+                <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
+                <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily: T.font }} tickFormatter={d => d.slice(5)}/>
+                <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily: T.font }} domain={["auto","auto"]}/>
+                <Tooltip content={tip}/>
+                <Line type="linear" dataKey="Peso" stroke={T.accent} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.accent, strokeWidth: 2 }} activeDot={{ r: 6 }}/>
+                <Line type="linear" dataKey="Grasa" stroke={T.red} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.red, strokeWidth: 2 }}/>
+                <Line type="linear" dataKey="Músculo" stroke={T.green} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.green, strokeWidth: 2 }}/>
+                <Line type="linear" dataKey="Agua" stroke={T.blue} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.blue, strokeWidth: 2 }}/>
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Weekly Averages */}
       {weeklyBios.length > 0 && (
         <div style={{ ...st.card, overflowX: "auto" }}>
-          <SH title="🗓️ PROMEDIOS SEMANALES (AXIOMA)" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>EVOLUCIÓN</span>}/>
+          <SH title="🗓️ PROMEDIOS SEMANALES (AXIOMA)" right={<span style={{ fontSize: 10, color: T.muted, fontFamily: T.font }}>EVOLUCIÓN</span>}/>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 700, fontFamily: T.font }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.card2 }}>
@@ -1897,40 +1832,138 @@ function Biometria({ bios, setBios, activeDate, T }) {
         </div>
       )}
 
-      {bios.length>0&&(
-        <div style={{...st.card,overflowX:"auto"}}>
-          <SH title="📋 LOG HISTORY" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{bios.length} RECORDS</span>}/>
-          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:700, fontFamily:T.font }}>
-            <thead><tr style={{borderBottom:`1px solid ${T.border}`, background:T.card2}}>
-              {["DATE","WEIGHT","BMI","FAT %","MUSC","VISC","WATER","PROT","BMR",""].map(h=>(
-                <th key={h} style={{padding:"10px 8px",color:T.muted,fontWeight:700,textAlign:h===""?"center":"right",letterSpacing:"0.1em"}}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>{[...bios].reverse().map(b=>editId===b.id?(
-              <tr key={b.id}><td colSpan={10} style={{padding:"8px 0"}}>
-                <EditRow fields={[{k:"date",l:"Date",t:"date"},{k:"weight",l:"Kg",t:"number",step:"0.1"},{k:"imc",l:"BMI",t:"number",step:"0.1"},{k:"fat",l:"Fat%",t:"number",step:"0.1"},{k:"muscle",l:"Musc",t:"number",step:"0.1"},{k:"visceral",l:"Visc",t:"number"},{k:"water",l:"H2o%",t:"number",step:"0.1"},{k:"protein",l:"Prot%",t:"number",step:"0.1"},{k:"dmr",l:"BMR",t:"number"}]}
-                  vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
-              </td></tr>
-            ):(
-              <tr key={b.id} style={{borderBottom:`1px solid ${T.border}`,background:b.date===activeDate?T.accentDim:"transparent"}}>
-                {[b.date.slice(5),`${b.weight}KG`,b.imc??"—",b.fat?`${b.fat}%`:"—",b.muscle?`${b.muscle}KG`:"—",b.visceral?`LV${b.visceral}`:"—",b.water?`${b.water}%`:"—",b.protein?`${b.protein}%`:"—",b.dmr||"—"].map((v,i)=>(
-                  <td key={i} style={{padding:"12px 8px",textAlign:i===0?"left":"right",color:i===0?T.text:T.muted,fontWeight:i===0?700:400}}>{v}</td>
+      {/* Body Logs History Table */}
+      {bios.length > 0 && (
+        <div style={{ ...st.card, overflowX: "auto" }}>
+          <SH title="📋 WEIGHT & BODY COMP LOGS" right={<span style={{ fontSize: 10, color: T.muted, fontFamily: T.font }}>{bios.length} RECORDS</span>}/>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 700, fontFamily: T.font }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.card2 }}>
+                {["DATE", "WEIGHT", "BMI", "FAT %", "MUSC", "VISC", "WATER", "PROT", "BMR", ""].map(h => (
+                  <th key={h} style={{ padding: "10px 8px", color: T.muted, fontWeight: 700, textAlign: h === "" ? "center" : "right", letterSpacing: "0.1em" }}>{h}</th>
                 ))}
-                <td style={{padding:"12px 8px",textAlign:"center"}}>
-                  <button style={st.icon(T.accent)} onClick={()=>{setEId(b.id);setER({date:b.date,weight:b.weight,imc:b.imc||"",fat:b.fat||"",muscle:b.muscle||"",visceral:b.visceral||"",water:b.water||"",protein:b.protein||"",dmr:b.dmr||""});}}>✏️</button>
-                  <button style={st.icon(T.red)}    onClick={()=>setBios(p=>p.filter(x=>x.id!==b.id))}>🗑</button>
-                </td>
               </tr>
-            ))}</tbody>
+            </thead>
+            <tbody>
+              {[...bios].reverse().map(b => bioEditId === b.id ? (
+                <tr key={b.id}>
+                  <td colSpan={10} style={{ padding: "8px 0" }}>
+                    <EditRow fields={[{ k: "date", l: "Date", t: "date" }, { k: "weight", l: "Kg", t: "number", step: "0.1" }, { k: "imc", l: "BMI", t: "number", step: "0.1" }, { k: "fat", l: "Fat%", t: "number", step: "0.1" }, { k: "muscle", l: "Musc", t: "number", step: "0.1" }, { k: "visceral", l: "Visc", t: "number" }, { k: "water", l: "H2o%", t: "number", step: "0.1" }, { k: "protein", l: "Prot%", t: "number", step: "0.1" }, { k: "dmr", l: "BMR", t: "number" }]}
+                      vals={bioEditRow} onChange={(k, v) => setBioER(p => ({ ...p, [k]: v }))} onSave={saveBioEd} onCancel={() => setBioEId(null)} T={T}/>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={b.id} style={{ borderBottom: `1px solid ${T.border}`, background: b.date === activeDate ? T.accentDim : "transparent" }}>
+                  {[b.date.slice(5), `${b.weight}KG`, b.imc ?? "—", b.fat ? `${b.fat}%` : "—", b.muscle ? `${b.muscle}KG` : "—", b.visceral ? `LV${b.visceral}` : "—", b.water ? `${b.water}%` : "—", b.protein ? `${b.protein}%` : "—", b.dmr || "—"].map((v, i) => (
+                    <td key={i} style={{ padding: "12px 8px", textAlign: i === 0 ? "left" : "right", color: i === 0 ? T.text : T.muted, fontWeight: i === 0 ? 700 : 400 }}>{v}</td>
+                  ))}
+                  <td style={{ padding: "12px 8px", textAlign: "center" }}>
+                    <button style={st.icon(T.accent)} onClick={() => { setBioEId(b.id); setBioER({ date: b.date, weight: b.weight, imc: b.imc || "", fat: b.fat || "", muscle: b.muscle || "", visceral: b.visceral || "", water: b.water || "", protein: b.protein || "", dmr: b.dmr || "" }); }}>✏️</button>
+                    <button style={st.icon(T.red)} onClick={() => setBios(p => p.filter(x => x.id !== b.id))}>🗑</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       )}
+
+      {/* Daily Metrics Log Accordion History */}
+      <div style={st.card}>
+        <SH title="📋 DAILY TELEMETRY LOGS" />
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          {groupedDaily.length === 0 && <div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
+          {groupedDaily.map(({ mk, weeks }) => (
+            <div key={mk} style={{ border:`1px solid ${T.border}`, borderRadius:6, padding:12, background:T.card2 }}>
+              <button onClick={() => toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
+                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
+                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk) ? "▲" : "▼"} {weeks.reduce((s,w) => s + w.days.length, 0)} LOGS</div>
+              </button>
+              {openMonths.has(mk) && weeks.map(({ wk, days }) => {
+                const projName = projects[wk];
+                return (
+                  <div key={wk} style={{ marginTop:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                      <button onClick={() => toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
+                        <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk) ? "▼" : "▶"}</span>
+                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
+                      </button>
+                      {editProjKey === wk ? (
+                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
+                          value={projTemp}
+                          onChange={e => setProjTemp(e.target.value)}
+                          onBlur={() => { setProjects(p => ({ ...p, [wk]: projTemp || undefined })); setEPK(null); }}
+                          onKeyDown={e => { if (e.key === "Enter") e.target.blur(); if (e.key === "Escape") setEPK(null); }}
+                          placeholder=""/>
+                      ) : (
+                        <button onClick={() => { setEPK(wk); setProjTemp(projects[wk] || ""); }}
+                          style={{ background: projName ? T.accentDim : "transparent", border: `1px dashed ${projName ? T.accent : T.border}`,
+                            borderRadius:4, padding:"2px 8px", fontSize:10, color: projName ? T.accent : T.muted,
+                            cursor:"pointer", fontWeight: projName ? 700 : 400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
+                          {projName || "+ TAG"}
+                        </button>
+                      )}
+                    </div>
+                    {openWeeks.has(wk) && (
+                      <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
+                        {days.map(d => {
+                          const dayMetrics = [
+                            { l:"IN", v: d.calIn || "—", c: T.accent },
+                            { l:"OUT", v: d.calOut || "—", c: T.blue },
+                            { l:"PROT", v: d.p ? `${Math.round(d.p)}g` : "—", c: T.green },
+                            { l:"PASOS", v: d.steps ? d.steps.toLocaleString() : "—", c: T.purple },
+                            { l:"SUEÑO", v: d.sleep ? `${d.sleep}h` : "—", c: T.purple },
+                            { l:"SCORE", v: d.score ? `${d.score}%` : "—", c: d.score >= 85 ? T.green : d.score >= 70 ? T.accent : T.red },
+                            { l:"REC", v: d.recovery ? `${d.recovery}%` : "—", c: getRecoveryColor(d.recovery, T) }
+                          ];
+
+                          return (
+                            <div key={d.date}>
+                              {dailyEditId === d.date ? (
+                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"hrv", l:"HRV" }, { k:"rhr", l:"RHR" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
+                                  vals={dailyEditRow} onChange={(k,v) => setDailyER(p => ({ ...p, [k]: v }))}
+                                  onSave={() => { upsertDaily({ date: d.date, recovery: +dailyEditRow.recovery || null, hrv: +dailyEditRow.hrv || null, rhr: +dailyEditRow.rhr || null, calOut: +dailyEditRow.calOut || 0, steps: +dailyEditRow.steps || null, sleep: +dailyEditRow.sleep || null, score: +dailyEditRow.score || null }); setDailyEId(null); }}
+                                  onCancel={() => setDailyEId(null)} T={T}/>
+                              ) : (
+                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date === activeDate ? T.accent : T.border}`, borderRadius:4 }}>
+                                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                                    <span style={{ fontWeight:700, fontSize:12, color: d.date === activeDate ? T.accent : T.text, fontFamily:T.font }}>
+                                      {d.date === TODAY ? "> TODAY" : d.date.slice(5)}
+                                    </span>
+                                    <div style={{ display:"flex", gap:4 }}>
+                                      <button style={st.icon(T.accent)} onClick={() => { setDailyEId(d.date); setDailyER({ recovery: d.recovery || "", hrv: d.hrv || "", rhr: d.rhr || "", calOut: d.calOut || "", steps: d.steps || "", sleep: d.sleep || "", score: d.score || "" }); }}>✏️</button>
+                                      <button style={st.icon(T.red)} onClick={() => setHL(p => p.filter(x => x.date !== d.date))}>🗑</button>
+                                    </div>
+                                  </div>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
+                                    {dayMetrics.map(m => (
+                                      <div key={m.l} style={{ background: T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
+                                        <div style={{ fontSize:9, color: T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
+                                        <div style={{ fontSize:11, fontWeight:700, color: m.c, fontFamily:T.font }}>{m.v}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: SUEÑO 
+// TAB: SUEÑO / RECOVERY (REDISEÑADO & ESPACIOSO)
 // ─────────────────────────────────────────────────────────────────────────────
 function Sueno({ healthLog, T }) {
   const st = mkS(T);
@@ -1984,13 +2017,15 @@ function Sueno({ healthLog, T }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      
+      {/* Target Last Night KPI Banner */}
       {lastNight && (
-        <div style={{ display: "flex", alignItems: "center", gap: 16, background: T.card2, borderRadius: 8, padding: "16px 20px", border: `1px solid ${T.border}` }}>
-          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={46} sw={4}/>
+        <div style={{ display: "flex", alignItems: "center", gap: 20, background: T.card2, borderRadius: 8, padding: "18px 24px", border: `1px solid ${T.border}` }}>
+          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={52} sw={5}/>
           <div>
-            <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.15em", fontFamily:T.font }}>SLEEP PERFORMANCE (LAST)</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginTop: 4, fontFamily:T.font }}>
+            <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.15em", fontFamily:T.font }}>SLEEP PERFORMANCE (LAST READING)</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginTop: 4, fontFamily:T.font }}>
               SCORE: <span style={{ color: scCol(lastNight.score) }}>{lastNight.score}%</span> • {fmt(lastNight.sleep, 1)} HRS
             </div>
           </div>
@@ -2003,75 +2038,78 @@ function Sueno({ healthLog, T }) {
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
-            {["week", "month", "year"].map(type => (
-              <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
-                style={{
-                  background: filterType === type ? T.accent : T.card2,
-                  color: filterType === type ? "#000" : T.muted,
-                  border: `1px solid ${filterType === type ? T.accent : T.border}`,
-                  borderRadius: 6, padding: "6px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                  fontFamily:T.font, textTransform:"uppercase", transition: "all 0.2s"
-                }}>
-                {type}
-              </button>
-            ))}
-          </div>
+          {/* Controls Bar */}
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 6, background: T.card2, padding: 4, borderRadius: 6, border: `1px solid ${T.border}` }}>
+              {["week", "month", "year"].map(type => (
+                <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
+                  style={{
+                    background: filterType === type ? T.accent : "transparent",
+                    color: filterType === type ? "#000" : T.muted,
+                    border: "none",
+                    borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                    fontFamily:T.font, textTransform:"uppercase", transition: "all 0.2s"
+                  }}>
+                  {type}
+                </button>
+              ))}
+            </div>
 
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch" }}>
-            <div style={{ ...st.card, flex: 1, minWidth: 260 }}>
-              <SH title={`🗓 PERIOD SELECTOR`} />
+            <div style={{ minWidth: 260, flex: 1 }}>
               <select style={st.sel} value={selKey} onChange={e => setSelKey(e.target.value)}>
                 {groupKeys.map(k => <option key={k} value={k}>{formatPeriod(k, filterType)}</option>)}
               </select>
             </div>
-            
-            <div style={{ ...st.card, flex: 2, minWidth: 260, display: "flex", justifyContent: "space-around", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG HOURS</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
-                  {avgSleep ? `${fmt(avgSleep, 1)}h` : "—"}
-                </div>
+          </div>
+
+          {/* Key Summary Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
+              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG HOURS</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
+                {avgSleep ? `${fmt(avgSleep, 1)}h` : "—"}
               </div>
-              <div style={{ width: 1, height: 40, background: T.border }} />
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG SCORE</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
-                  {avgScore ? `${Math.round(avgScore)}%` : "—"}
-                </div>
+            </div>
+            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
+              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG SCORE</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
+                {avgScore ? `${Math.round(avgScore)}%` : "—"}
               </div>
-              <div style={{ width: 1, height: 40, background: T.border }} />
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG REC</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 6, fontFamily:T.font }}>
-                  {avgRec ? `${Math.round(avgRec)}%` : "—"}
-                </div>
+            </div>
+            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
+              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG RECOVERY</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
+                {avgRec ? `${Math.round(avgRec)}%` : "—"}
               </div>
             </div>
           </div>
 
-          <div style={st.g2}>
+          {/* Individual Chart Cards (Full Width Layout to Prevent Cramping) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            
+            {/* Hours Chart */}
             <div style={st.card}>
-              <SH title="⏱️ HOURS (TGT: 8H)" />
-              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={currentData} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
+              <SH title="⏱️ SLEEP DURATION (HOURS vs 8H TGT)" />
+              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={currentData} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[4, 10]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[4, 10]} />
                     <Tooltip content={tip} />
-                    <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" />
-                    <Line type="step" dataKey="sleep" stroke={T.blue} strokeWidth={2} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.blue}} name="Horas" />
+                    <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" label={{ value: "TGT 8H", fill: T.green, fontSize: 10 }} />
+                    <Line type="step" dataKey="sleep" stroke={T.blue} strokeWidth={2} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.blue }} name="Horas" />
                   </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
 
+            {/* Score Chart */}
             <div style={st.card}>
-              <SH title="🔋 SCORE (TGT: 85%)" />
-              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={400}>
-                  <AreaChart data={currentData} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
+              <SH title="🔋 SLEEP QUALITY SCORE (vs 85% TGT)" />
+              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={currentData} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
                     <defs>
                       <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={T.purple} stopOpacity={0.3} />
@@ -2079,30 +2117,32 @@ function Sueno({ healthLog, T }) {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[40, 100]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[40, 100]} />
                     <Tooltip content={tip} />
-                    <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" />
-                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: T.card, stroke: T.purple, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.purple}} name="Score %" />
+                    <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" label={{ value: "TGT 85%", fill: T.green, fontSize: 10 }} />
+                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: T.card, stroke: T.purple, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.purple }} name="Score %" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
             </div>
 
-            <div style={{ ...st.card, gridColumn: "1 / -1" }}>
-              <SH title="🔥 RECOVERY TREND" />
-              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA" T={T} /> : (
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 20, right: 15, bottom: 10, left: -15 }}>
+            {/* Recovery Chart */}
+            <div style={st.card}>
+              <SH title="🔥 RECOVERY TREND TELEMETRY" />
+              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
                     <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 14, fontWeight: 700, fontFamily:T.font }} domain={[0, 100]} />
+                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[0, 100]} />
                     <Tooltip content={tip} />
-                    <Line type="linear" dataKey="recovery" stroke={T.green} strokeWidth={2} dot={{ fill: T.card, stroke: T.green, strokeWidth: 2, r: 4 }} activeDot={{r:6,fill:T.green}} name="Recovery %" />
+                    <Line type="linear" dataKey="recovery" stroke={T.green} strokeWidth={2} dot={{ fill: T.card, stroke: T.green, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.green }} name="Recovery %" />
                   </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
+
           </div>
         </>
       )}
@@ -2127,7 +2167,7 @@ export default function App() {
 
   const [activeDate, setActiveDate] = useState(TODAY);
 
-  const [tab,      setTab]  =useState("dashboard");
+  const [tab,        setTab]  =useState("dashboard");
   const [healthLog,setHL]   =useState(()=>lsGet("hl",  SEED_HEALTH));
   const [foodLog,  setFL]   =useState(()=>lsGet("fl",  []));
   const [db,       setDb]   =useState(()=>lsGet("db",  SEED_DB));
@@ -2217,7 +2257,6 @@ export default function App() {
     {id:"dashboard",l:"SYS DASHBOARD"},
     {id:"recap",l:"RECAP"},
     {id:"calendario",l:"CALENDAR"},
-    {id:"dailylog",l:"INPUT LOG"},
     {id:"nutricion",l:"FUEL"},
     {id:"fuerza",l:"CHASSIS"},
     {id:"running",l:"AERO"},
@@ -2319,12 +2358,11 @@ export default function App() {
         {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
         {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} T={T}/>}
         {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} isDark={isDark} T={T}/>}
-        {tab==="dailylog"   && <DailyLog  allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
-        {tab==="fuerza"     && <Fuerza    strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
-        {tab==="running"    && <Running   runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
-        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
-        {tab==="sleep"      && <Sueno     healthLog={healthLog} T={T}/>}
+        {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
+        {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} allDayData={allDayData} setHL={setHL} goals={goals} setGoals={setGoals} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
+        {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
       </div>
     </div>
   );
