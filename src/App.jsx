@@ -18,7 +18,8 @@ const DARK = {
   shadow:"0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
   pickerBg:"#050506", font:"'DM Mono', monospace, system-ui",
 };
-const LIGHT = { // Fallback, though telemetry is meant for dark mode
+
+const LIGHT = {
   bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
   accent:"#0055FF", 
   accentDim:"rgba(0, 85, 255, 0.1)",
@@ -28,6 +29,19 @@ const LIGHT = { // Fallback, though telemetry is meant for dark mode
   purple:"#9333EA", orange:"#EA580C", teal:"#0D9488", pink:"#DB2777",
   shadow:"0 2px 10px rgba(0,0,0,0.05)",
   pickerBg:"#F1F5F9", font:"'DM Mono', monospace, system-ui",
+};
+
+const BLUEPRINT = {
+  bg:"#0b284e url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 39.5h40M39.5 0v40' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E\")",
+  card:"#113160", card2:"#16407c", card3:"#1d5098",
+  accent:"#64FFDA", // Teal/Cyan engineering accent
+  accentDim:"rgba(100, 255, 218, 0.12)", 
+  navy:"#0b284e", navyBright:"#113160",
+  text:"#E6F1FF", muted:"#8ab4f8", border:"#285cac", inputBg:"#0b284e",
+  green:"#00FF88", red:"#FF3366", blue:"#66b2ff",
+  purple:"#d7aeff", orange:"#FFD700", teal:"#64FFDA", pink:"#EC4899",
+  shadow:"0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+  pickerBg:"#0b284e", font:"'DM Mono', monospace, system-ui",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -349,7 +363,7 @@ function MiniRing({ pct, color, size=42, sw=4 }) {
   );
 }
 
-function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
+function PaceRing({ currentPaceSecs, targetPaceSecs, theme, T }) {
   const size=200, sw=18, r=(size-sw)/2, circ=2*Math.PI*r;
   const basePace = targetPaceSecs + 180; 
   let rawPct = 0;
@@ -362,7 +376,7 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, isDark, T }) {
   const off = circ*(1-pct);
   const done = currentPaceSecs > 0 && currentPaceSecs <= targetPaceSecs;
   
-  const trackClr=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)";
+  const trackClr=theme==="light"?"rgba(0,0,0,0.06)":"rgba(255,255,255,0.05)";
   
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
@@ -428,7 +442,7 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
     vals={raw} onChange={(k,v)=>setRaw(p=>({...p,[k]:v}))} onSave={doSave} onCancel={onCancel} T={T}/>;
 }
 
-function KPICard({ id, label, value, sub, color, isDark, T }) {
+function KPICard({ id, label, value, sub, color, theme, T }) {
   return (
     <div style={{
       background: T.card2, border: `1px solid ${T.border}`,
@@ -457,7 +471,7 @@ function Placeholder({ msg, T }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
-function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setPlans, setTab, activeDate, isDark, T }) {
+function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setPlans, setTab, activeDate, theme, T }) {
   const st=mkS(T);
   const [editDay, setEditDay] = useState(null);
   const tip=p=><ChartTip {...p} T={T}/>;
@@ -481,7 +495,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:10 }}>
-        {kpis.map(k=><KPICard key={k.label} {...k} isDark={isDark} T={T}/>)}
+        {kpis.map(k=><KPICard key={k.label} {...k} theme={theme} T={T}/>)}
       </div>
 
       <div style={{ ...st.card, padding:0, overflowX:"auto" }}>
@@ -745,7 +759,7 @@ function Recap({ allDayData, bios, T }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: CALENDARIO 
 // ─────────────────────────────────────────────────────────────────────────────
-function Calendario({ allDayData, bios, activeDate, setActiveDate, isDark, T }) {
+function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
   const st = mkS(T);
   const [view, setView] = useState("month"); 
   
@@ -1398,7 +1412,7 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: RUNNING
 // ─────────────────────────────────────────────────────────────────────────────
-function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime, shoes, setShoes, activeDate, isDark, T }) {
+function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime, shoes, setShoes, activeDate, theme, T }) {
   const st=mkS(T);
   const [form,setForm]=useState({ date:activeDate,km:"",time:"",lpm:"",ppm:"",shoe:"" });
   const [editId,setEId]=useState(null), [editRow,setER]=useState({});
@@ -1464,7 +1478,7 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
                   value={runGoal} onChange={e=>setRunGoal(+e.target.value||21.1)}/>
               </div>
             }/>
-          <PaceRing currentPaceSecs={avgPaceSecs} targetPaceSecs={reqSecs} isDark={isDark} T={T}/>
+          <PaceRing currentPaceSecs={avgPaceSecs} targetPaceSecs={reqSecs} theme={theme} T={T}/>
           
           <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center", marginTop: 12 }}>
             {[{l:"REQ",v:requiredPace,c:T.muted},{l:"AVG",v:avgPaceSecs?secsToPace(avgPaceSecs):"—",c:T.blue},{l:"BEST",v:bestPaceSecs?secsToPace(bestPaceSecs):"—",c:T.green}].map(m=>(
@@ -2190,9 +2204,15 @@ export default function App() {
     return()=>{try{document.head.removeChild(l);}catch(_){}};
   },[]);
 
-  // Telemetría con soporte liberado de Dark/Light mode
-  const [isDark,setDark]=useState(()=>lsGet("dark",true));
-  const T=isDark?DARK:LIGHT;
+  // Telemetría con soporte liberado de Dark/Light/Blueprint mode
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem(LS + "theme");
+    if (savedTheme) return JSON.parse(savedTheme);
+    const isDark = lsGet("dark", true); // Fallback para migración de versiones anteriores
+    return isDark ? "dark" : "light";
+  });
+  
+  const T = theme === "dark" ? DARK : theme === "blueprint" ? BLUEPRINT : LIGHT;
 
   const [activeDate, setActiveDate] = useState(TODAY);
 
@@ -2212,7 +2232,7 @@ export default function App() {
   const [runGoal,    setRunGoal]   =useState(()=>lsGet("runGoal",21.1));
   const [targetTime, setTargetTime] =useState(()=>lsGet("targetTime", "02:00:00"));
 
-  useEffect(()=>{lsSet("dark",isDark);},[isDark]);
+  useEffect(()=>{lsSet("theme",theme);},[theme]);
   useEffect(()=>{lsSet("hl",healthLog);},[healthLog]);
   useEffect(()=>{lsSet("fl",foodLog);},[foodLog]);
   useEffect(()=>{lsSet("db",db);},[db]);
@@ -2300,6 +2320,10 @@ export default function App() {
   const greeting=currentHour<12?"MORNING":currentHour<18?"AFTERNOON":"EVENING";
   const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
 
+  const cycleTheme = () => {
+    setTheme(t => t === "dark" ? "light" : t === "light" ? "blueprint" : "dark");
+  };
+
   return (
     <div style={{
       background:T.bg, minHeight:"100vh", position: "relative", overflow: "hidden",
@@ -2343,10 +2367,10 @@ export default function App() {
         
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
           <button 
-            onClick={() => setDark(!isDark)} 
+            onClick={cycleTheme} 
             style={{ 
-              background: isDark ? T.card2 : T.accent, 
-              color: isDark ? T.text : "#000", 
+              background: theme === "light" ? T.accent : T.card2, 
+              color: theme === "light" ? "#000" : T.text, 
               border: `1px solid ${T.border}`, 
               borderRadius: 20, 
               padding: "6px 14px", 
@@ -2357,10 +2381,10 @@ export default function App() {
               display: "flex", 
               alignItems: "center", 
               gap: 6, 
-              boxShadow: isDark ? "none" : T.shadow,
+              boxShadow: theme === "light" ? T.shadow : "none",
               transition: "all 0.2s"
             }}>
-            {isDark ? "🌙 DARK" : "☀️ LIGHT"}
+            {theme === "dark" ? "🌙 DARK" : theme === "light" ? "☀️ LIGHT" : "📐 BLUEPRINT"}
           </button>
 
           {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, color:T.accent, fontWeight:700, border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.calIn} IN</div>}
@@ -2385,13 +2409,13 @@ export default function App() {
 
       {/* ── Content ── */}
       <div style={{ position:"relative", zIndex:1 }}>
-        {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} theme={theme} T={T}/>}
         {tab==="daily"      && <DailyData setBios={setBios} setHL={setHL} goals={goals} setGoals={setGoals} activeDate={activeDate} T={T}/>}
         {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} T={T}/>}
-        {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} isDark={isDark} T={T}/>}
+        {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} theme={theme} T={T}/>}
         {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
         {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
-        {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} isDark={isDark} T={T}/>}
+        {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} theme={theme} T={T}/>}
         {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
         {tab==="telemetry"  && <TelemetryLogs allDayData={allDayData} setHL={setHL} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
