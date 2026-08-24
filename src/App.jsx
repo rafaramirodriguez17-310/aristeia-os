@@ -53,6 +53,42 @@ const PLANS = {
   Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
 };
+
+// PLANTILLAS PRE-CARGADAS (Solución 2)
+const RUTINAS_BASE = {
+  "Pecho + Tríceps": [
+    { exercise: "Press Banca", sets: 4, reps: 10, weight: 60, rpe: 8 },
+    { exercise: "Aperturas Inclinadas", sets: 3, reps: 12, weight: 14, rpe: 8 },
+    { exercise: "Pushdown en Polea", sets: 3, reps: 15, weight: 25, rpe: 8 },
+    { exercise: "Fondos en Paralelas", sets: 3, reps: 10, weight: 0, rpe: 8 }
+  ],
+  "Espalda + Bíceps": [
+    { exercise: "Peso Muerto", sets: 4, reps: 8, weight: 100, rpe: 8 },
+    { exercise: "Jalón al Pecho", sets: 3, reps: 12, weight: 50, rpe: 8 },
+    { exercise: "Remo en Polea", sets: 3, reps: 12, weight: 45, rpe: 8 },
+    { exercise: "Curl con Barra", sets: 3, reps: 12, weight: 20, rpe: 8 }
+  ],
+  "Piernas + Glúteos": [
+    { exercise: "Sentadilla", sets: 4, reps: 10, weight: 100, rpe: 8 },
+    { exercise: "Prensa de Pierna", sets: 3, reps: 12, weight: 150, rpe: 8 },
+    { exercise: "Leg Extension", sets: 3, reps: 15, weight: 50, rpe: 9 }
+  ],
+  "Hombros + Core": [
+    { exercise: "Press Militar", sets: 4, reps: 10, weight: 40, rpe: 8 },
+    { exercise: "Elevaciones Laterales", sets: 4, reps: 15, weight: 10, rpe: 9 },
+    { exercise: "Plancha", sets: 3, reps: 1, weight: 0, rpe: 8 }
+  ],
+  "Upper Compuesto": [
+    { exercise: "Press Banca", sets: 4, reps: 8, weight: 65, rpe: 8 },
+    { exercise: "Dominadas", sets: 4, reps: 8, weight: 0, rpe: 8 },
+    { exercise: "Remo con Barra", sets: 3, reps: 10, weight: 50, rpe: 8 }
+  ],
+  "Piernas + Cardio": [
+    { exercise: "Sentadilla", sets: 4, reps: 10, weight: 100, rpe: 8 },
+    { exercise: "Carrera en Cinta", sets: 1, reps: 1, weight: 0, rpe: 7 }
+  ]
+};
+
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 const DAY_FULL_ES = { Lun:"LUNES", Mar:"MARTES", Mié:"MIÉRCOLES", Jue:"JUEVES", Vie:"VIERNES", Sáb:"SÁBADO", Dom:"DOMINGO" };
 const EXERCISE_LIB = {
@@ -228,7 +264,7 @@ function NumberPicker({ value, onChange, options, label, T }) {
   );
 }
 
-function WeeklyStrView({ strLog, plans, program, activeDate, T }) {
+function WeeklyStrView({ strLog, plans, program, activeDate, onInject, T }) {
   const st = mkS(T);
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
   const [expanded, setExpanded] = useState(() => new Set([actDayDow]));
@@ -288,9 +324,17 @@ function WeeklyStrView({ strLog, plans, program, activeDate, T }) {
             {isOpen && (
               <div style={{ padding:"0 20px 20px", borderTop:`1px solid ${T.border}` }}>
                 {dayExs.length === 0 ? (
-                  <div style={{ color:T.muted, fontSize:12, padding:"14px 0", display:"flex", alignItems:"center", gap:8 }}>
-                    <span style={{ opacity:0.4 }}>[ ]</span>
-                    {isRest ? "SISTEMA EN REPOSO 🔋" : "SIN TELEMETRÍA DE ENTRENAMIENTO"}
+                  <div style={{ color:T.muted, fontSize:12, padding:"14px 0", display:"flex", flexDirection:"column", gap:12 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <span style={{ opacity:0.4 }}>[ ]</span>
+                      {isRest ? "SISTEMA EN REPOSO 🔋" : "SIN TELEMETRÍA DE ENTRENAMIENTO"}
+                    </div>
+                    {/* BOTÓN DE INYECCIÓN (SOLUCIÓN 2) */}
+                    {!isRest && RUTINAS_BASE[planned] && (
+                      <button style={{ ...st.ghost(true), alignSelf: "flex-start", marginTop: 4 }} onClick={() => onInject(dateStr, RUTINAS_BASE[planned])}>
+                        ⚡ INYECTAR PLANTILLA: {planned.toUpperCase()}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div style={{ display:"flex", flexDirection:"column", gap:6, marginTop:12 }}>
@@ -700,8 +744,8 @@ function Recap({ allDayData, bios, T }) {
         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:1000, fontFamily:T.font }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
-              {["WEEK / DAY", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)"].map((h, i) => (
-                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: i===0 ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
+              {["WEEK / DAY", "FOCUS", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)"].map((h, i) => (
+                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: i<=1 ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -713,6 +757,7 @@ function Recap({ allDayData, bios, T }) {
                   {/* Fila del Promedio Semanal */}
                   <tr onClick={() => toggle(w.week)} style={{ borderBottom:`1px solid ${T.border}`, background: isOpen ? T.card3 : "transparent", cursor: "pointer", transition: "background 0.2s" }}>
                     <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700, color:T.accent }}>{isOpen ? "▼" : "▶"} {fmtWeek(w.week)}</td>
+                    <td style={{ padding:"12px 8px", textAlign:"center", color:T.muted }}>—</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.red }}>{w.fat ? w.fat.toFixed(1) + "%" : "—"}</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.muscle ? w.muscle.toFixed(1) + " KG" : "—"}</td>
@@ -732,6 +777,9 @@ function Recap({ allDayData, bios, T }) {
                     return (
                       <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background: T.card2, fontSize: 10 }}>
                         <td style={{ padding:"8px 8px 8px 24px", textAlign:"left", color:T.text }}>{d.date}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"left", color:T.accent, fontSize:9, textTransform:"uppercase" }}>
+                          {d.focus && d.focus.length > 0 ? d.focus.map(f => f.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'').trim()).join(", ") : "—"}
+                        </td>
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.weight ? d.weight.toFixed(1) : "—"}</td>
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.fat ? d.fat.toFixed(1) + "%" : "—"}</td>
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.muscle ? d.muscle.toFixed(1) : "—"}</td>
@@ -1254,6 +1302,14 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
     if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} RECORDS INJECTED.`); }
   };
 
+  // Función para inyectar plantilla completa
+  const injectTemplate = (date, template) => {
+    const newSets = template.map(t => ({
+      id: uid(), exercise: t.exercise, sets: t.sets, reps: t.reps, weight: t.weight, rpe: t.rpe, date, program
+    }));
+    setStr(p => [...p, ...newSets]);
+  };
+
   const saveEd=()=>{ setStr(p=>p.map(l=>l.id===editId?{...l,...editRow,weight:+editRow.weight,reps:+editRow.reps,sets:+editRow.sets,rpe:+editRow.rpe}:l)); setEId(null); };
 
   const tabStyle = (id) => ({
@@ -1304,7 +1360,7 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
       </div>
 
       {strView==="weekly" && (
-        <WeeklyStrView strLog={strLog} plans={plans} program={program} activeDate={activeDate} T={T}/>
+        <WeeklyStrView strLog={strLog} plans={plans} program={program} activeDate={activeDate} onInject={injectTemplate} T={T}/>
       )}
 
       {strView==="register" && (
@@ -1563,6 +1619,7 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
 // GLOBALS PARA BIOMETRÍA & DAILY DATA
 // ─────────────────────────────────────────────────────────────────────────────
 const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
+const FOCUS_TAGS = ["🫁 Pecho", "🔙 Espalda", "🦵 Piernas", "💪 Brazos", "🏔 Hombros", "⚡ Core", "🏃 Cardio", "🥊 HIIT", "🧘‍♀️ Movilidad"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: DAILY DATA (LOG DIARIO & BODY COMP INPUTS)
@@ -1571,7 +1628,7 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
   const st = mkS(T);
   
   const [bioForm, setBioForm] = useState({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" });
-  const [dailyForm, setDailyForm] = useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+  const [dailyForm, setDailyForm] = useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"", focus:[] });
   const [editG, setEG] = useState(false);
 
   useEffect(() => {
@@ -1584,6 +1641,13 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
     if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
     return [...prev, entry];
   });
+
+  const toggleFocus = (tag) => {
+    setDailyForm(p => ({
+      ...p,
+      focus: p.focus.includes(tag) ? p.focus.filter(t => t !== tag) : [...p.focus, tag]
+    }));
+  };
 
   const saveDaily = () => {
     if (!dailyForm.date) return;
@@ -1599,9 +1663,10 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
       ...(dailyForm.hrv && { hrv: +dailyForm.hrv }),
       ...(dailyForm.rhr && { rhr: +dailyForm.rhr }),
       ...(finalRecovery && { recovery: finalRecovery }),
+      ...(dailyForm.focus.length > 0 && { focus: dailyForm.focus }),
       goals: { ...goals } 
     });
-    setDailyForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"" });
+    setDailyForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"", focus:[] });
   };
 
   const addBio = () => {
@@ -1652,6 +1717,28 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
             <div style={{ gridColumn:"span 2" }}>
               <span style={st.lbl}>DATE</span>
               <input style={st.inp} type="date" value={dailyForm.date} onChange={e => setDailyForm(p => ({ ...p, date: e.target.value }))}/>
+            </div>
+
+            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4 }}>
+              <span style={{ ...st.lbl, color:T.purple }}>🏷️ ENFOQUE DEL DÍA (MÚLTIPLE)</span>
+            </div>
+            
+            <div style={{ gridColumn:"span 2", display:"flex", gap:8, flexWrap:"wrap", marginBottom: 8 }}>
+              {FOCUS_TAGS.map(tag => {
+                const isActive = dailyForm.focus.includes(tag);
+                return (
+                  <button key={tag} onClick={() => toggleFocus(tag)}
+                    style={{
+                      background: isActive ? T.accentDim : T.card2,
+                      border: `1px solid ${isActive ? T.accent : T.border}`,
+                      color: isActive ? T.accent : T.muted,
+                      borderRadius: 16, padding: "6px 12px", fontSize: 11, cursor: "pointer",
+                      fontFamily: T.font, fontWeight: isActive ? 700 : 400, transition: "all 0.15s"
+                    }}>
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
             
             <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4 }}>
@@ -2287,7 +2374,7 @@ export default function App() {
     const p=hasF?r1(fs.reduce((s,f)=>s+f.p,0)):(h.p||0);
     const c=hasF?r1(fs.reduce((s,f)=>s+f.c,0)):(h.c||0);
     const g=hasF?r1(fs.reduce((s,f)=>s+f.g,0)):(h.g||0);
-    return{date,calOut:h.calOut||0,calIn,p,c,g,sleep:h.sleep||null,score:h.score||null,hrv:h.hrv||null,rhr:h.rhr||null,recovery:h.recovery||null,steps:h.steps||null,balance:calIn-(h.calOut||0),goals:h.goals||{...DEFAULT_GOALS}};
+    return{date,calOut:h.calOut||0,calIn,p,c,g,sleep:h.sleep||null,score:h.score||null,hrv:h.hrv||null,rhr:h.rhr||null,recovery:h.recovery||null,steps:h.steps||null,balance:calIn-(h.calOut||0),goals:h.goals||{...DEFAULT_GOALS}, focus:h.focus||[]};
   },[healthLog,foodLog]);
 
   const allDates = useMemo(() => {
