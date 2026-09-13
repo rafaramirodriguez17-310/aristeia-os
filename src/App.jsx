@@ -44,6 +44,21 @@ const BLUEPRINT = {
   pickerBg:"#0b284e", font:"'DM Mono', monospace, system-ui",
 };
 
+const WINTER_ARC = {
+  bg:"#00072d", 
+  card:"#051650", 
+  card2:"#0a2472", 
+  card3:"#123499",
+  accent:"#5eaf73", // Muted green from palette
+  accentDim:"rgba(94, 175, 115, 0.15)", 
+  navy:"#00072d", navyBright:"#051650",
+  text:"#E2E8F0", muted:"#8FA3C0", border:"#123499", inputBg:"#00072d",
+  green:"#5eaf73", red:"#C96A6E", blue:"#4B72B8", // Silenced status colors
+  purple:"#8A6BB8", orange:"#C28945", teal:"#459B9E", pink:"#B85E8A",
+  shadow:"0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+  pickerBg:"#00072d", font:"'DM Mono', monospace, system-ui",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // STATIC DATA & WHOOP LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,7 +69,6 @@ const PLANS = {
   Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
 };
 
-// PLANTILLAS PRE-CARGADAS (Solución 2)
 const RUTINAS_BASE = {
   "Pecho + Tríceps": [
     { exercise: "Press Banca", sets: 4, reps: 10, weight: 60, rpe: 8 },
@@ -1005,12 +1019,6 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>HRV / RHR</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: T.text, paddingTop: 2, fontFamily:T.font }}>
-                    {selectedDayData.hrv ? `${selectedDayData.hrv}` : "—"} / {selectedDayData.rhr ? `${selectedDayData.rhr}` : "—"}
-                  </div>
-                </div>
-                <div>
                   <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>SLEEP</div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: T.purple, fontFamily:T.font }}>
                     {selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}
@@ -1745,7 +1753,7 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
               <span style={{ ...st.lbl, color:T.accent }}>⚡ ERS & SLEEP</span>
             </div>
             
-            {[["HRV (ms)","hrv"], ["RHR (bpm)","rhr"], ["SLEEP (hrs)","sleep"], ["SCORE (%)","score"]].map(([l,k]) => (
+            {[["SLEEP (hrs)","sleep"], ["SCORE (%)","score"]].map(([l,k]) => (
               <div key={k}>
                 <span style={st.lbl}>{l}</span>
                 <input style={st.inp} type="number" step={k === "sleep" ? "0.01" : "1"} placeholder="—"
@@ -1785,7 +1793,7 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
               <span style={st.lbl}>HEIGHT (CM)</span>
               <input style={{ ...st.inp, opacity:0.5, cursor:"not-allowed" }} type="number" readOnly value="181" />
             </div>
-            {[["WEIGHT (KG) *","weight",T.accent], ["FAT %","fat",T.red], ["MUSCLE (KG)","muscle",T.green], ["WATER %","water",T.blue], ["PROT %","protein",T.purple], ["BMR KCAL","dmr",T.muted]].map(([l,k,c]) => (
+            {[["WEIGHT (KG) *","weight",T.accent], ["FAT %","fat",T.red], ["MUSC (KG)","muscle",T.green], ["WATER %","water",T.blue], ["PROT %","protein",T.purple], ["BMR KCAL","dmr",T.muted]].map(([l,k,c]) => (
               <div key={k}>
                 <span style={st.lbl}>{l}</span>
                 <input style={{ ...st.inp, borderColor:`${c}55` }} type="number" step="0.1" placeholder=""
@@ -1899,7 +1907,7 @@ function TelemetryLogs({ allDayData, setHL, projects, setProjects, activeDate, T
                           return (
                             <div key={d.date}>
                               {dailyEditId === d.date ? (
-                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"hrv", l:"HRV" }, { k:"rhr", l:"RHR" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
+                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
                                   vals={dailyEditRow} onChange={(k,v) => setDailyER(p => ({ ...p, [k]: v }))}
                                   onSave={() => { upsertDaily({ date: d.date, recovery: +dailyEditRow.recovery || null, hrv: +dailyEditRow.hrv || null, rhr: +dailyEditRow.rhr || null, calOut: +dailyEditRow.calOut || 0, steps: +dailyEditRow.steps || null, sleep: +dailyEditRow.sleep || null, score: +dailyEditRow.score || null }); setDailyEId(null); }}
                                   onCancel={() => setDailyEId(null)} T={T}/>
@@ -2291,15 +2299,15 @@ export default function App() {
     return()=>{try{document.head.removeChild(l);}catch(_){}};
   },[]);
 
-  // Telemetría con soporte liberado de Dark/Light/Blueprint mode
+  // Telemetría con soporte liberado de Dark/Light/Blueprint/Winter Arc mode
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem(LS + "theme");
     if (savedTheme) return JSON.parse(savedTheme);
-    const isDark = lsGet("dark", true); // Fallback para migración de versiones anteriores
+    const isDark = lsGet("dark", true); 
     return isDark ? "dark" : "light";
   });
   
-  const T = theme === "dark" ? DARK : theme === "blueprint" ? BLUEPRINT : LIGHT;
+  const T = theme === "dark" ? DARK : theme === "blueprint" ? BLUEPRINT : theme === "winter_arc" ? WINTER_ARC : LIGHT;
 
   const [activeDate, setActiveDate] = useState(TODAY);
 
@@ -2391,14 +2399,14 @@ export default function App() {
 
   const TABS=[
     {id:"dashboard",l:"SYS DASHBOARD"},
-    {id:"daily",l:"DAILY DATA"},     // <--- NUEVO
+    {id:"daily",l:"DAILY DATA"},     
     {id:"recap",l:"RECAP"},
     {id:"calendario",l:"CALENDAR"},
     {id:"nutricion",l:"FUEL"},
     {id:"fuerza",l:"CHASSIS"},
     {id:"running",l:"AERO"},
-    {id:"bio",l:"WEIGHT"},           // <--- REDUCIDO A ANALÍTICA
-    {id:"telemetry",l:"DAILY LOGS"}, // <--- NUEVO
+    {id:"bio",l:"WEIGHT"},           
+    {id:"telemetry",l:"DAILY LOGS"}, 
     {id:"sleep",l:"RECOVERY"},
   ];
 
@@ -2408,7 +2416,7 @@ export default function App() {
   const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
 
   const cycleTheme = () => {
-    setTheme(t => t === "dark" ? "light" : t === "light" ? "blueprint" : "dark");
+    setTheme(t => t === "dark" ? "light" : t === "light" ? "blueprint" : t === "blueprint" ? "winter_arc" : "dark");
   };
 
   return (
@@ -2471,7 +2479,7 @@ export default function App() {
               boxShadow: theme === "light" ? T.shadow : "none",
               transition: "all 0.2s"
             }}>
-            {theme === "dark" ? "🌙 DARK" : theme === "light" ? "☀️ LIGHT" : "📐 BLUEPRINT"}
+            {theme === "dark" ? "🌙 DARK" : theme === "light" ? "☀️ LIGHT" : theme === "blueprint" ? "📐 BLUEPRINT" : "❄️ WINTER ARC"}
           </button>
 
           {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, color:T.accent, fontWeight:700, border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.calIn} IN</div>}
@@ -2506,6 +2514,11 @@ export default function App() {
         {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
         {tab==="telemetry"  && <TelemetryLogs allDayData={allDayData} setHL={setHL} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
+      </div>
+
+      {/* GARMIN FOOTER */}
+      <div style={{ textAlign: "center", padding: "30px 0 10px", fontSize: 10, color: T.muted, letterSpacing: "0.2em", fontFamily: T.font, opacity: 0.5, fontWeight: 700 }}>
+        POWERED BY GARMIN
       </div>
     </div>
   );
