@@ -114,6 +114,7 @@ const EXERCISE_LIB = {
   "⚡ Core":    ["Plancha","Crunch","Russian Twist","Leg Raise","Dragon Flag","Ab Wheel"],
   "🏃 Cardio":  ["Caminata Inclinada","Carrera en Cinta","Bicicleta Estacionaria","HIIT","Saltar la Cuerda","Escaladora"],
 };
+
 const getLocalYYYYMMDD = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split("T")[0];
@@ -1310,7 +1311,6 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
     if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} RECORDS INJECTED.`); }
   };
 
-  // Función para inyectar plantilla completa
   const injectTemplate = (date, template) => {
     const newSets = template.map(t => ({
       id: uid(), exercise: t.exercise, sets: t.sets, reps: t.reps, weight: t.weight, rpe: t.rpe, date, program
