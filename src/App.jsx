@@ -5,86 +5,87 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS — F1 TELEMETRY · ENGINEERING DASHBOARD
+// ESTILOS GLOBALES & CSS VARIABLES (ENGINEERING & WHOOP VIBE)
 // ─────────────────────────────────────────────────────────────────────────────
-const DARK = {
-  bg:"#050506", card:"#0A0B0E", card2:"#12141A", card3:"#1A1D24",
-  accent:"#00E5FF", // Neon Cyan (Telemetry standard)
-  accentDim:"rgba(0, 229, 255, 0.12)", 
-  navy:"#0A0B0E", navyBright:"#12141A",
-  text:"#E2E8F0", muted:"#64748B", border:"#1F242F", inputBg:"#050506",
-  green:"#39FF14", red:"#FF007F", blue:"#3B82F6",
-  purple:"#B026FF", orange:"#FFD700", teal:"#14B8A6", pink:"#EC4899",
-  shadow:"0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
-  pickerBg:"#050506", font:"'DM Mono', monospace, system-ui",
-};
+const GlobalStyles = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+    
+    :root {
+      --bg: #0C1730; --side: #09122A; --card: #132244; --hero: #182B56;
+      --tx: #EAF0FB; --mu: #9FB0D0; --track: #26386A;
+      --ok: #5DBFA0; --mid: #D8AA5A; --bad: #D87474;
+      --btn: #5DBFA0; --btnt: #06201A; --sel: #1B2F5C;
+    }
+    
+    .theme-light {
+      --bg: #F3F5FA; --side: #FFFFFF; --card: #FFFFFF; --hero: #FFFFFF;
+      --tx: #14213D; --mu: #56658A; --track: #E1E7F3;
+      --ok: #2F9E80; --mid: #B9822A; --bad: #C2514F;
+      --btn: #14213D; --btnt: #FFFFFF; --sel: #E8EEF9;
+    }
 
-const LIGHT = {
-  bg:"#F8FAFC", card:"#FFFFFF", card2:"#F1F5F9", card3:"#E2E8F0",
-  accent:"#0055FF", 
-  accentDim:"rgba(0, 85, 255, 0.1)",
-  navy:"#0F172A", navyBright:"#1E293B",
-  text:"#0F172A", muted:"#64748B", border:"#CBD5E1", inputBg:"#F8FAFC",
-  green:"#16A34A", red:"#DC2626", blue:"#2563EB",
-  purple:"#9333EA", orange:"#EA580C", teal:"#0D9488", pink:"#DB2777",
-  shadow:"0 2px 10px rgba(0,0,0,0.05)",
-  pickerBg:"#F1F5F9", font:"'DM Mono', monospace, system-ui",
-};
+    body {
+      background-color: var(--bg);
+      color: var(--tx);
+      font-family: 'DM Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-const BLUEPRINT = {
-  bg:"#0b284e url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 39.5h40M39.5 0v40' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E\")",
-  card:"#113160", card2:"#16407c", card3:"#1d5098",
-  accent:"#64FFDA", // Teal/Cyan engineering accent
-  accentDim:"rgba(100, 255, 218, 0.12)", 
-  navy:"#0b284e", navyBright:"#113160",
-  text:"#E6F1FF", muted:"#8ab4f8", border:"#285cac", inputBg:"#0b284e",
-  green:"#00FF88", red:"#FF3366", blue:"#66b2ff",
-  purple:"#d7aeff", orange:"#FFD700", teal:"#64FFDA", pink:"#EC4899",
-  shadow:"0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
-  pickerBg:"#0b284e", font:"'DM Mono', monospace, system-ui",
-};
-
-const WINTER_ARC = {
-  bg:"#00072d", 
-  card:"#051650", 
-  card2:"#0a2472", 
-  card3:"#123499",
-  accent:"#5eaf73", // Muted green from palette
-  accentDim:"rgba(94, 175, 115, 0.15)", 
-  navy:"#00072d", navyBright:"#051650",
-  text:"#E2E8F0", muted:"#8FA3C0", border:"#123499", inputBg:"#00072d",
-  green:"#5eaf73", red:"#C96A6E", blue:"#4B72B8", // Silenced status colors
-  purple:"#8A6BB8", orange:"#C28945", teal:"#459B9E", pink:"#B85E8A",
-  shadow:"0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
-  pickerBg:"#00072d", font:"'DM Mono', monospace, system-ui",
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ICONS (Minimalist SVG)
-// ─────────────────────────────────────────────────────────────────────────────
-const EditIcon = ({ color }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </svg>
+    * { box-sizing: border-box; }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--track); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--mu); }
+  `}</style>
 );
 
-const DeleteIcon = ({ color }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-  </svg>
-);
+const T = {
+  bg: "var(--bg)", card: "var(--card)", card2: "var(--side)", card3: "var(--hero)",
+  text: "var(--tx)", muted: "var(--mu)", border: "var(--track)", inputBg: "var(--bg)",
+  ok: "var(--ok)", mid: "var(--mid)", bad: "var(--bad)",
+  btn: "var(--btn)", btnt: "var(--btnt)", sel: "var(--sel)", font: "'DM Sans', sans-serif"
+};
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ICONS (Minimalist SVG - Lucide Style)
+// ─────────────────────────────────────────────────────────────────────────────
+const Icons = {
+  Moon: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>,
+  Heart: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"></path></svg>,
+  Battery: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line></svg>,
+  Activity: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
+  Flame: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>,
+  Food: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>,
+  Plus: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+  Sun: ({ size=16, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+  Edit: ({ size=14, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
+  Delete: ({ size=14, color }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COLORES SEMÁNTICOS (SOLO PARA MÉTRICAS ESPECÍFICAS)
+// ─────────────────────────────────────────────────────────────────────────────
+const getSleepColor = (hrs) => hrs >= 7 ? T.ok : hrs >= 5.5 ? T.mid : T.bad;
+const getRecoveryColor = (score) => {
+  if (!score) return T.muted;
+  if (score >= 67) return T.ok;
+  if (score >= 34) return T.mid;
+  return T.bad;
+};
+const getStepsColor = (steps) => steps >= 10000 ? T.ok : steps >= 6000 ? T.mid : T.bad;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STATIC DATA & WHOOP LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
-  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"🔋 Descanso" },
-  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",             Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"🔋 Descanso" },
-  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"🔋 Descanso" },
-  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"🔋 Descanso",       Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"🔋 Descanso" },
+  Hipertrofia:{ Lun:"Pecho + Tríceps", Mar:"Espalda + Bíceps", Mié:"Piernas + Glúteos", Jue:"Hombros + Core",       Vie:"Upper Compuesto",       Sáb:"Piernas + Cardio", Dom:"Descanso" },
+  Fuerza:     { Lun:"Squat Heavy",     Mar:"Press Banca Heavy", Mié:"Descanso activo",   Jue:"Peso Muerto",             Vie:"OHP + Accesorios",      Sáb:"Cardio LISS",      Dom:"Descanso" },
+  Definición: { Lun:"Full Body A",     Mar:"HIIT 30min",        Mié:"Full Body B",       Jue:"LISS 45min",              Vie:"Full Body C + Cardio",  Sáb:"HIIT 30min",       Dom:"Descanso" },
+  Power:      { Lun:"Potencia Sup.",   Mar:"Potencia Inf.",     Mié:"Descanso",          Jue:"Olímpicos + Fuerza",  Vie:"Pliometría + Velocidad", Sáb:"LISS",            Dom:"Descanso" },
 };
 
 const RUTINAS_BASE = {
@@ -122,15 +123,15 @@ const RUTINAS_BASE = {
 };
 
 const PLAN_KEYS = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
-const DAY_FULL_ES = { Lun:"LUNES", Mar:"MARTES", Mié:"MIÉRCOLES", Jue:"JUEVES", Vie:"VIERNES", Sáb:"SÁBADO", Dom:"DOMINGO" };
+const DAY_FULL_ES = { Lun:"Lunes", Mar:"Martes", Mié:"Miércoles", Jue:"Jueves", Vie:"Viernes", Sáb:"Sábado", Dom:"Domingo" };
 const EXERCISE_LIB = {
-  "🫁 Pecho":   ["Press Banca","Press Inclinado","Press Declinado","Aperturas c/ Mancuernas","Fondos en Paralelas","Crossover en Polea"],
-  "🔙 Espalda": ["Peso Muerto","Dominadas","Remo con Barra","Remo en Polea","Jalón al Pecho","Pull-over","Face Pull"],
-  "🦵 Piernas": ["Sentadilla","Prensa de Pierna","Leg Extension","Femoral Tumbado","Zancadas","Hip Thrust","Peso Muerto Rumano","Sentadilla Búlgara"],
-  "💪 Brazos":  ["Curl con Barra","Curl Martillo","Curl Scott","Extensión de Tríceps","Press Francés","Pushdown en Polea"],
-  "🏔 Hombros": ["Press Militar","Press Arnold","Elevaciones Laterales","Elevaciones Frontales","Encogimientos"],
-  "⚡ Core":    ["Plancha","Crunch","Russian Twist","Leg Raise","Dragon Flag","Ab Wheel"],
-  "🏃 Cardio":  ["Caminata Inclinada","Carrera en Cinta","Bicicleta Estacionaria","HIIT","Saltar la Cuerda","Escaladora"],
+  "Pecho":   ["Press Banca","Press Inclinado","Press Declinado","Aperturas c/ Mancuernas","Fondos en Paralelas","Crossover en Polea"],
+  "Espalda": ["Peso Muerto","Dominadas","Remo con Barra","Remo en Polea","Jalón al Pecho","Pull-over","Face Pull"],
+  "Piernas": ["Sentadilla","Prensa de Pierna","Leg Extension","Femoral Tumbado","Zancadas","Hip Thrust","Peso Muerto Rumano","Sentadilla Búlgara"],
+  "Brazos":  ["Curl con Barra","Curl Martillo","Curl Scott","Extensión de Tríceps","Press Francés","Pushdown en Polea"],
+  "Hombros": ["Press Militar","Press Arnold","Elevaciones Laterales","Elevaciones Frontales","Encogimientos"],
+  "Core":    ["Plancha","Crunch","Russian Twist","Leg Raise","Dragon Flag","Ab Wheel"],
+  "Cardio":  ["Caminata Inclinada","Carrera en Cinta","Bicicleta Estacionaria","HIIT","Saltar la Cuerda","Escaladora"],
 };
 
 const getLocalYYYYMMDD = () => {
@@ -140,7 +141,6 @@ const getLocalYYYYMMDD = () => {
 const TODAY = getLocalYYYYMMDD();
 const DEFAULT_GOALS = { cal:2400, p:180, c:280, g:60 };
 
-// Lógica para calcular Recovery tipo Whoop
 const calculateWhoopRecovery = (hrv, rhr, sleepScore) => {
   if (!hrv && !rhr && !sleepScore) return null;
   let factors = 0;
@@ -158,20 +158,13 @@ const calculateWhoopRecovery = (hrv, rhr, sleepScore) => {
   return factors > 0 ? Math.round(scoreSum / factors) : null;
 };
 
-const getRecoveryColor = (score, T) => {
-  if (!score) return T.muted;
-  if (score >= 67) return T.green;
-  if (score >= 34) return T.orange;
-  return T.red;
-};
-
 const SEED_HEALTH   = [];
 const SEED_DB = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOCAL STORAGE HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
-const LS = "aristeia_v7_";
+const LS = "aristeia_v8_";
 function lsGet(key, fallback) {
   try { const r=localStorage.getItem(LS+key); return r===null?fallback:JSON.parse(r); }
   catch { return fallback; }
@@ -242,15 +235,16 @@ function getCurrentWeekDates(refDateStr = TODAY) {
 const SVG_ARROW=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
 function mkS(T) {
   return {
-    card:   { background:T.card, borderRadius:12, padding:18, color:T.text, boxShadow:T.shadow, fontFamily:T.font, border:`1px solid ${T.border}`, position:"relative" },
+    card:   { background:T.card, borderRadius:12, padding:18, color:T.text, border:`1px solid ${T.border}`, position:"relative" },
     card2:  { background:T.card2, borderRadius:8, padding:14, color:T.text, fontFamily:T.font, border:`1px solid ${T.border}` },
-    lbl:    { fontSize:10, color:T.muted, textTransform:"uppercase", letterSpacing:"0.15em", marginBottom:6, display:"block", fontWeight:700 },
-    inp:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, transition:"border-color 0.15s" },
-    sel:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 34px 10px 14px", color:T.text, fontSize:13, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
-    btn:    { background:T.accent, color:"#000", border:"none", borderRadius:6, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:T.font, width:"100%", textTransform:"uppercase", letterSpacing:"0.05em" },
-    btnSm:  { background:T.navyBright, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
-    ghost:  a=>({ background:a?T.accentDim:"transparent", color:a?T.accent:T.muted, border:`1px solid ${a?T.accent:T.border}`, borderRadius:6, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
-    icon:   c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"6px", borderRadius:4, display:"inline-flex", alignItems:"center", justifyContent:"center", transition:"background 0.15s" }),
+    lbl:    { fontSize:12, color:T.muted, marginBottom:6, display:"block", fontWeight:500 },
+    num:    { fontVariantNumeric:"tabular-nums", fontWeight:600 },
+    inp:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", color:T.text, fontSize:14, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, transition:"border-color 0.15s" },
+    sel:    { background:T.inputBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 34px 10px 14px", color:T.text, fontSize:14, width:"100%", outline:"none", boxSizing:"border-box", fontFamily:T.font, appearance:"none", WebkitAppearance:"none", backgroundImage:SVG_ARROW, backgroundRepeat:"no-repeat", backgroundPosition:"right 12px center", cursor:"pointer" },
+    btn:    { background:T.btn, color:T.btnt, border:"none", borderRadius:6, padding:"12px 22px", fontWeight:600, fontSize:14, cursor:"pointer", fontFamily:T.font, width:"100%", display:"flex", justifyContent:"center", gap:8, alignItems:"center" },
+    btnSm:  { background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
+    ghost:  a=>({ background:a?T.sel:"transparent", color:T.text, border:`1px solid ${a?T.border:"transparent"}`, borderRadius:6, padding:"8px 18px", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
+    icon:   ()=>({ background:"none", border:"none", cursor:"pointer", padding:"6px", borderRadius:4, display:"inline-flex", alignItems:"center", justifyContent:"center", transition:"background 0.15s" }),
     g2:     { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:16 },
   };
 }
@@ -266,9 +260,9 @@ function NumberPicker({ value, onChange, options, label, T }) {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, flexShrink:0 }}>
-      <span style={{ fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", fontFamily:T.font }}>{label}</span>
+      <span style={{ fontSize:11, color:T.muted, fontWeight:600, fontFamily:T.font }}>{label}</span>
       <div style={{
-        background:T.pickerBg, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 5px",
+        background:T.bg, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 5px",
         height:210, overflowY:"auto", width:62,
         display:"flex", flexDirection:"column", alignItems:"center", gap:3,
         scrollbarWidth:"none", msOverflowStyle:"none",
@@ -280,13 +274,14 @@ function NumberPicker({ value, onChange, options, label, T }) {
               onClick={() => onChange(String(opt))}
               style={{
                 width:50, minHeight:38, flexShrink:0,
-                border: isSel ? `1px solid ${T.accent}` : "1px solid transparent",
-                background: isSel ? T.accentDim : "transparent",
+                border: isSel ? `1px solid ${T.border}` : "1px solid transparent",
+                background: isSel ? T.sel : "transparent",
                 borderRadius:4,
-                color: isSel ? T.accent : T.text,
-                fontWeight: isSel ? 700 : 400, fontSize:15,
+                color: T.text,
+                fontWeight: isSel ? 600 : 400, fontSize:15,
                 cursor:"pointer", fontFamily:T.font, textAlign:"center",
                 transition:"all 0.12s",
+                fontVariantNumeric: "tabular-nums"
               }}>
               {opt}
             </button>
@@ -325,47 +320,42 @@ function WeeklyStrView({ strLog, plans, program, activeDate, onInject, T }) {
         return (
           <div key={dayKey} style={{ borderBottom:`1px solid ${T.border}` }}>
             <button onClick={() => toggle(dayKey)} style={{
-              width:"100%", background:isSelectedDay ? T.accentDim : "transparent",
+              width:"100%", background:isSelectedDay ? T.sel : "transparent",
               border:"none", cursor:"pointer", padding:"16px 20px",
               display:"flex", justifyContent:"space-between", alignItems:"center",
               textAlign:"left", fontFamily:T.font, transition:"background 0.15s"
             }}>
               <div>
-                <div style={{
-                  fontSize:28, fontWeight:700, letterSpacing:"-1px", lineHeight:1,
-                  color: isSelectedDay ? T.accent : isRest ? T.muted : T.text, textTransform:"uppercase"
-                }}>
+                <div style={{ fontSize:22, fontWeight:600, color: isSelectedDay ? T.text : isRest ? T.muted : T.text }}>
                   {DAY_FULL_ES[dayKey]}
                 </div>
-                <div style={{ fontSize:11, color:T.muted, marginTop:6, display:"flex", gap:10, alignItems:"center" }}>
+                <div style={{ fontSize:12, color:T.muted, marginTop:4, display:"flex", gap:10, alignItems:"center" }}>
                   <span>{fmtDate}</span>
-                  {dateStr === TODAY && <span style={{ background:T.card3, border:`1px solid ${T.border}`, color:T.text, borderRadius:4, padding:"2px 6px", fontSize:9, fontWeight:800 }}>HOY</span>}
-                  {isSelectedDay && dateStr !== TODAY && <span style={{ background:T.accent, color:"#000", borderRadius:4, padding:"2px 6px", fontSize:9, fontWeight:800 }}>ACTIVO</span>}
-                  {planned && <span style={{ color:isRest?T.muted:T.accent, fontWeight:600 }}>{planned}</span>}
+                  {dateStr === TODAY && <span style={{ background:T.card3, border:`1px solid ${T.border}`, color:T.text, borderRadius:4, padding:"2px 6px", fontSize:10, fontWeight:600 }}>Hoy</span>}
+                  {isSelectedDay && dateStr !== TODAY && <span style={{ background:T.text, color:T.bg, borderRadius:4, padding:"2px 6px", fontSize:10, fontWeight:600 }}>Activo</span>}
+                  {planned && <span style={{ color:isRest?T.muted:T.text, fontWeight:500 }}>{planned}</span>}
                 </div>
               </div>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 {dayExs.length > 0 && (
-                  <span style={{ background:isSelectedDay?T.accent:T.card3, color:isSelectedDay?"#000":T.text, borderRadius:4, padding:"3px 8px", fontSize:12, fontWeight:700 }}>
+                  <span style={{ background:isSelectedDay?T.text:T.card3, color:isSelectedDay?T.bg:T.text, borderRadius:4, padding:"3px 8px", fontSize:13, fontWeight:600 }}>
                     {dayExs.filter(e => checked[e.id]).length}/{dayExs.length}
                   </span>
                 )}
-                <span style={{ color:T.muted, fontSize:16, fontWeight:700 }}>{isOpen ? "−" : "+"}</span>
+                <span style={{ color:T.muted, fontSize:16, fontWeight:600 }}>{isOpen ? "−" : "+"}</span>
               </div>
             </button>
 
             {isOpen && (
               <div style={{ padding:"0 20px 20px", borderTop:`1px solid ${T.border}` }}>
                 {dayExs.length === 0 ? (
-                  <div style={{ color:T.muted, fontSize:12, padding:"14px 0", display:"flex", flexDirection:"column", gap:12 }}>
+                  <div style={{ color:T.muted, fontSize:13, padding:"14px 0", display:"flex", flexDirection:"column", gap:12 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                      <span style={{ opacity:0.4 }}>[ ]</span>
-                      {isRest ? "SISTEMA EN REPOSO 🔋" : "SIN TELEMETRÍA DE ENTRENAMIENTO"}
+                      {isRest ? "Día de descanso" : "Sin registro de entrenamiento"}
                     </div>
-                    {/* BOTÓN DE INYECCIÓN (SOLUCIÓN 2) */}
                     {!isRest && RUTINAS_BASE[planned] && (
-                      <button style={{ ...st.ghost(true), alignSelf: "flex-start", marginTop: 4 }} onClick={() => onInject(dateStr, RUTINAS_BASE[planned])}>
-                        ⚡ INYECTAR PLANTILLA: {planned.toUpperCase()}
+                      <button style={{ ...st.ghost(true), alignSelf: "flex-start", marginTop: 4, display:"flex", alignItems:"center", gap:6 }} onClick={() => onInject(dateStr, RUTINAS_BASE[planned])}>
+                        <Icons.Activity color={T.text} size={14}/> Cargar plantilla: {planned}
                       </button>
                     )}
                   </div>
@@ -376,19 +366,19 @@ function WeeklyStrView({ strLog, plans, program, activeDate, onInject, T }) {
                       return (
                         <div key={ex.id} onClick={() => toggleCheck(ex.id)} style={{
                           display:"flex", alignItems:"center", gap:12, padding:"10px 14px", borderRadius:6, cursor:"pointer",
-                          background: done ? T.accentDim : T.card2, border:`1px solid ${done ? T.accent : T.border}`, transition:"all 0.15s"
+                          background: done ? T.sel : T.card2, border:`1px solid ${done ? T.border : T.border}`, transition:"all 0.15s"
                         }}>
-                          <div style={{ width:16, height:16, borderRadius:2, flexShrink:0, border:`1px solid ${done ? T.accent : T.muted}`, background: done ? T.accent : "transparent", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s" }}>
-                            {done && <span style={{ color:"#000", fontSize:12, fontWeight:900, lineHeight:1 }}>✓</span>}
+                          <div style={{ width:18, height:18, borderRadius:4, flexShrink:0, border:`1px solid ${done ? T.text : T.muted}`, background: done ? T.text : "transparent", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s" }}>
+                            {done && <span style={{ color:T.bg, fontSize:12, fontWeight:900, lineHeight:1 }}>✓</span>}
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontSize:13, fontWeight:700, color: done ? T.accent : T.text, textDecoration: done ? "line-through" : "none", textTransform:"uppercase" }}>
+                            <div style={{ fontSize:14, fontWeight:600, color: done ? T.text : T.text, textDecoration: done ? "line-through" : "none" }}>
                               {ex.exercise}
                             </div>
-                            <div style={{ fontSize:11, color:T.muted, marginTop:4, display:"flex", gap:10, fontFamily:T.font }}>
+                            <div style={{ fontSize:12, color:T.muted, marginTop:2, display:"flex", gap:10, fontFamily:T.font, ...st.num }}>
                               {ex.sets && ex.reps && <span>{ex.sets}x{ex.reps}</span>}
                               {ex.weight > 0 && <span style={{ color:T.text }}>{ex.weight}kg</span>}
-                              {ex.rpe > 0 && <span style={{ color:T.orange }}>RPE {ex.rpe}</span>}
+                              {ex.rpe > 0 && <span>RPE {ex.rpe}</span>}
                             </div>
                           </div>
                         </div>
@@ -408,23 +398,25 @@ function WeeklyStrView({ strLog, plans, program, activeDate, onInject, T }) {
 function ChartTip({ active, payload, T }) {
   if (!active||!payload?.length) return null;
   return (
-    <div style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:4, padding:"8px 12px", boxShadow:T.shadow, fontSize:11, fontFamily:T.font, textTransform:"uppercase" }}>
-      {payload.map((p,i)=><div key={i} style={{color:p.color}}>{p.name}: <b>{fmt(p.value)}</b></div>)}
+    <div style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:4, padding:"8px 12px", boxShadow:"0 4px 12px rgba(0,0,0,0.1)", fontSize:12, fontFamily:T.font }}>
+      {payload.map((p,i)=><div key={i} style={{color:p.color, fontWeight:600}}>{p.name}: {fmt(p.value)}</div>)}
     </div>
   );
 }
-function SH({ title, right }) {
+function SH({ title, right, icon }) {
   return (
     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:8 }}>
-      <div style={{ fontSize:13, fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase" }}>{title}</div>
+      <div style={{ fontSize:15, fontWeight:600, display:"flex", alignItems:"center", gap:8 }}>
+        {icon} {title}
+      </div>
       {right}
     </div>
   );
 }
 function ProgBar({ value, max, color, h=4 }) {
   return (
-    <div style={{ height:h, borderRadius:1, overflow:"hidden", background:"rgba(255,255,255,0.08)", marginTop:6 }}>
-      <div style={{ height:"100%", width:`${Math.min((value/max)*100,100)}%`, background:color, borderRadius:1, transition:"width 0.45s ease" }}/>
+    <div style={{ height:h, borderRadius:2, overflow:"hidden", background:"var(--track)", marginTop:6 }}>
+      <div style={{ height:"100%", width:`${Math.min((value/max)*100,100)}%`, background:color, borderRadius:2, transition:"width 0.45s ease" }}/>
     </div>
   );
 }
@@ -432,9 +424,9 @@ function MiniRing({ pct, color, size=42, sw=4 }) {
   const r=(size-sw)/2, c=2*Math.PI*r, off=c*(1-Math.min(pct,1));
   return (
     <svg width={size} height={size} style={{ transform:"rotate(-90deg)", flexShrink:0 }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={sw}/>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--track)" strokeWidth={sw}/>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw}
-        strokeLinecap="butt" strokeDasharray={`${c} ${c}`} strokeDashoffset={off}
+        strokeLinecap="round" strokeDasharray={`${c} ${c}`} strokeDashoffset={off}
         style={{ transition:"stroke-dashoffset 0.5s ease" }}/>
     </svg>
   );
@@ -453,23 +445,21 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, theme, T }) {
   const off = circ*(1-pct);
   const done = currentPaceSecs > 0 && currentPaceSecs <= targetPaceSecs;
   
-  const trackClr=theme==="light"?"rgba(0,0,0,0.06)":"rgba(255,255,255,0.05)";
-  
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
       <svg width={size} height={size} style={{ display:"block" }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={trackClr} strokeWidth={sw}
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--track)" strokeWidth={sw}
           transform={`rotate(-90 ${size/2} ${size/2})`}/>
-        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke={done?T.green:T.accent}
-          strokeWidth={sw} strokeLinecap="butt"
+        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke={done?T.ok:T.text}
+          strokeWidth={sw} strokeLinecap="round"
           strokeDasharray={`${circ} ${circ}`} strokeDashoffset={off}
           transform={`rotate(-90 ${size/2} ${size/2})`}
           style={{ transition:"stroke-dashoffset 0.8s ease" }}/>}
       </svg>
       <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:2 }}>
-        <div style={{ fontSize:9, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase" }}>LIVE PACE</div>
-        <div style={{ fontSize:32, fontWeight:700, color:done?T.green:T.accent, lineHeight:1, fontFamily:T.font }}>{currentPaceSecs > 0 ? secsToPace(currentPaceSecs) : "--:--"}</div>
-        <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>TGT {secsToPace(targetPaceSecs)}</div>
+        <div style={{ fontSize:11, color:T.muted, fontWeight:600 }}>RITMO ACTUAL</div>
+        <div style={{ fontSize:32, fontWeight:600, color:done?T.ok:T.text, lineHeight:1, fontFamily:T.font, fontVariantNumeric:"tabular-nums" }}>{currentPaceSecs > 0 ? secsToPace(currentPaceSecs) : "--:--"}</div>
+        <div style={{ fontSize:12, color:T.muted, fontFamily:T.font }}>Meta {secsToPace(targetPaceSecs)}</div>
       </div>
     </div>
   );
@@ -478,7 +468,7 @@ function PaceRing({ currentPaceSecs, targetPaceSecs, theme, T }) {
 function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
   const st=mkS(T);
   return (
-    <div style={{ ...st.card2, border:`1px solid ${T.accent}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
+    <div style={{ ...st.card2, border:`1px solid ${T.text}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))", gap:6 }}>
         {fields.map(f=>(
           <div key={f.k}><span style={st.lbl}>{f.l}</span>
@@ -486,8 +476,8 @@ function EditRow({ fields, vals, onChange, onSave, onCancel, T }) {
         ))}
       </div>
       <div style={{ display:"flex", gap:6 }}>
-        <button style={{ ...st.btnSm, background:T.green, color:"#000", border:"none", flex:1 }} onClick={onSave}>✓ OK</button>
-        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>✕ CANCEL</button>
+        <button style={{ ...st.btnSm, background:T.text, color:T.bg, border:"none", flex:1 }} onClick={onSave}>Guardar</button>
+        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>Cancelar</button>
       </div>
     </div>
   );
@@ -501,17 +491,17 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
   const preview=hasUnit?{ cal:Math.round(entry.unitCal*qty), p:r1(entry.unitP*qty), c:r1(entry.unitC*qty), g:r1(entry.unitG*qty) }:null;
   const doSave=()=>onSave(hasUnit?{ ...entry, qty, ...preview }:{ ...entry, ...raw, cal:+raw.cal, p:+raw.p||0, c:+raw.c||0, g:+raw.g||0 });
   if (hasUnit) return (
-    <div style={{ ...st.card2, border:`1px solid ${T.accent}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
-      <div style={{ fontSize:12, fontWeight:700, textTransform:"uppercase" }}>{entry.name}</div>
+    <div style={{ ...st.card2, border:`1px solid ${T.text}`, padding:12, display:"flex", flexDirection:"column", gap:8 }}>
+      <div style={{ fontSize:14, fontWeight:600 }}>{entry.name}</div>
       <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-        <div style={{ flex:1 }}><span style={st.lbl}>CANTIDAD</span>
+        <div style={{ flex:1 }}><span style={st.lbl}>Cantidad</span>
           <input style={{...st.inp, padding:"6px 10px"}} type="number" value={qty} min="0.25" step="0.25" onChange={e=>setQty(+e.target.value)}/></div>
-        <div style={{ fontSize:11, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {entry.unit}</div>
+        <div style={{ fontSize:13, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {entry.unit}</div>
       </div>
-      {preview&&<div style={{ fontSize:10, color:T.muted, fontFamily:T.font }}>= {preview.cal} KCAL · {preview.p}P · {preview.c}C · {preview.g}G</div>}
+      {preview&&<div style={{ fontSize:12, color:T.muted, fontFamily:T.font, ...st.num }}>= {preview.cal.toLocaleString('es-ES')} KCAL · {preview.p}P · {preview.c}C · {preview.g}G</div>}
       <div style={{ display:"flex", gap:6 }}>
-        <button style={{ ...st.btnSm, background:T.green, color:"#000", border:"none", flex:1 }} onClick={doSave}>✓ OK</button>
-        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>✕ CANCEL</button>
+        <button style={{ ...st.btnSm, background:T.text, color:T.bg, border:"none", flex:1 }} onClick={doSave}>Guardar</button>
+        <button style={{ ...st.btnSm, flex:1 }} onClick={onCancel}>Cancelar</button>
       </div>
     </div>
   );
@@ -519,22 +509,22 @@ function FoodEditRow({ entry, onSave, onCancel, T }) {
     vals={raw} onChange={(k,v)=>setRaw(p=>({...p,[k]:v}))} onSave={doSave} onCancel={onCancel} T={T}/>;
 }
 
-function KPICard({ id, label, value, sub, color, theme, T }) {
+function KPICard({ icon, label, value, sub, color, T }) {
+  const st = mkS(T);
   return (
     <div style={{
       background: T.card2, border: `1px solid ${T.border}`,
-      borderRadius:8, padding:"14px",
-      color:T.text, minHeight:90, display:"flex", flexDirection:"column", justifyContent:"space-between",
+      borderRadius:8, padding:"16px",
+      color:T.text, minHeight:100, display:"flex", flexDirection:"column", justifyContent:"space-between",
       position:"relative", overflow:"hidden"
     }}>
-      <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:color }} />
-      <div style={{ fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", marginLeft:6 }}>
-        {id} · {label}
+      <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:T.muted, fontWeight:600 }}>
+        {icon} {label}
       </div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginTop:12, marginLeft:6 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginTop:12 }}>
         <div>
-          <div style={{ fontSize:26, fontWeight:700, color, lineHeight:1, fontFamily:T.font }}>{value}</div>
-          {sub&&<div style={{ fontSize:10, color:T.muted, marginTop:4, fontFamily:T.font }}>{sub}</div>}
+          <div style={{ fontSize:28, fontWeight:600, color, lineHeight:1, fontFamily:T.font, ...st.num }}>{value}</div>
+          {sub&&<div style={{ fontSize:12, color:T.muted, marginTop:6, fontFamily:T.font }}>{sub}</div>}
         </div>
       </div>
     </div>
@@ -542,7 +532,7 @@ function KPICard({ id, label, value, sub, color, theme, T }) {
 }
 
 function Placeholder({ msg, T }) {
-  return <div style={{ height:120, display:"flex", alignItems:"center", justifyContent:"center", color:T.muted, fontSize:11, fontFamily:T.font, textTransform:"uppercase", letterSpacing:"0.05em" }}>[{msg}]</div>;
+  return <div style={{ height:120, display:"flex", alignItems:"center", justifyContent:"center", color:T.muted, fontSize:13, fontFamily:T.font, fontWeight:500 }}>{msg}</div>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -552,61 +542,56 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
   const st=mkS(T);
   const [editDay, setEditDay] = useState(null);
   const tip=p=><ChartTip {...p} T={T}/>;
-  
-  const pCol=(v,g)=>v>=g?T.green:v>=g*.8?T.accent:T.red;
-  const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
-  const cCol=(v,g)=>v>g?T.red:v>g*.85?T.accent:T.green;
 
   const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
 
   const kpis=[
-    { id:"PWR", label:"Cal In",   value:activeDayData.calIn||"—", sub:`TGT: ${goals.cal}`,  color:T.accent },
-    { id:"SYS", label:"Balance", value:activeDayData.calOut>0?(activeDayData.balance>0?`+${activeDayData.balance}`:activeDayData.balance):"—", sub:activeDayData.balance<0?"DEFICIT":"SURPLUS", color:activeDayData.calOut>0?bCol(activeDayData.balance):T.muted },
-    { id:"MAC", label:"Protein", value:activeDayData.p?`${Math.round(activeDayData.p)}g`:"—", sub:`TGT: ${goals.p}g`, color:pCol(activeDayData.p,goals.p) },
-    { id:"MAC", label:"Carbs",   value:activeDayData.c?`${Math.round(activeDayData.c)}g`:"—", sub:`MAX: ${goals.c}g`,  color:cCol(activeDayData.c,goals.c) },
-    { id:"AER", label:"Cal Out", value:activeDayData.calOut||"—", sub:"BURNED",        color:T.blue },
-    { id:"AER", label:"Steps",   value:activeDayData.steps?activeDayData.steps.toLocaleString():"—", sub:"TGT: 10K", color:T.purple },
-    { id:"REC", label:"Recovery",value:activeDayData.recovery?`${activeDayData.recovery}%`:"—", sub:`Zz: ${activeDayData.sleep||"—"}h · SCR: ${activeDayData.score||"—"}%`, color:getRecoveryColor(activeDayData.recovery, T) || T.purple },
-    { id:"NRG", label:"Battery", value:activeDayData.bodyBattery?`${activeDayData.bodyBattery}%`:"—", sub:"ENERGY", color:T.teal },
+    { icon:<Icons.Food size={14} color={T.muted}/>, label:"Cal In",   value:activeDayData.calIn ? activeDayData.calIn.toLocaleString('es-ES') : "—", sub:activeDayData.calIn ? `Meta: ${goals.cal.toLocaleString('es-ES')}` : "Sin registrar",  color:T.text },
+    { icon:<Icons.Activity size={14} color={T.muted}/>, label:"Balance", value:activeDayData.calIn > 0 && activeDayData.calOut > 0 ? (activeDayData.balance > 0 ? `+${activeDayData.balance.toLocaleString('es-ES')}` : activeDayData.balance.toLocaleString('es-ES')) : "—", sub:activeDayData.calIn > 0 && activeDayData.calOut > 0 ? (activeDayData.balance < 0 ? "Déficit" : "Superávit") : "Sin registrar", color: T.text },
+    { icon:<Icons.Food size={14} color={T.muted}/>, label:"Proteína", value:activeDayData.calIn > 0 ? `${Math.round(activeDayData.p)}g` : "—", sub:`Meta: ${goals.p}g`, color: T.text },
+    { icon:<Icons.Flame size={14} color={T.muted}/>, label:"Cal Out", value:activeDayData.calOut ? activeDayData.calOut.toLocaleString('es-ES') : "—", sub:"Quemadas", color:T.text },
+    { icon:<Icons.Activity size={14} color={T.muted}/>, label:"Pasos",   value:activeDayData.steps ? activeDayData.steps.toLocaleString('es-ES') : "—", sub:"Meta: 10,000", color: activeDayData.steps ? getStepsColor(activeDayData.steps, T) : T.text },
+    { icon:<Icons.Heart size={14} color={T.muted}/>, label:"Recuperación", value:activeDayData.recovery ? `${activeDayData.recovery}%` : "—", sub:`Sueño: ${activeDayData.sleep||"—"}h`, color:getRecoveryColor(activeDayData.recovery, T) },
+    { icon:<Icons.Battery size={14} color={T.muted}/>, label:"Batería", value:activeDayData.bodyBattery ? `${activeDayData.bodyBattery}%` : "—", sub:"Energía", color:T.text },
   ];
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:10 }}>
-        {kpis.map(k=><KPICard key={k.label} {...k} theme={theme} T={T}/>)}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))", gap:12 }}>
+        {kpis.map(k=><KPICard key={k.label} {...k} T={T}/>)}
       </div>
 
       <div style={{ ...st.card, padding:0, overflowX:"auto" }}>
-        <div style={{ padding:"16px 18px", borderBottom:`1px solid ${T.border}` }}>
-          <SH title="📊 CHAMPIONSHIP PROGRESS (7 DÍAS)" right={<span style={{ fontSize:10, color:T.muted, fontFamily:T.font }}>P:<span style={{color:T.green}}>≥TGT</span></span>}/>
+        <div style={{ padding:"16px 20px", borderBottom:`1px solid ${T.border}` }}>
+          <SH title="Progreso de 7 días" icon={<Icons.Activity size={18} color={T.text}/>} right={<span style={{ fontSize:12, color:T.muted, fontFamily:T.font }}>Desempeño reciente</span>}/>
         </div>
-        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:700, fontFamily:T.font }}>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth:700, fontFamily:T.font }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
-              {[["DATE","l"],["OUT","r"],["IN","r"],["BAL","r"],["PROT","r"],["CARB","r"],["FAT","r"],["SLEEP","r"],["REC","r"],["BATT","r"],["STEPS","r"]].map(([h,a])=>(
-                <th key={h} style={{ padding:"10px 14px", color:T.muted, fontWeight:700, textAlign:a==="r"?"right":"left", letterSpacing:"0.1em" }}>{h}</th>
+              {[["Fecha","l"],["Out","r"],["In","r"],["Balance","r"],["Prot","r"],["Carb","r"],["Grasa","r"],["Sueño","r"],["Recup","r"],["Bat","r"],["Pasos","r"]].map(([h,a])=>(
+                <th key={h} style={{ padding:"12px 14px", color:T.muted, fontWeight:600, textAlign:a==="r"?"right":"left" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {weekData.slice(0,7).map(d=>{
-              const isT=d.date===activeDate, g=d.goals, bal=d.calIn-d.calOut, ho=d.calOut>0;
+              const isT=d.date===activeDate, g=d.goals, bal=d.calIn-d.calOut, hasIn=d.calIn>0, hasOut=d.calOut>0;
               return (
-                <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.accentDim:"transparent", transition:"background 0.2s" }}>
-                  <td style={{ padding:"12px 14px", fontWeight:isT?700:400, color:isT?T.accent:T.text, whiteSpace:"nowrap" }}>
-                    {isT && <span style={{display:"inline-block", width:8, height:8, borderRadius:"50%", background:T.accent, marginRight:8, boxShadow:`0 0 8px ${T.accent}`}}/>}
-                    {d.date===TODAY?"TODAY":d.date.slice(5)}
+                <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background:isT?T.sel:"transparent", transition:"background 0.2s", ...st.num }}>
+                  <td style={{ padding:"12px 14px", fontWeight:isT?600:400, color:isT?T.text:T.text, whiteSpace:"nowrap" }}>
+                    {isT && <span style={{display:"inline-block", width:6, height:6, borderRadius:"50%", background:T.text, marginRight:8}}/>}
+                    {d.date===TODAY?"Hoy":d.date.slice(5)}
                   </td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.blue }}>{ho?d.calOut.toLocaleString():"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.accent }}>{d.calIn?d.calIn.toLocaleString():"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", fontWeight:700, color:(ho&&d.calIn)?bCol(bal):T.muted }}>{(ho&&d.calIn)?(bal>0?`+${bal}`:bal):"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.p?pCol(d.p,g.p):T.muted }}>{d.p?`${Math.round(d.p)}g`:"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.c?cCol(d.c,g.c):T.muted }}>{d.c?`${Math.round(d.c)}g`:"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.g?T.purple:T.muted }}>{d.g?`${Math.round(d.g)}g`:"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.muted }}>{d.sleep?`${fmt(d.sleep,1)}h`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.text }}>{hasOut?d.calOut.toLocaleString('es-ES'):"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.text }}>{hasIn?d.calIn.toLocaleString('es-ES'):"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", fontWeight:600, color:T.text }}>{(hasOut&&hasIn)?(bal>0?`+${bal.toLocaleString('es-ES')}`:bal.toLocaleString('es-ES')):"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:hasIn?T.text:T.muted }}>{hasIn?`${Math.round(d.p)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:hasIn?T.text:T.muted }}>{hasIn?`${Math.round(d.c)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:hasIn?T.text:T.muted }}>{hasIn?`${Math.round(d.g)}g`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.sleep ? getSleepColor(d.sleep, T) : T.muted }}>{d.sleep?`${fmt(d.sleep,1)}h`:"—"}</td>
                   <td style={{ padding:"12px 14px", textAlign:"right", color:getRecoveryColor(d.recovery, T) }}>{d.recovery?`${d.recovery}%`:"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.teal }}>{d.bodyBattery?`${d.bodyBattery}%`:"—"}</td>
-                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.muted }}>{d.steps?d.steps.toLocaleString():"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:T.text }}>{d.bodyBattery?`${d.bodyBattery}%`:"—"}</td>
+                  <td style={{ padding:"12px 14px", textAlign:"right", color:d.steps ? getStepsColor(d.steps, T) : T.muted }}>{d.steps?d.steps.toLocaleString('es-ES'):"—"}</td>
                 </tr>
               );
             })}
@@ -616,63 +601,60 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 
       <div style={st.g2}>
         <div style={st.card}>
-          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.green }}>🥩 PROT INJECTION VS TARGET</div>
+          <SH title="Proteína vs Meta" icon={<Icons.Food size={18} color={T.text}/>} />
           {last7.filter(d=>d.calIn>0).length>=2?(
-            <ResponsiveContainer width="100%" height={160}>
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart data={last7} margin={{top:15,right:4,bottom:0,left:-22}}>
-                <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
-                <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
+                <CartesianGrid strokeDasharray="2 2" stroke="var(--track)" vertical={false}/>
+                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:11,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+                <YAxis tick={{fill:T.muted,fontSize:11,fontFamily:T.font}}/>
                 <Tooltip content={tip}/>
-                <ReferenceLine y={goals.p} stroke={T.green} strokeDasharray="3 3" label={{position:"top",value:`TGT ${goals.p}g`,fill:T.green,fontSize:10,fontFamily:T.font}} />
+                <ReferenceLine y={goals.p} stroke={T.text} strokeDasharray="3 3" label={{position:"top",value:`Meta ${goals.p}g`,fill:T.text,fontSize:11,fontFamily:T.font}} />
                 <Bar dataKey="p" name="Proteína" radius={[2,2,0,0]} barSize={16}>
-                  {last7.map((d,i)=><Cell key={i} fill={d.p>=goals.p?T.green:T.border}/>)}
+                  {last7.map((d,i)=><Cell key={i} fill={d.p>=goals.p?T.text:T.muted}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ):<Placeholder msg="INSUFFICIENT TELEMETRY" T={T}/>}
+          ):<Placeholder msg="Datos insuficientes" T={T}/>}
         </div>
         
         <div style={st.card}>
-          <div style={{ fontSize:11, fontWeight:700, marginBottom:16, letterSpacing:"0.1em", color:T.accent }}>
-            ⚖️ CALORIC DELTA <span style={{color:T.green}}>[↓ QUEMADO {'>'} CONSUMIDO]</span>
-          </div>
-          {last7.filter(d=>d.calOut>0).length>=2?(
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={last7.filter(d=>d.calOut>0)} margin={{top:15,right:4,bottom:0,left:-22}}>
-                <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
-                <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
+          <SH title="Déficit / Superávit" icon={<Icons.Flame size={18} color={T.text}/>} />
+          {last7.filter(d=>d.calOut>0 && d.calIn>0).length>=2?(
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={last7.filter(d=>d.calOut>0 && d.calIn>0)} margin={{top:15,right:4,bottom:0,left:-22}}>
+                <CartesianGrid strokeDasharray="2 2" stroke="var(--track)" vertical={false}/>
+                <XAxis dataKey="date" tick={{fill:T.muted,fontSize:11,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+                <YAxis tick={{fill:T.muted,fontSize:11,fontFamily:T.font}}/>
                 <Tooltip content={tip}/>
                 <ReferenceLine y={0} stroke={T.text} strokeWidth={1} />
                 <Bar dataKey="balance" name="Balance" radius={[2,2,0,0]} barSize={16}>
-                  {last7.filter(d=>d.calOut>0).map((d,i)=>(
-                    <Cell key={i} fill={d.balance < 0 ? T.green : T.red}/>
+                  {last7.filter(d=>d.calOut>0 && d.calIn>0).map((d,i)=>(
+                    <Cell key={i} fill={d.balance < 0 ? T.ok : T.bad}/>
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ):<Placeholder msg="INSUFFICIENT TELEMETRY" T={T}/>}
+          ):<Placeholder msg="Datos insuficientes" T={T}/>}
         </div>
       </div>
 
       <div style={st.card}>
-        <SH title={<>🗓️ WEEKLY SETUP · <span style={{color:T.accent}}>{program}</span></>}
-          right={<span style={{fontSize:10, color:T.muted, fontFamily:T.font}}>CLICK TO EDIT</span>}/>
+        <SH title="Plan semanal" icon={<Icons.Activity size={18} color={T.text}/>} right={<span style={{fontSize:12, color:T.muted, fontFamily:T.font}}>{program}</span>}/>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))", gap:8 }}>
           {PLAN_KEYS.map(day=>{
             const label=plans[program]?.[day]||"—", isT=day===actDayDow, isR=label.includes("Descanso");
             return (
-              <div key={day} onClick={() => setEditDay(day)} style={{ background:isT?T.accentDim:T.card2, border:`1px solid ${isT?T.accent:T.border}`, borderRadius:6, padding:"12px 10px", textAlign:"center", cursor:"pointer", transition:"all 0.2s" }}>
-                <div style={{ fontSize:10, fontWeight:700, color:isT?T.accent:T.muted, letterSpacing:"0.15em", marginBottom:8, fontFamily:T.font }}>{day.toUpperCase()}</div>
+              <div key={day} onClick={() => setEditDay(day)} style={{ background:isT?T.sel:T.card2, border:`1px solid ${isT?T.border:T.border}`, borderRadius:6, padding:"12px 10px", textAlign:"center", cursor:"pointer", transition:"all 0.2s" }}>
+                <div style={{ fontSize:11, fontWeight:600, color:isT?T.text:T.muted, marginBottom:8, fontFamily:T.font }}>{DAY_FULL_ES[day]}</div>
                 {editDay === day ? (
                   <input autoFocus value={plans[program]?.[day] || ""}
                     onChange={e => setPlans(p => ({...p, [program]: {...p[program], [day]: e.target.value}}))}
                     onBlur={() => setEditDay(null)}
                     onKeyDown={e => e.key === 'Enter' && setEditDay(null)}
-                    style={{ background:"transparent", border:"none", outline:"none", fontSize:11, textAlign:"center", color:T.text, width:"100%", fontFamily:T.font, textTransform:"uppercase" }} />
+                    style={{ background:"transparent", border:"none", outline:"none", fontSize:12, textAlign:"center", color:T.text, width:"100%", fontFamily:T.font }} />
                 ) : (
-                  <div style={{ fontSize:11, fontWeight:700, color:isR?T.muted:T.text, lineHeight:1.4, textTransform:"uppercase" }}>{label}</div>
+                  <div style={{ fontSize:13, fontWeight:600, color:isR?T.muted:T.text, lineHeight:1.4 }}>{label}</div>
                 )}
               </div>
             );
@@ -684,7 +666,7 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS) — PESTAÑA INDEPENDIENTE
+// TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS)
 // ─────────────────────────────────────────────────────────────────────────────
 function Recap({ allDayData, bios, setHL, setBios, T }) {
   const st = mkS(T);
@@ -702,12 +684,8 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
   const weeklyStats = useMemo(() => {
     const combined = {};
     
-    // Merge Health/Food data
-    allDayData.forEach(d => {
-      combined[d.date] = { ...d };
-    });
+    allDayData.forEach(d => { combined[d.date] = { ...d }; });
     
-    // Merge Biometrics
     bios.forEach(b => {
       if (!combined[b.date]) combined[b.date] = { date: b.date };
       combined[b.date].weight = b.weight;
@@ -753,7 +731,6 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
       if (d.muscle > 0) { groups[wk].muscleSum += d.muscle; groups[wk].muscleDays++; }
     });
 
-    // Compute Averages
     return Object.values(groups).sort((a,b) => b.week.localeCompare(a.week)).map(g => {
       const avgCalIn = g.calInDays ? g.calInSum / g.calInDays : 0;
       const avgCalOut = g.calOutDays ? g.calOutSum / g.calOutDays : 0;
@@ -787,7 +764,6 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
   }, [weeklyStats, selectedMonth]);
 
   const handleSaveEdit = () => {
-    // 1. Guardar en Health Log (Sleep, Score, Rec, Batt, CalOut, CalIn, Steps)
     setHL(prev => {
       const i = prev.findIndex(x => x.date === editDate);
       const existing = i >= 0 ? prev[i] : { date: editDate };
@@ -805,7 +781,6 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
       return [...prev, entry];
     });
 
-    // 2. Guardar en Biometrics (Peso, Grasa, Músculo)
     if (editForm.weight || editForm.fat || editForm.muscle) {
       setBios(prev => {
         const i = prev.findIndex(x => x.date === editDate);
@@ -824,28 +799,26 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
     setEditDate(null);
   };
 
-  const bCol = b => b < 0 ? T.green : b < 300 ? T.accent : T.red;
-
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ ...st.card, overflowX:"auto" }}>
-        <SH title="📊 WEEKLY RECAP & DAILY LOGS" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{filteredStats.length} WEEKS</span>}/>
-        
-        {/* Selector de Meses */}
-        <div style={{ padding: "0 4px 16px", display: "flex", gap: 8, overflowX: "auto", borderBottom: `1px solid ${T.border}`, marginBottom: 8 }}>
-          <button onClick={() => setSelectedMonth("all")} style={st.ghost(selectedMonth === "all")}>TODOS</button>
-          {availableMonths.map(m => (
-            <button key={m} onClick={() => setSelectedMonth(m)} style={st.ghost(selectedMonth === m)}>
-              {fmtMonth(m).toUpperCase()}
-            </button>
-          ))}
+      <div style={{ ...st.card, overflowX:"auto", padding:0 }}>
+        <div style={{ padding:"16px 20px" }}>
+          <SH title="Resumen semanal" icon={<Icons.Activity size={18} color={T.text}/>} right={<span style={{fontSize:12,color:T.muted}}>{filteredStats.length} Semanas</span>}/>
+          <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
+            <button onClick={() => setSelectedMonth("all")} style={st.ghost(selectedMonth === "all")}>Todos</button>
+            {availableMonths.map(m => (
+              <button key={m} onClick={() => setSelectedMonth(m)} style={st.ghost(selectedMonth === m)}>
+                {fmtMonth(m)}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:1000, fontFamily:T.font }}>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth:1000, fontFamily:T.font }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
-              {["WEEK / DAY", "FOCUS", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "BATT %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)", ""].map((h, i) => (
-                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: (i<=1 || h==="") ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
+              {["Semana / Día", "Enfoque", "Peso", "Grasa", "Músculo", "Sueño", "Recup", "Batería", "In", "Out", "Balance", "Prot", "Carb", "Grasa", ""].map((h, i) => (
+                <th key={h} style={{ padding:"12px 14px", color:T.muted, fontWeight:600, textAlign: (i<=1 || h==="") ? "left" : "right" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -854,33 +827,32 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
               const isOpen = expanded.has(w.week);
               return (
                 <React.Fragment key={w.week}>
-                  {/* Fila del Promedio Semanal */}
-                  <tr onClick={() => toggle(w.week)} style={{ borderBottom:`1px solid ${T.border}`, background: isOpen ? T.card3 : "transparent", cursor: "pointer", transition: "background 0.2s" }}>
-                    <td style={{ padding:"12px 8px", textAlign:"left", fontWeight:700, color:T.accent }}>{isOpen ? "▼" : "▶"} {fmtWeek(w.week)}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"center", color:T.muted }}>—</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent, fontWeight:700 }}>{w.weight ? w.weight.toFixed(1) + " KG" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.red }}>{w.fat ? w.fat.toFixed(1) + "%" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.muscle ? w.muscle.toFixed(1) + " KG" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.sleep ? w.sleep.toFixed(1) + "H" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:getRecoveryColor(w.recovery, T) }}>{w.recovery ? Math.round(w.recovery) + "%" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.teal }}>{w.bodyBattery ? Math.round(w.bodyBattery) + "%" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.accent }}>{w.calIn ? Math.round(w.calIn) : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.calOut ? Math.round(w.calOut) : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:w.balance ? bCol(w.balance) : T.muted, fontWeight:700 }}>{w.balance ? (w.balance > 0 ? "+" : "") + Math.round(w.balance) : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.p ? Math.round(w.p) + "g" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.c ? Math.round(w.c) + "g" : "—"}</td>
-                    <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
+                  <tr onClick={() => toggle(w.week)} style={{ borderBottom:`1px solid ${T.border}`, background: isOpen ? T.sel : "transparent", cursor: "pointer", transition: "background 0.2s", ...st.num }}>
+                    <td style={{ padding:"14px", textAlign:"left", fontWeight:600, color:T.text }}>{isOpen ? "▼" : "▶"} {fmtWeek(w.week)}</td>
+                    <td style={{ padding:"14px", textAlign:"left", color:T.muted }}>—</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text, fontWeight:600 }}>{w.weight ? `${w.weight.toFixed(1)}kg` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.fat ? `${w.fat.toFixed(1)}%` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.muscle ? `${w.muscle.toFixed(1)}kg` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:w.sleep ? getSleepColor(w.sleep, T) : T.text }}>{w.sleep ? `${w.sleep.toFixed(1)}h` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:getRecoveryColor(w.recovery, T) }}>{w.recovery ? `${Math.round(w.recovery)}%` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.bodyBattery ? `${Math.round(w.bodyBattery)}%` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.calIn ? Math.round(w.calIn).toLocaleString('es-ES') : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.calOut ? Math.round(w.calOut).toLocaleString('es-ES') : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text, fontWeight:600 }}>{w.balance ? (w.balance > 0 ? "+" : "") + Math.round(w.balance).toLocaleString('es-ES') : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.p ? `${Math.round(w.p)}g` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.c ? `${Math.round(w.c)}g` : "—"}</td>
+                    <td style={{ padding:"14px", textAlign:"right", color:T.text }}>{w.g ? `${Math.round(w.g)}g` : "—"}</td>
                     <td></td>
                   </tr>
                   
-                  {/* Filas Diarias (Visibles solo si la semana está expandida) */}
                   {isOpen && w.days.map(d => {
-                    const dBal = (d.calIn > 0 && d.calOut > 0) ? d.calIn - d.calOut : null;
+                    const hasIn = d.calIn > 0;
+                    const dBal = (hasIn && d.calOut > 0) ? d.calIn - d.calOut : null;
                     
                     if (editDate === d.date) {
                       return (
                         <tr key={`${d.date}-edit`}>
-                          <td colSpan={15} style={{ padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
+                          <td colSpan={15} style={{ padding: "12px", borderBottom: `1px solid ${T.border}` }}>
                             <EditRow 
                               fields={[
                                 { k:"weight", l:"Peso (Kg)", t:"number", step:"0.1" },
@@ -888,8 +860,8 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                                 { k:"muscle", l:"Musc (Kg)", t:"number", step:"0.1" },
                                 { k:"sleep", l:"Sueño (h)", step:"0.01", t:"number" },
                                 { k:"score", l:"Score %", t:"number" },
-                                { k:"recovery", l:"Rec %", t:"number" },
-                                { k:"bodyBattery", l:"Batt %", t:"number" },
+                                { k:"recovery", l:"Recup %", t:"number" },
+                                { k:"bodyBattery", l:"Bat %", t:"number" },
                                 { k:"calIn", l:"Cal In", t:"number" },
                                 { k:"calOut", l:"Cal Out", t:"number" },
                                 { k:"steps", l:"Pasos", t:"number" }
@@ -906,24 +878,24 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                     }
 
                     return (
-                      <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background: T.card2, fontSize: 10 }}>
-                        <td style={{ padding:"8px 8px 8px 24px", textAlign:"left", color:T.text }}>{d.date}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"left", color:T.accent, fontSize:9, textTransform:"uppercase" }}>
-                          {d.focus && d.focus.length > 0 ? d.focus.map(f => f.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'').trim()).join(", ") : "—"}
+                      <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background: T.card2, ...st.num }}>
+                        <td style={{ padding:"10px 14px 10px 30px", textAlign:"left", color:T.text, fontSize:12 }}>{d.date}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"left", color:T.text, fontSize:12 }}>
+                          {d.focus && d.focus.length > 0 ? d.focus.join(", ") : "—"}
                         </td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.weight ? d.weight.toFixed(1) : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.fat ? d.fat.toFixed(1) + "%" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.muscle ? d.muscle.toFixed(1) : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.sleep ? d.sleep.toFixed(1) + "H" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:getRecoveryColor(d.recovery, T) }}>{d.recovery ? Math.round(d.recovery) + "%" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.teal }}>{d.bodyBattery ? Math.round(d.bodyBattery) + "%" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.calIn ? Math.round(d.calIn) : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.calOut ? Math.round(d.calOut) : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:dBal ? bCol(dBal) : T.muted }}>{dBal ? (dBal > 0 ? "+" : "") + Math.round(dBal) : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.p ? Math.round(d.p) + "g" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.c ? Math.round(d.c) + "g" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.g ? Math.round(d.g) + "g" : "—"}</td>
-                        <td style={{ padding:"8px 8px", textAlign:"center" }}>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{d.weight ? d.weight.toFixed(1) : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{d.fat ? `${d.fat.toFixed(1)}%` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{d.muscle ? d.muscle.toFixed(1) : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:d.sleep ? getSleepColor(d.sleep, T) : T.text, fontSize:12 }}>{d.sleep ? `${d.sleep.toFixed(1)}h` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:getRecoveryColor(d.recovery, T), fontSize:12 }}>{d.recovery ? `${Math.round(d.recovery)}%` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{d.bodyBattery ? `${Math.round(d.bodyBattery)}%` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{hasIn ? Math.round(d.calIn).toLocaleString('es-ES') : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:T.text, fontSize:12 }}>{d.calOut ? Math.round(d.calOut).toLocaleString('es-ES') : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:dBal ? (dBal<0?T.ok:T.bad) : T.muted, fontSize:12, fontWeight:600 }}>{dBal ? (dBal > 0 ? "+" : "") + Math.round(dBal).toLocaleString('es-ES') : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:hasIn?T.text:T.muted, fontSize:12 }}>{hasIn ? `${Math.round(d.p)}g` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:hasIn?T.text:T.muted, fontSize:12 }}>{hasIn ? `${Math.round(d.c)}g` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"right", color:hasIn?T.text:T.muted, fontSize:12 }}>{hasIn ? `${Math.round(d.g)}g` : "—"}</td>
+                        <td style={{ padding:"10px 14px", textAlign:"center" }}>
                           <div style={{ display:"flex", gap:4 }}>
                             <button style={st.icon()} onClick={(e) => {
                               e.stopPropagation();
@@ -934,7 +906,7 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                                 bodyBattery: d.bodyBattery || "", calIn: d.calIn || "", calOut: d.calOut || "", steps: d.steps || ""
                               });
                             }}>
-                              <EditIcon color={T.accent} />
+                              <EditIcon color={T.text} />
                             </button>
                             <button style={st.icon()} onClick={(e) => {
                               e.stopPropagation();
@@ -943,7 +915,7 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                                 setBios(p => p.filter(x => x.date !== d.date));
                               }
                             }}>
-                              <DeleteIcon color={T.red} />
+                              <DeleteIcon color={T.bad} />
                             </button>
                           </div>
                         </td>
@@ -1026,15 +998,15 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
       
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", background: T.card2, borderRadius: 6, padding: 4, border:`1px solid ${T.border}` }}>
-          {["semana", "mes", "año"].map(v => {
-            const val = v === "semana" ? "week" : v === "mes" ? "month" : "year";
+          {["Semana", "Mes", "Año"].map(v => {
+            const val = v === "Semana" ? "week" : v === "Mes" ? "month" : "year";
             return (
               <button key={v} onClick={() => setView(val)}
                 style={{
                   background: view === val ? T.card : "transparent",
-                  color: view === val ? T.accent : T.muted,
-                  borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
-                  fontFamily: T.font, textTransform:"uppercase", transition: "all 0.2s"
+                  color: view === val ? T.text : T.muted,
+                  borderRadius: 4, padding: "6px 16px", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer",
+                  fontFamily: T.font, transition: "all 0.2s"
                 }}>
                 {v}
               </button>
@@ -1044,11 +1016,11 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
 
         {(view === "month" || view === "year") && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}`, transition: "all 0.15s" }} onClick={prevPeriod}>◀</button>
-            <div style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", color: T.text, minWidth: 120, textAlign: "center", fontFamily:T.font }}>
+            <button style={{ ...st.icon(), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}` }} onClick={prevPeriod}>◀</button>
+            <div style={{ fontSize: 16, fontWeight: 600, color: T.text, minWidth: 120, textAlign: "center", fontFamily:T.font }}>
               {view === "year" ? year : new Date(year, month, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
             </div>
-            <button style={{ ...st.icon(T.text), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}`, transition: "all 0.15s" }} onClick={nextPeriod}>▶</button>
+            <button style={{ ...st.icon(), background: T.card, padding: "8px 14px", border:`1px solid ${T.border}` }} onClick={nextPeriod}>▶</button>
           </div>
         )}
       </div>
@@ -1064,11 +1036,11 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
                 return (
                   <button key={i} onClick={() => { setNavDate(mDate); setView("month"); }}
                     style={{
-                      background: isCurrentMonth ? T.accentDim : T.card2,
-                      border: `1px solid ${isCurrentMonth ? T.accent : T.border}`,
+                      background: isCurrentMonth ? T.sel : T.card2,
+                      border: `1px solid ${isCurrentMonth ? T.border : T.border}`,
                       borderRadius: 6, padding: "20px 10px",
-                      color: isCurrentMonth ? T.accent : T.text,
-                      fontWeight: 700, fontSize: 12, textTransform: "uppercase", cursor: "pointer", fontFamily:T.font, transition: "all 0.15s"
+                      color: isCurrentMonth ? T.text : T.text,
+                      fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily:T.font, transition: "all 0.15s"
                     }}>
                     {mDate.toLocaleDateString("es-ES", { month: "short" })}
                   </button>
@@ -1080,7 +1052,7 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
           {view === "month" && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, textAlign: "center" }}>
               {["L", "M", "X", "J", "V", "S", "D"].map(d => (
-                <div key={d} style={{ fontSize: 10, fontWeight: 700, color: T.muted, marginBottom: 8, fontFamily:T.font }}>{d}</div>
+                <div key={d} style={{ fontSize: 13, fontWeight: 600, color: T.muted, marginBottom: 8, fontFamily:T.font }}>{d}</div>
               ))}
               {daysGrid.map((day, i) => {
                 if (!day) return <div key={`pad-${i}`} />;
@@ -1093,13 +1065,13 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
                   <button key={day.dateStr} 
                     onClick={() => setActiveDate(day.dateStr)}
                     style={{
-                      background: isSelected ? T.accent : recoveryColor ? `${recoveryColor}18` : hasData ? T.card2 : "transparent",
-                      border: `1px solid ${isSelected ? T.accent : recoveryColor ? recoveryColor : isToday ? T.muted : "transparent"}`,
+                      background: isSelected ? T.text : recoveryColor ? `${recoveryColor}18` : hasData ? T.card2 : "transparent",
+                      border: `1px solid ${isSelected ? T.text : recoveryColor ? recoveryColor : isToday ? T.muted : "transparent"}`,
                       borderRadius: 6, aspectRatio: "1/1", display: "flex", flexDirection: "column",
                       alignItems: "center", justifyContent: "center", cursor: "pointer",
-                      color: isSelected ? "#000" : recoveryColor ? recoveryColor : T.text, fontFamily:T.font, transition: "all 0.15s", padding: 0
+                      color: isSelected ? T.bg : recoveryColor ? recoveryColor : T.text, fontFamily:T.font, transition: "all 0.15s", padding: 0
                     }}>
-                    <span style={{ fontSize: 13, fontWeight: isToday || isSelected ? 700 : 400 }}>{day.d}</span>
+                    <span style={{ fontSize: 14, fontWeight: isToday || isSelected ? 600 : 400, ...st.num }}>{day.d}</span>
                   </button>
                 );
               })}
@@ -1116,16 +1088,16 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
                    <button key={dateStr} onClick={() => setActiveDate(dateStr)}
                     style={{
                       flex: 1, margin: "0 4px", padding: "16px 0",
-                      background: isSelected ? T.accent : T.card2,
-                      border: `1px solid ${isSelected ? T.accent : isToday ? T.muted : T.border}`,
+                      background: isSelected ? T.text : T.card2,
+                      border: `1px solid ${isSelected ? T.text : isToday ? T.muted : T.border}`,
                       borderRadius: 6, display: "flex", flexDirection: "column",
-                      alignItems: "center", cursor: "pointer", color: isSelected ? "#000" : T.text,
+                      alignItems: "center", cursor: "pointer", color: isSelected ? T.bg : T.text,
                       fontFamily:T.font, transition: "all 0.15s"
                     }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.8, textTransform: "uppercase" }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.8 }}>
                         {mDate.toLocaleDateString("es-ES", { weekday: "short" })}
                       </span>
-                      <span style={{ fontSize: 20, fontWeight: 700, marginTop: 4 }}>
+                      <span style={{ fontSize: 24, fontWeight: 600, marginTop: 4, ...st.num }}>
                         {mDate.getDate()}
                       </span>
                    </button>
@@ -1139,37 +1111,31 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           
           {(isSelectedDayInMonth || view === "week") && (
-            <div style={{ ...st.card2, border: `1px solid ${T.accentDim}`, padding: 20 }}>
-              <SH title={`📌 TELEMETRY: ${activeDate === TODAY ? "TODAY" : activeDate}`} />
+            <div style={{ ...st.card2, border: `1px solid ${T.sel}`, padding: 20 }}>
+              <SH title={`Registro: ${activeDate === TODAY ? "Hoy" : activeDate}`} icon={<Icons.Activity size={18} color={T.text}/>}/>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>CAL OUT</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: T.blue, fontFamily:T.font }}>
-                    {selectedDayData.calOut ? `${selectedDayData.calOut}` : "—"}
+                  <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, fontFamily:T.font }}>Cal Quemadas</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>
+                    {selectedDayData.calOut ? selectedDayData.calOut.toLocaleString('es-ES') : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>CAL IN</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily:T.font }}>
-                    {selectedDayData.calIn ? `${selectedDayData.calIn}` : "—"}
+                  <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, fontFamily:T.font }}>Cal Ingeridas</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>
+                    {selectedDayData.calIn > 0 ? selectedDayData.calIn.toLocaleString('es-ES') : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>RECOVERY</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: getRecoveryColor(selectedDayData.recovery, T), fontFamily:T.font }}>
+                  <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, fontFamily:T.font }}>Recuperación</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: getRecoveryColor(selectedDayData.recovery, T), fontFamily:T.font, ...st.num }}>
                     {selectedDayData.recovery ? `${selectedDayData.recovery}%` : "—"}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>SLEEP</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: T.purple, fontFamily:T.font }}>
+                  <div style={{ fontSize: 12, color: T.muted, fontWeight: 600, fontFamily:T.font }}>Sueño</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: selectedDayData.sleep ? getSleepColor(selectedDayData.sleep, T) : T.text, fontFamily:T.font, ...st.num }}>
                     {selectedDayData.sleep ? `${selectedDayData.sleep}h` : "—"}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 9, color: T.muted, fontWeight: 700, letterSpacing:"0.1em", fontFamily:T.font }}>SCORE</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: T.teal, fontFamily:T.font }}>
-                    {selectedDayData.score ? `${selectedDayData.score}%` : "—"}
                   </div>
                 </div>
               </div>
@@ -1177,23 +1143,23 @@ function Calendario({ allDayData, bios, activeDate, setActiveDate, theme, T }) {
           )}
 
           <div style={{ ...st.card, padding: 20, flex: 1 }}>
-            <SH title={`📊 RECAP: ${new Date(year, month, 1).toLocaleDateString("es-ES", { month: "short" }).toUpperCase()}`} />
+            <SH title={`Promedios: ${new Date(year, month, 1).toLocaleDateString("es-ES", { month: "short" })}`} icon={<Icons.Activity size={18} color={T.text}/>} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
-                <span style={st.lbl}>AVG CAL IN</span>
-                <div style={{ fontSize: 22, fontWeight: 700, color: T.accent, fontFamily:T.font }}>{Math.round(avgCalIn)}</div>
+                <span style={st.lbl}>In Promedio</span>
+                <div style={{ fontSize: 24, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>{Math.round(avgCalIn).toLocaleString('es-ES')}</div>
               </div>
               <div>
-                <span style={st.lbl}>AVG CAL OUT</span>
-                <div style={{ fontSize: 22, fontWeight: 700, color: T.blue, fontFamily:T.font }}>{Math.round(avgCalOut)}</div>
+                <span style={st.lbl}>Out Promedio</span>
+                <div style={{ fontSize: 24, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>{Math.round(avgCalOut).toLocaleString('es-ES')}</div>
               </div>
               <div>
-                <span style={st.lbl}>AVG SLEEP</span>
-                <div style={{ fontSize: 22, fontWeight: 700, color: T.purple, fontFamily:T.font }}>{avgSleep > 0 ? avgSleep.toFixed(1) : "—"}<span style={{fontSize:12, color:T.muted}}>h</span></div>
+                <span style={st.lbl}>Sueño Prom.</span>
+                <div style={{ fontSize: 24, fontWeight: 600, color: avgSleep ? getSleepColor(avgSleep, T) : T.text, fontFamily:T.font, ...st.num }}>{avgSleep > 0 ? avgSleep.toFixed(1) : "—"}<span style={{fontSize:14, color:T.muted}}>h</span></div>
               </div>
               <div>
-                <span style={st.lbl}>AVG SCORE</span>
-                <div style={{ fontSize: 22, fontWeight: 700, color: T.teal, fontFamily:T.font }}>{avgScore > 0 ? Math.round(avgScore) : "—"}<span style={{fontSize:12, color:T.muted}}>%</span></div>
+                <span style={st.lbl}>Score Prom.</span>
+                <div style={{ fontSize: 24, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>{avgScore > 0 ? Math.round(avgScore) : "—"}<span style={{fontSize:14, color:T.muted}}>%</span></div>
               </div>
             </div>
           </div>
@@ -1219,18 +1185,17 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
   const [dbER,setDbER]=useState({});
   const [lgEId,setLgEId]=useState(null);
 
-  const pCol=(v,g)=>v>=g?T.green:v>=g*.8?T.accent:T.red;
-  const cCol=(v,g)=>v>g?T.red:v>g*.85?T.accent:T.green;
+  const pCol=(v,g)=>v>=g?T.text:T.muted;
   const gGoal=goals.g||60;
   const filtered=db.filter(d=>d.name.toLowerCase().includes(search.toLowerCase()));
-  const macros=[{name:"Proteína",v:Math.round(activeDayData.p*4),c:T.green},{name:"Carbos",v:Math.round(activeDayData.c*4),c:T.blue},{name:"Grasas",v:Math.round(activeDayData.g*9),c:T.purple}].filter(d=>d.v>0);
+  const macros=[{name:"Proteína",v:Math.round(activeDayData.p*4),c:T.text},{name:"Carbos",v:Math.round(activeDayData.c*4),c:T.muted},{name:"Grasas",v:Math.round(activeDayData.g*9),c:T.border}].filter(d=>d.v>0);
 
   const addDB=()=>{ if(!sel) return; setFL(p=>[...p,{
     date:activeDate, id:uid(), name:sel.name, qty, unit:sel.unit,
     cal:Math.round(sel.cal*qty), p:r1(sel.p*qty), c:r1(sel.c*qty), g:r1(sel.g*qty),
     unitCal:sel.cal, unitP:sel.p, unitC:sel.c, unitG:sel.g,
   }]); setSel(null);setQty(1);setSrch(""); };
-  const addMan=()=>{ if(!mf.cal) return; setFL(p=>[...p,{date:activeDate,id:uid(),name:mf.name||"Log manual",qty:1,cal:+mf.cal,p:+mf.p||0,c:+mf.c||0,g:+mf.g||0}]); setMF({name:"",cal:"",p:"",c:"",g:""}); };
+  const addMan=()=>{ if(!mf.cal) return; setFL(p=>[...p,{date:activeDate,id:uid(),name:mf.name||"Registro manual",qty:1,cal:+mf.cal,p:+mf.p||0,c:+mf.c||0,g:+mf.g||0}]); setMF({name:"",cal:"",p:"",c:"",g:""}); };
   const addToDb=()=>{ if(!adb.name||!adb.cal) return; setDb(p=>[...p,{id:uid(),name:adb.name,unit:adb.unit||"Porción",cal:+adb.cal,p:+adb.p||0,c:+adb.c||0,g:+adb.g||0}]); setAdb({name:"",unit:"",cal:"",p:"",c:"",g:""}); setMode("search"); };
   const saveDbEd=()=>{ setDb(p=>p.map(f=>f.id===dbEId?{...f,...dbER,cal:+dbER.cal,p:+dbER.p,c:+dbER.c,g:+dbER.g}:f)); setDbEId(null); };
 
@@ -1239,7 +1204,7 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-        {[["search","🔍 SEARCH DB"],["manual","✏️ MANUAL IN"],["adddb","➕ ADD NEW"],["editdb","🛠 EDIT DB"]].map(([id,label])=>(
+        {[["search","Buscar BD"],["manual","Entrada manual"],["adddb","Agregar a BD"],["editdb","Editar BD"]].map(([id,label])=>(
           <button key={id} style={st.ghost(mode===id)} onClick={()=>{setMode(id);setDbEId(null);}}>{label}</button>
         ))}
       </div>
@@ -1247,64 +1212,64 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
       <div style={{ display:"grid", gridTemplateColumns:"minmax(260px,1.15fr) minmax(260px,1fr)", gap:16, alignItems:"start" }}>
         <div style={{ ...st.card, display:"flex", flexDirection:"column", minHeight:460 }}>
           {mode==="search"&&(<>
-            <SH title={`🔍 DB SEARCH (${db.length})`}/>
-            <input style={{ ...st.inp, marginBottom:12 }} placeholder="Type to search..." value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
+            <SH title={`Búsqueda en BD (${db.length})`} icon={<Icons.Food size={18} color={T.text}/>}/>
+            <input style={{ ...st.inp, marginBottom:12 }} placeholder="Buscar..." value={search} onChange={e=>{setSrch(e.target.value);setSel(null);}}/>
             
             {sel&&(
-              <div style={{ ...st.card2, marginBottom:16, border:`1px solid ${T.accent}`, position:"sticky", top:0, zIndex:10 }}>
+              <div style={{ ...st.card2, marginBottom:16, border:`1px solid ${T.text}`, position:"sticky", top:0, zIndex:10 }}>
                 <div style={{ display:"flex", justifyContent:"space-between" }}>
-                  <div style={{ fontSize:13, fontWeight:700, color:T.accent, marginBottom:10, textTransform:"uppercase" }}>{sel.name}</div>
+                  <div style={{ fontSize:15, fontWeight:600, color:T.text, marginBottom:10 }}>{sel.name}</div>
                   <button onClick={()=>setSel(null)} style={{background:"none", border:"none", color:T.muted, cursor:"pointer"}}>✕</button>
                 </div>
                 <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10 }}>
-                  <div style={{ flex:1 }}><span style={st.lbl}>QTY</span>
+                  <div style={{ flex:1 }}><span style={st.lbl}>Cantidad</span>
                     <input style={st.inp} type="number" value={qty} min="0.25" step="0.25" onChange={e=>setQty(+e.target.value)}/></div>
-                  <div style={{ fontSize:12, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {sel.unit}</div>
+                  <div style={{ fontSize:13, color:T.muted, paddingTop:16, fontFamily:T.font }}>× {sel.unit}</div>
                 </div>
-                <div style={{ fontSize:11, color:T.muted, marginBottom:10, fontWeight:700, fontFamily:T.font }}>{Math.round(sel.cal*qty)} KCAL · {r1(sel.p*qty)}P · {r1(sel.c*qty)}C · {r1(sel.g*qty)}G</div>
-                <button style={st.btn} onClick={addDB}>INJECT TO TANK</button>
+                <div style={{ fontSize:12, color:T.muted, marginBottom:10, fontWeight:600, fontFamily:T.font, ...st.num }}>{Math.round(sel.cal*qty).toLocaleString('es-ES')} KCAL · {r1(sel.p*qty)}P · {r1(sel.c*qty)}C · {r1(sel.g*qty)}G</div>
+                <button style={st.btn} onClick={addDB}>Registrar</button>
               </div>
             )}
 
             <div style={{ flex:1, overflowY:"auto", marginBottom:10, minHeight:0 }}>
               {filtered.map(f=>(
                 <div key={f.id} onClick={()=>setSel(f)} style={{ padding:"10px 14px", borderRadius:6, cursor:"pointer", marginBottom:6,
-                  border:`1px solid ${sel?.id===f.id?T.accent+"60":"transparent"}`,
-                  background:sel?.id===f.id?T.accentDim:"transparent", transition:"all 0.12s" }}>
-                  <div style={{ fontWeight:700, fontSize:13, textTransform:"uppercase" }}>{f.name}</div>
-                  <div style={{ fontSize:11, color:T.muted, marginTop:4, fontFamily:T.font }}>{f.cal} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div>
+                  border:`1px solid ${sel?.id===f.id?T.border:"transparent"}`,
+                  background:sel?.id===f.id?T.sel:"transparent", transition:"all 0.12s" }}>
+                  <div style={{ fontWeight:600, fontSize:14 }}>{f.name}</div>
+                  <div style={{ fontSize:12, color:T.muted, marginTop:4, fontFamily:T.font, ...st.num }}>{f.cal.toLocaleString('es-ES')} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div>
                 </div>
               ))}
             </div>
           </>)}
           {mode==="manual"&&(<>
-            <SH title="✏️ MANUAL INJECTION"/>
+            <SH title="Registro manual" icon={<Icons.Edit size={18} color={T.text}/>}/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>DESC</span>
+              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Descripción</span>
                 <input style={st.inp} placeholder="" value={mf.name} onChange={e=>setMF(p=>({...p,name:e.target.value}))}/></div>
-              {[["KCAL *","cal"],["PROT (g)","p"],["CARB (g)","c"],["FAT (g)","g"]].map(([l,k])=>(
+              {[["Kcal *","cal"],["Prot (g)","p"],["Carb (g)","c"],["Grasa (g)","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
                   <input style={st.inp} type="number" placeholder="" value={mf[k]} onChange={e=>setMF(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
-            {mf.cal&&<div style={{fontSize:10,color:T.muted,marginBottom:10, fontFamily:T.font}}>PREVIEW: {mf.cal} KCAL · {mf.p||0}P · {mf.c||0}C · {mf.g||0}G</div>}
-            <button style={st.btn} onClick={addMan}>INJECT TO TANK</button>
+            {mf.cal&&<div style={{fontSize:12,color:T.muted,marginBottom:10, fontFamily:T.font, ...st.num}}>Vista previa: {Number(mf.cal).toLocaleString('es-ES')} KCAL · {mf.p||0}P · {mf.c||0}C · {mf.g||0}G</div>}
+            <button style={st.btn} onClick={addMan}>Registrar</button>
           </>)}
           {mode==="adddb"&&(<>
-            <SH title="➕ NEW DB ENTRY"/>
+            <SH title="Nueva entrada BD" icon={<Icons.Plus size={18} color={T.text}/>}/>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
-              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>ITEM</span>
+              <div style={{gridColumn:"span 2"}}><span style={st.lbl}>Item</span>
                 <input style={st.inp} placeholder="" value={adb.name} onChange={e=>setAdb(p=>({...p,name:e.target.value}))}/></div>
-              <div><span style={st.lbl}>UNIT</span><input style={st.inp} placeholder="" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
-              {[["KCAL","cal"],["PROT","p"],["CARB","c"],["FAT","g"]].map(([l,k])=>(
+              <div><span style={st.lbl}>Unidad</span><input style={st.inp} placeholder="" value={adb.unit} onChange={e=>setAdb(p=>({...p,unit:e.target.value}))}/></div>
+              {[["Kcal","cal"],["Prot (g)","p"],["Carb (g)","c"],["Grasa (g)","g"]].map(([l,k])=>(
                 <div key={k}><span style={st.lbl}>{l}</span>
                   <input style={st.inp} type="number" placeholder="" value={adb[k]} onChange={e=>setAdb(p=>({...p,[k]:e.target.value}))}/></div>
               ))}
             </div>
-            <button style={st.btn} onClick={addToDb}>💾 SAVE TO DB</button>
+            <button style={st.btn} onClick={addToDb}>Guardar en BD</button>
           </>)}
           {mode==="editdb"&&(<>
-            <SH title={`🛠 EDIT DB (${db.length})`}/>
+            <SH title={`Editar BD (${db.length})`} icon={<Icons.Edit size={18} color={T.text}/>}/>
             <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:8 }}>
               {db.map(f=>dbEId===f.id?(
                 <EditRow key={f.id}
@@ -1312,14 +1277,14 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
                   vals={dbER} onChange={(k,v)=>setDbER(p=>({...p,[k]:v}))} onSave={saveDbEd} onCancel={()=>setDbEId(null)} T={T}/>
               ):(
                 <div key={f.id} style={{ ...st.card2, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <div><div style={{fontWeight:700,fontSize:12,textTransform:"uppercase"}}>{f.name}</div>
-                    <div style={{fontSize:10,color:T.muted, fontFamily:T.font, marginTop:4}}>{f.cal} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div></div>
+                  <div><div style={{fontWeight:600,fontSize:14}}>{f.name}</div>
+                    <div style={{fontSize:12,color:T.muted, fontFamily:T.font, marginTop:4, ...st.num}}>{f.cal.toLocaleString('es-ES')} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div></div>
                   <div style={{display:"flex",gap:4}}>
                     <button style={st.icon()} onClick={()=>{setDbEId(f.id);setDbER({...f});}}>
-                      <EditIcon color={T.accent} />
+                      <EditIcon color={T.text} />
                     </button>
                     <button style={st.icon()} onClick={()=>setDb(p=>p.filter(x=>x.id!==f.id))}>
-                      <DeleteIcon color={T.red} />
+                      <DeleteIcon color={T.bad} />
                     </button>
                   </div>
                 </div>
@@ -1332,10 +1297,10 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
           <div style={st.card}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
               <div>
-                <span style={st.lbl}>{isToday ? "LIVE INJECTION" : "INJECTION REC."}</span>
-                <div style={{ fontSize:42, fontWeight:700, color:T.accent, lineHeight:1, fontFamily:T.font }}>{activeDayData.calIn}</div>
-                <div style={{ fontSize:10, color:T.muted, marginTop:4, fontFamily:T.font }}>TGT: {goals.cal} KCAL</div>
-                <ProgBar value={activeDayData.calIn} max={goals.cal} color={activeDayData.calIn>goals.cal?T.red:T.accent} h={4}/>
+                <span style={st.lbl}>{isToday ? "Ingesta de hoy" : "Registro de ingesta"}</span>
+                <div style={{ fontSize:42, fontWeight:600, color:T.text, lineHeight:1, fontFamily:T.font, ...st.num }}>{activeDayData.calIn > 0 ? activeDayData.calIn.toLocaleString('es-ES') : "0"}</div>
+                <div style={{ fontSize:12, color:T.muted, marginTop:6, fontFamily:T.font }}>Meta: {goals.cal.toLocaleString('es-ES')} KCAL</div>
+                <ProgBar value={activeDayData.calIn} max={goals.cal} color={activeDayData.calIn>goals.cal?T.bad:T.text} h={6}/>
               </div>
               {macros.length>0&&(
                 <div style={{width:64,height:64}}>
@@ -1347,20 +1312,20 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
                 </div>
               )}
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginTop:16 }}>
-              {[{n:"PROT",v:activeDayData.p,g:goals.p,c:pCol(activeDayData.p,goals.p)},{n:"CARB",v:activeDayData.c,g:goals.c,c:cCol(activeDayData.c,goals.c)},{n:"FAT",v:activeDayData.g,g:gGoal,c:T.purple}].map(m=>(
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginTop:24 }}>
+              {[{n:"Prot",v:activeDayData.p,g:goals.p,c:pCol(activeDayData.p,goals.p)},{n:"Carb",v:activeDayData.c,g:goals.c,c:cCol(activeDayData.c,goals.c)},{n:"Grasa",v:activeDayData.g,g:gGoal,c:T.muted}].map(m=>(
                 <div key={m.n} style={{ background:T.card2, borderRadius:6, padding:10, textAlign:"center", border:`1px solid ${T.border}` }}>
-                  <div style={{ fontSize:22, fontWeight:700, color:m.c, fontFamily:T.font }}>{Math.round(m.v)}</div>
-                  <div style={{ fontSize:9, color:T.muted, fontFamily:T.font, marginTop:2 }}>{m.n} / {m.g}G</div>
-                  <ProgBar value={m.v} max={m.g} color={m.c} h={2}/>
+                  <div style={{ fontSize:22, fontWeight:600, color:m.c, fontFamily:T.font, ...st.num }}>{Math.round(m.v)}</div>
+                  <div style={{ fontSize:11, color:T.muted, fontFamily:T.font, marginTop:4 }}>{m.n} / {m.g}g</div>
+                  <ProgBar value={m.v} max={m.g} color={m.c} h={4}/>
                 </div>
               ))}
             </div>
           </div>
           <div style={{ ...st.card, flex:1 }}>
-            <SH title={`📋 LOG (${isToday ? "TODAY" : activeDate})`} right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{activeFood.length} ENTRIES</span>}/>
+            <SH title={`Registro (${isToday ? "Hoy" : activeDate})`} icon={<Icons.Food size={18} color={T.text}/>} right={<span style={{fontSize:12,color:T.muted,fontFamily:T.font}}>{activeFood.length} Entradas</span>}/>
             {activeFood.length===0?(
-              <div style={{color:T.muted,fontSize:11,textAlign:"center",padding:16,fontFamily:T.font}}>[NO FUEL LOADED]</div>
+              <div style={{color:T.muted,fontSize:13,textAlign:"center",padding:16,fontFamily:T.font}}>Aún sin registrar calorías</div>
             ):(
               <div style={{ maxHeight:300, overflowY:"auto", display:"flex", flexDirection:"column", gap:6 }}>
                 {activeFood.map(f=>lgEId===f.id?(
@@ -1368,21 +1333,21 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
                     onSave={saved=>{setFL(p=>p.map(x=>x.id===f.id?saved:x));setLgEId(null);}}
                     onCancel={()=>setLgEId(null)} T={T}/>
                 ):(
-                  <div key={f.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 10px", background:T.card2, borderRadius:4, border:`1px solid ${T.border}` }}>
+                  <div key={f.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 12px", background:T.card2, borderRadius:6, border:`1px solid ${T.border}` }}>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:11, fontWeight:700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", textTransform:"uppercase" }}>
+                      <div style={{ fontSize:13, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                         {f.name}{f.unit?` (${f.qty} × ${f.unit})`:""}
                       </div>
-                      <div style={{ fontSize:10, color:T.muted, fontFamily:T.font, marginTop:2 }}>{f.p}P · {f.c}C · {f.g}G</div>
+                      <div style={{ fontSize:11, color:T.muted, fontFamily:T.font, marginTop:4, ...st.num }}>{f.p}P · {f.c}C · {f.g}G</div>
                     </div>
-                    <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-                      <span style={{ fontSize:16, fontWeight:700, color:T.accent, fontFamily:T.font }}>{f.cal}</span>
+                    <div style={{ display:"flex", gap:14, alignItems:"center" }}>
+                      <span style={{ fontSize:16, fontWeight:600, color:T.text, fontFamily:T.font, ...st.num }}>{f.cal.toLocaleString('es-ES')}</span>
                       <div style={{ display:"flex", gap:2 }}>
                         <button style={st.icon()} onClick={()=>setLgEId(f.id)}>
-                          <EditIcon color={T.accent} />
+                          <EditIcon color={T.text} />
                         </button>
                         <button style={st.icon()} onClick={()=>setFL(p=>p.filter(x=>x.id!==f.id))}>
-                          <DeleteIcon color={T.red} />
+                          <DeleteIcon color={T.bad} />
                         </button>
                       </div>
                     </div>
@@ -1457,7 +1422,7 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 
       newSets.push({ id:uid(), ...matchObj, date:activeDate, program });
     });
-    if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} RECORDS INJECTED.`); }
+    if (newSets.length > 0) { setStr(p=>[...p,...newSets]); setQuickLoad(""); alert(`✅ ${newSets.length} registros insertados.`); }
   };
 
   const injectTemplate = (date, template) => {
@@ -1469,40 +1434,32 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 
   const saveEd=()=>{ setStr(p=>p.map(l=>l.id===editId?{...l,...editRow,weight:+editRow.weight,reps:+editRow.reps,sets:+editRow.sets,rpe:+editRow.rpe}:l)); setEId(null); };
 
-  const tabStyle = (id) => ({
-    background: strView===id ? T.accent : T.card2,
-    color: strView===id ? "#000" : T.muted,
-    border:`1px solid ${strView===id ? T.accent : T.border}`, borderRadius:6, padding:"8px 16px",
-    fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font, textTransform:"uppercase",
-    transition:"all 0.15s", letterSpacing:"0.05em"
-  });
-
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <div style={st.card}>
-        <SH title={<>🗓 CHASSIS PROGRAM · <span style={{color:T.accent,fontWeight:900}}>{program}</span></>}
+        <SH title={<>Plan actual · <span style={{color:T.text,fontWeight:700}}>{program}</span></>}
           right={<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{Object.keys(PLANS).map(p=><button key={p} style={st.ghost(program===p)} onClick={()=>setProg(p)}>{p}</button>)}</div>}/>
         <button onClick={()=>setPlanO(o=>!o)} style={{ ...st.ghost(planOpen), marginBottom:planOpen?14:0 }}>
-          {planOpen?"✕ CLOSE EDITOR":"⚙️ CONFIG"}
+          {planOpen?"Cerrar editor":"Configurar plan"}
         </button>
         {planOpen&&(
           <div style={{ marginTop:14 }}>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
-              <div style={{fontSize:11,color:T.muted, fontFamily:T.font}}>SYNCED WITH DASHBOARD.</div>
-              <button onClick={()=>setPlans(p=>({...p,[program]:{...PLANS[program]}}))} style={{...st.ghost(false),fontSize:10,padding:"4px 12px"}}>↺ RESTORE</button>
+              <div style={{fontSize:12,color:T.muted, fontFamily:T.font}}>Sincronizado con el Dashboard.</div>
+              <button onClick={()=>setPlans(p=>({...p,[program]:{...PLANS[program]}}))} style={{...st.ghost(false),fontSize:11,padding:"4px 12px"}}>Restaurar por defecto</button>
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:8 }}>
               {PLAN_KEYS.map(day=>{ 
                 const actDayDow = PLAN_KEYS[new Date(activeDate+"T12:00:00").getDay()===0 ? 6 : new Date(activeDate+"T12:00:00").getDay()-1];
                 const isT=day===actDayDow; 
                 return (
-                <div key={day} style={{ background:isT?T.accentDim:T.card2, border:`1px solid ${isT?T.accent:T.border}`, borderRadius:6, padding:10 }}>
+                <div key={day} style={{ background:isT?T.sel:T.card2, border:`1px solid ${isT?T.border:T.border}`, borderRadius:6, padding:10 }}>
                   <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                    <span style={{fontSize:9,fontWeight:700,color:isT?T.accent:T.muted,letterSpacing:"0.1em"}}>{day.toUpperCase()}</span>
-                    {isT&&<span style={{fontSize:8,background:T.accent,color:"#000",borderRadius:2,padding:"2px 4px",fontWeight:800}}>ACT</span>}
+                    <span style={{fontSize:11,fontWeight:600,color:isT?T.text:T.muted}}>{DAY_FULL_ES[day]}</span>
+                    {isT&&<span style={{fontSize:10,background:T.text,color:T.bg,borderRadius:4,padding:"2px 6px",fontWeight:600}}>Activo</span>}
                   </div>
                   <input value={plans[program]?.[day]||""} onChange={e=>setPlans(p=>({...p,[program]:{...p[program],[day]:e.target.value}}))}
-                    style={{...st.inp,fontSize:11,padding:"6px 10px"}} placeholder=""/>
+                    style={{...st.inp,fontSize:13,padding:"6px 10px"}} placeholder=""/>
                 </div>
               );})}
             </div>
@@ -1511,9 +1468,9 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
       </div>
 
       <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-        <button style={tabStyle("weekly")} onClick={()=>setStrView("weekly")}>📅 WEEKLY VIEW</button>
-        <button style={tabStyle("register")} onClick={()=>setStrView("register")}>🏋️ MANUAL IN</button>
-        <button style={tabStyle("history")} onClick={()=>setStrView("history")}>📊 TELEMETRY ({strLog.length})</button>
+        <button style={st.ghost(strView==="weekly")} onClick={()=>setStrView("weekly")}>Vista Semanal</button>
+        <button style={st.ghost(strView==="register")} onClick={()=>setStrView("register")}>Registro Manual</button>
+        <button style={st.ghost(strView==="history")} onClick={()=>setStrView("history")}>Historial ({strLog.length})</button>
       </div>
 
       {strView==="weekly" && (
@@ -1524,23 +1481,23 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
         <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
           <div style={st.g2}>
             <div style={st.card}>
-              <SH title={`🏋️ SINGLE LOG (${activeDate === TODAY ? "TODAY" : activeDate})`}/>
+              <SH title={`Registro individual (${activeDate === TODAY ? "Hoy" : activeDate})`} icon={<Icons.Plus size={18} color={T.text}/>}/>
               <div style={{marginBottom:10}}>
-                <span style={st.lbl}>EXERCISE</span>
+                <span style={st.lbl}>Ejercicio</span>
                 <select value={exSel} onChange={e=>setExSel(e.target.value)} style={st.sel}>
-                  <option value="" disabled>— SELECT —</option>
+                  <option value="" disabled>— Seleccionar —</option>
                   {Object.entries(EXERCISE_LIB).map(([cat,exs])=>(
                     <optgroup key={cat} label={cat}>{exs.map(ex=><option key={ex} value={ex}>{ex}</option>)}</optgroup>
                   ))}
-                  <option value="__custom__">✏️ CUSTOM</option>
+                  <option value="__custom__">Personalizado</option>
                 </select>
               </div>
-              {isCustom&&<div style={{marginBottom:10}}><span style={st.lbl}>NAME</span>
-                <input style={{...st.inp,borderColor:T.accent+"60"}} placeholder="" value={exCust} onChange={e=>setExCust(e.target.value)}/></div>}
-              {(exSel&&!isCustom)&&<div style={{background:T.accentDim,border:`1px solid ${T.accent}`,borderRadius:6,padding:"8px 14px",marginBottom:12,fontSize:11,color:T.accent,fontWeight:700}}>✓ {exSel.toUpperCase()}</div>}
+              {isCustom&&<div style={{marginBottom:10}}><span style={st.lbl}>Nombre del ejercicio</span>
+                <input style={{...st.inp,borderColor:T.border}} placeholder="" value={exCust} onChange={e=>setExCust(e.target.value)}/></div>}
+              {(exSel&&!isCustom)&&<div style={{background:T.sel,border:`1px solid ${T.border}`,borderRadius:6,padding:"8px 14px",marginBottom:12,fontSize:13,color:T.text,fontWeight:600}}>✓ {exSel}</div>}
 
               <div style={{marginBottom:18}}>
-                <span style={st.lbl}>WEIGHT (KG)</span>
+                <span style={st.lbl}>Peso (KG)</span>
                 <input style={st.inp} type="number" placeholder="" step="0.5"
                   value={form.weight} onChange={e=>setForm(p=>({...p,weight:e.target.value}))}/>
               </div>
@@ -1550,37 +1507,37 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
                 background:T.card2, borderRadius:8, border:`1px solid ${T.border}`, padding:"16px 12px", marginBottom:16
               }}>
                 <NumberPicker value={form.sets} onChange={v=>setForm(p=>({...p,sets:v}))}
-                  options={SETS_OPTIONS} label="SETS" T={T}/>
+                  options={SETS_OPTIONS} label="Sets" T={T}/>
                 <div style={{ width:1, background:T.border, alignSelf:"stretch" }}/>
                 <NumberPicker value={form.reps} onChange={v=>setForm(p=>({...p,reps:v}))}
-                  options={REPS_OPTIONS} label="REPS" T={T}/>
+                  options={REPS_OPTIONS} label="Reps" T={T}/>
                 <div style={{ width:1, background:T.border, alignSelf:"stretch" }}/>
                 <NumberPicker value={form.rpe} onChange={v=>setForm(p=>({...p,rpe:v}))}
                   options={RPE_OPTIONS} label="RPE" T={T}/>
               </div>
 
               {(form.sets && form.reps) && (
-                <div style={{ background:T.accentDim, border:`1px solid ${T.accent}`, borderRadius:6, padding:"8px 14px", marginBottom:12, fontSize:12, color:T.accent, fontWeight:700, textAlign:"center", fontFamily:T.font }}>
+                <div style={{ background:T.sel, border:`1px solid ${T.border}`, borderRadius:6, padding:"10px 14px", marginBottom:12, fontSize:14, color:T.text, fontWeight:600, textAlign:"center", fontFamily:T.font }}>
                   {form.sets}×{form.reps}{form.weight?` @ ${form.weight}kg`:""}{form.rpe?` · RPE ${form.rpe}`:""}
                 </div>
               )}
 
               <button style={{...st.btn, opacity:(exSel&&!(isCustom&&!exCust))?1:0.4}}
-                onClick={addSet}>INJECT SET</button>
+                onClick={addSet}>Registrar Serie</button>
             </div>
 
             <div style={st.card}>
-              <SH title="⚡ FAST INJECTOR (AI PARSER)"/>
-              <span style={st.lbl}>PASTE RAW TEXT (AI OUTPUT COMPATIBLE)</span>
+              <SH title="Carga rápida por IA" icon={<Icons.Activity size={18} color={T.text}/>}/>
+              <span style={st.lbl}>Pega texto directamente desde tu IA</span>
               <textarea
                 style={{ ...st.inp, minHeight:160, resize:"vertical", marginBottom:12, lineHeight:1.6 }}
-                placeholder="Paste AI output directly:&#10;**1. Press Banca** 4x10 @ 60kg RPE 8&#10;- Sentadilla 4 x 10 con 100kg&#10;Curl Bicep 3x12"
+                placeholder="Pega el output directamente:&#10;**1. Press Banca** 4x10 @ 60kg RPE 8&#10;- Sentadilla 4 x 10 con 100kg&#10;Curl Bicep 3x12"
                 value={quickLoad}
                 onChange={e=>setQuickLoad(e.target.value)}
               />
-              <button style={st.btn} onClick={parseAndLoad}>⚡ PARSE & INJECT</button>
-              <div style={{ fontSize:10, color:T.muted, marginTop:12, lineHeight:1.5, fontFamily:T.font }}>
-                [SYS MSG: Engine optimized to clean markdown (**), bullet points (-), numbers (1.), and auto-detect SetsxReps, Weight (@ / con), and RPE].
+              <button style={st.btn} onClick={parseAndLoad}>Analizar e Inyectar</button>
+              <div style={{ fontSize:12, color:T.muted, marginTop:12, lineHeight:1.5, fontFamily:T.font }}>
+                El sistema detectará automáticamente Ejercicio, SetsxReps, Peso y RPE.
               </div>
             </div>
           </div>
@@ -1589,12 +1546,12 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
 
       {strView==="history" && (
         <div style={st.card}>
-          <SH title="📊 TELEMETRY DATA" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{strLog.length} SETS</span>}/>
+          <SH title="Historial de fuerza" right={<span style={{fontSize:12,color:T.muted,fontFamily:T.font}}>{strLog.length} series registradas</span>}/>
           {strLog.length===0 ? (
-            <div style={{color:T.muted,fontSize:11,textAlign:"center",padding:30,fontFamily:T.font}}>[NO RECORDS]</div>
+            <div style={{color:T.muted,fontSize:13,textAlign:"center",padding:30,fontFamily:T.font}}>Aún sin registrar</div>
           ) : (<>
-            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"8px 0", borderBottom:`1px solid ${T.border}`, fontSize:10, color:T.muted, fontWeight:700, letterSpacing:"0.1em", fontFamily:T.font }}>
-              {["EXERCISE","KG","REPS","SET","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
+            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"8px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, color:T.muted, fontWeight:600, fontFamily:T.font }}>
+              {["Ejercicio","KG","Reps","Set","RPE",""].map((h,i)=><span key={i}>{h}</span>)}
             </div>
             <div style={{ maxHeight:420, overflowY:"auto" }}>
               {[...strLog].reverse().map(l=>editId===l.id?(
@@ -1603,17 +1560,17 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
                     vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
                 </div>
               ):(
-                <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"12px 0", borderBottom:`1px solid ${T.border}`, fontSize:12, alignItems:"center", background:l.date===activeDate?T.accentDim:"transparent", fontFamily:T.font }}>
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:700,color:l.date===activeDate?T.accent:T.text,textTransform:"uppercase"}}>{l.exercise}</span>
-                  <span style={{color:T.accent,fontWeight:700}}>{l.weight||"—"}</span>
+                <div key={l.id} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr auto", gap:4, padding:"12px 0", borderBottom:`1px solid ${T.border}`, fontSize:13, alignItems:"center", background:l.date===activeDate?T.sel:"transparent", fontFamily:T.font, ...st.num }}>
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600,color:l.date===activeDate?T.text:T.text}}>{l.exercise}</span>
+                  <span style={{color:T.text,fontWeight:600}}>{l.weight||"—"}</span>
                   <span>{l.reps||"—"}</span><span>{l.sets||"—"}</span>
-                  <span style={{color:l.rpe>=9?T.red:l.rpe>=7?T.accent:T.green,fontWeight:700}}>{l.rpe||"—"}</span>
+                  <span style={{color:T.text,fontWeight:600}}>{l.rpe||"—"}</span>
                   <div style={{display:"flex",gap:2}}>
                     <button style={st.icon()} onClick={()=>{setEId(l.id);setER({exercise:l.exercise,weight:l.weight,reps:l.reps,sets:l.sets,rpe:l.rpe});}}>
-                      <EditIcon color={T.accent} />
+                      <EditIcon color={T.text} />
                     </button>
                     <button style={st.icon()} onClick={()=>setStr(p=>p.filter(x=>x.id!==l.id))}>
-                      <DeleteIcon color={T.red} />
+                      <DeleteIcon color={T.bad} />
                     </button>
                   </div>
                 </div>
@@ -1668,86 +1625,86 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       
-      <div style={{...st.card2, background: T.accentDim, border:`1px solid ${T.accent}`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
+      <div style={{...st.card2, background: T.sel, border:`1px solid ${T.border}`, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center"}}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: T.accent, marginBottom: 4, letterSpacing:"0.05em" }}>🏁 TGT: {runGoal} KM</div>
-          <div style={{ fontSize: 10, color: T.muted, fontFamily:T.font }}>[SYS] EVALUATING CURRENT PACE VS REQUIRED TO ACHIEVE {targetTime}</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 4 }}>Meta: {runGoal} KM</div>
+          <div style={{ fontSize: 12, color: T.muted, fontFamily:T.font }}>Evaluando ritmo actual vs requerido para {targetTime}</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div>
-            <span style={{ fontSize: 9, fontWeight: 700, color: T.accent, display: "block", marginBottom: 4, fontFamily:T.font }}>TGT TIME (HH:MM:SS)</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.text, display: "block", marginBottom: 4, fontFamily:T.font }}>Tiempo Meta (HH:MM:SS)</span>
             <input style={{...st.inp, width: 120, padding: "6px 10px"}} type="text" value={targetTime} onChange={e=>setTargetTime(e.target.value)} />
           </div>
           <div style={{ background: T.card, border:`1px solid ${T.border}`, padding: "6px 14px", borderRadius: 6, textAlign: "center" }}>
-            <span style={{ fontSize: 9, fontWeight: 700, color: T.muted, display: "block", fontFamily:T.font }}>REQ PACE</span>
-            <span style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily:T.font }}>{requiredPace}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted, display: "block", fontFamily:T.font }}>Ritmo req.</span>
+            <span style={{ fontSize: 20, fontWeight: 600, color: T.text, fontFamily:T.font, ...st.num }}>{requiredPace}</span>
           </div>
         </div>
       </div>
 
       <div style={st.g2}>
         <div style={{ ...st.card, display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
-          <SH title="🏃 PACE TELEMETRY"
+          <SH title="Ritmo actual" icon={<Icons.Activity size={18} color={T.text}/>}
             right={
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={st.lbl}>DIST TGT:</span>
-                <input style={{ ...st.inp, width:70, padding:"4px 8px", fontSize:12 }} type="number" step="0.1"
+                <span style={st.lbl}>Distancia:</span>
+                <input style={{ ...st.inp, width:80, padding:"6px 10px", fontSize:14 }} type="number" step="0.1"
                   value={runGoal} onChange={e=>setRunGoal(+e.target.value||21.1)}/>
               </div>
             }/>
           <PaceRing currentPaceSecs={avgPaceSecs} targetPaceSecs={reqSecs} theme={theme} T={T}/>
           
           <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center", marginTop: 12 }}>
-            {[{l:"REQ",v:requiredPace,c:T.muted},{l:"AVG",v:avgPaceSecs?secsToPace(avgPaceSecs):"—",c:T.blue},{l:"BEST",v:bestPaceSecs?secsToPace(bestPaceSecs):"—",c:T.green}].map(m=>(
-              <div key={m.l} style={{ textAlign:"center", background:T.card2, border:`1px solid ${T.border}`, padding:"6px 14px", borderRadius:4 }}>
-                <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:"0.1em",fontFamily:T.font}}>{m.l}</div>
-                <div style={{fontSize:18,fontWeight:700,color:m.c,fontFamily:T.font}}>{m.v}</div>
+            {[{l:"REQUERIDO",v:requiredPace},{l:"PROMEDIO",v:avgPaceSecs?secsToPace(avgPaceSecs):"—"},{l:"MEJOR",v:bestPaceSecs?secsToPace(bestPaceSecs):"—"}].map(m=>(
+              <div key={m.l} style={{ textAlign:"center", background:T.card2, border:`1px solid ${T.border}`, padding:"8px 16px", borderRadius:6 }}>
+                <div style={{fontSize:11,color:T.muted,fontWeight:600,fontFamily:T.font}}>{m.l}</div>
+                <div style={{fontSize:20,fontWeight:600,color:T.text,fontFamily:T.font, ...st.num}}>{m.v}</div>
               </div>
             ))}
           </div>
         </div>
         <div style={st.card}>
-          <SH title="➕ INJECT RUN LOG"/>
+          <SH title="Registrar carrera" icon={<Icons.Plus size={18} color={T.text}/>}/>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-            {[["DATE","date","date"],["DIST (KM)","km","number"],["TIME (HH:MM:SS)","time","text"],["HR AVG","lpm","number"],["CADENCE","ppm","number"]].map(([l,k,t])=>(
+            {[["Fecha","date","date"],["Distancia (KM)","km","number"],["Tiempo (HH:MM:SS)","time","text"],["HR Promedio","lpm","number"],["Cadencia","ppm","number"]].map(([l,k,t])=>(
               <div key={k}><span style={st.lbl}>{l}</span>
                 <input style={st.inp} type={t} placeholder="" step={k==="km"?"0.1":undefined} value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))}/></div>
             ))}
             <div>
-              <span style={st.lbl}>SHOES</span>
+              <span style={st.lbl}>Tenis</span>
               <select style={st.sel} value={form.shoe} onChange={handleShoeChange}>
-                <option value="" disabled>-- SEL --</option>
-                {shoes.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-                <option value="__new__">+ ADD NEW</option>
+                <option value="" disabled>-- Seleccionar --</option>
+                {shoes.map(s => <option key={s} value={s}>{s}</option>)}
+                <option value="__new__">+ Agregar nuevos</option>
               </select>
             </div>
-            <div style={{ gridColumn: "span 2", marginTop: 8, background:T.card2, border:`1px solid ${T.border}`, padding:"10px", borderRadius:6 }}>
-              <span style={st.lbl}>COMPUTED PACE</span>
-              <div style={{ fontSize:22, fontWeight:700, color:T.accent, fontFamily:T.font }}>{calcPace(+form.km,form.time)}</div>
+            <div style={{ gridColumn: "span 2", marginTop: 8, background:T.card2, border:`1px solid ${T.border}`, padding:"12px", borderRadius:6 }}>
+              <span style={st.lbl}>Ritmo calculado</span>
+              <div style={{ fontSize:24, fontWeight:600, color:T.text, fontFamily:T.font, ...st.num }}>{calcPace(+form.km,form.time)}</div>
             </div>
           </div>
-          <button style={st.btn} onClick={add}>SAVE RUN DATA</button>
+          <button style={st.btn} onClick={add}>Guardar Carrera</button>
         </div>
       </div>
 
       <div style={st.card}>
-        <SH title="📈 DISTANCE EVOLUTION" right={<span style={{fontSize:10,color:T.muted,fontFamily:T.font}}>{runs.length} LOGS</span>}/>
-        {runs.length<2?<Placeholder msg="NEED MORE DATA FOR TELEMETRY" T={T}/>:(
+        <SH title="Evolución de distancia" right={<span style={{fontSize:12,color:T.muted,fontFamily:T.font}}>{runs.length} Registros</span>}/>
+        {runs.length<2?<Placeholder msg="Datos insuficientes" T={T}/>:(
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={runs} margin={{top:10,right:10,bottom:0,left:-22}}>
-              <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
-              <YAxis tick={{fill:T.muted,fontSize:10,fontFamily:T.font}}/>
+              <CartesianGrid strokeDasharray="2 2" stroke="var(--track)" vertical={false}/>
+              <XAxis dataKey="date" tick={{fill:T.muted,fontSize:11,fontFamily:T.font}} tickFormatter={d=>d.slice(5)}/>
+              <YAxis tick={{fill:T.muted,fontSize:11,fontFamily:T.font}}/>
               <Tooltip content={tip}/>
-              <Line type="linear" dataKey="km" stroke={T.accent} strokeWidth={2} dot={{fill:T.card,stroke:T.accent,strokeWidth:2,r:4}} activeDot={{r:6,fill:T.accent}} name="KM"/>
+              <Line type="linear" dataKey="km" stroke={T.text} strokeWidth={2} dot={{fill:T.card,stroke:T.text,strokeWidth:2,r:4}} activeDot={{r:6,fill:T.text}} name="KM"/>
             </LineChart>
           </ResponsiveContainer>
         )}
       </div>
 
       <div style={st.card}>
-        <SH title="📋 LOG HISTORY" />
-        {runs.length===0?<Placeholder msg="[EMPTY LOG]" T={T}/>:(
+        <SH title="Historial de carreras" />
+        {runs.length===0?<Placeholder msg="Aún sin registrar" T={T}/>:(
           <div style={{ maxHeight:250, overflowY:"auto", paddingRight:10 }}>
             {[...runs].reverse().map(r=>editId===r.id?(
               <div key={r.id} style={{marginBottom:8}}>
@@ -1755,20 +1712,20 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
                   vals={editRow} onChange={(k,v)=>setER(p=>({...p,[k]:v}))} onSave={saveEd} onCancel={()=>setEId(null)} T={T}/>
               </div>
             ):(
-              <div key={r.id} style={{ display:"flex", justifyContent:"space-between", padding:"12px 10px", borderBottom:`1px solid ${T.border}`, fontSize:11, alignItems:"center", background:r.date===activeDate?T.accentDim:"transparent", fontFamily:T.font }}>
+              <div key={r.id} style={{ display:"flex", justifyContent:"space-between", padding:"12px 14px", borderBottom:`1px solid ${T.border}`, fontSize:13, alignItems:"center", background:r.date===activeDate?T.sel:"transparent", fontFamily:T.font, ...st.num }}>
                 <span style={{color:T.text,minWidth:45}}>{r.date.slice(5)}</span>
-                <span style={{color:T.accent,fontWeight:700,fontSize:13}}>{r.km} KM</span>
+                <span style={{color:T.text,fontWeight:600,fontSize:14}}>{r.km} KM</span>
                 <span style={{color:T.muted}}>{r.time}</span>
-                <span style={{color:T.teal,fontWeight:700}}>{r.pace}</span>
-                <span style={{color:T.purple}}>{r.shoe?.toUpperCase()||"—"}</span>
+                <span style={{color:T.text,fontWeight:600}}>{r.pace}</span>
+                <span style={{color:T.text}}>{r.shoe ||"—"}</span>
                 <span style={{color:T.muted}}>{r.lpm?`${r.lpm} HR`:"—"}</span>
                 <span style={{color:T.muted}}>{r.ppm?`${r.ppm} CAD`:"—"}</span>
                 <div style={{display:"flex",gap:4}}>
                   <button style={st.icon()} onClick={()=>{setEId(r.id);setER({date:r.date,km:r.km,time:r.time,shoe:r.shoe||"",lpm:r.lpm||"",ppm:r.ppm||""});}}>
-                    <EditIcon color={T.accent} />
+                    <EditIcon color={T.text} />
                   </button>
                   <button style={st.icon()} onClick={()=>setRuns(p=>p.filter(x=>x.id!==r.id))}>
-                    <DeleteIcon color={T.red} />
+                    <DeleteIcon color={T.bad} />
                   </button>
                 </div>
               </div>
@@ -1780,634 +1737,13 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GLOBALS PARA BIOMETRÍA & DAILY DATA
-// ─────────────────────────────────────────────────────────────────────────────
-const VISCERAL_OPTIONS = Array.from({length: 15}, (_, i) => String(i + 1));
-const FOCUS_TAGS = ["🫁 Pecho", "🔙 Espalda", "🦵 Piernas", "💪 Brazos", "🏔 Hombros", "⚡ Core", "🏃 Cardio", "🥊 HIIT", "🧘‍♀️ Movilidad"];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TAB: DAILY DATA (LOG DIARIO & BODY COMP INPUTS)
-// ─────────────────────────────────────────────────────────────────────────────
-function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
-  const st = mkS(T);
-  
-  const [bioForm, setBioForm] = useState({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" });
-  const [dailyForm, setDailyForm] = useState({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"", bodyBattery:"", focus:[] });
-  const [editG, setEG] = useState(false);
-
-  useEffect(() => {
-    setBioForm(p => ({ ...p, date: activeDate }));
-    setDailyForm(p => ({ ...p, date: activeDate }));
-  }, [activeDate]);
-
-  const upsertDaily = entry => setHL(prev => {
-    const i = prev.findIndex(d => d.date === entry.date);
-    if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
-    return [...prev, entry];
-  });
-
-  const toggleFocus = (tag) => {
-    setDailyForm(p => ({
-      ...p,
-      focus: p.focus.includes(tag) ? p.focus.filter(t => t !== tag) : [...p.focus, tag]
-    }));
-  };
-
-  const saveDaily = () => {
-    if (!dailyForm.date) return;
-    const calcRec = calculateWhoopRecovery(+dailyForm.hrv, +dailyForm.rhr, +dailyForm.score);
-    const finalRecovery = dailyForm.recovery ? +dailyForm.recovery : calcRec;
-
-    upsertDaily({ 
-      date: dailyForm.date, 
-      ...(dailyForm.calOut && { calOut: +dailyForm.calOut }), 
-      ...(dailyForm.steps && { steps: +dailyForm.steps }),
-      ...(dailyForm.sleep && { sleep: +dailyForm.sleep }), 
-      ...(dailyForm.score && { score: +dailyForm.score }),
-      ...(dailyForm.hrv && { hrv: +dailyForm.hrv }),
-      ...(dailyForm.rhr && { rhr: +dailyForm.rhr }),
-      ...(finalRecovery && { recovery: finalRecovery }),
-      ...(dailyForm.bodyBattery && { bodyBattery: +dailyForm.bodyBattery }),
-      ...(dailyForm.focus.length > 0 && { focus: dailyForm.focus }),
-      goals: { ...goals } 
-    });
-    setDailyForm({ date:activeDate, calOut:"", steps:"", sleep:"", score:"", hrv:"", rhr:"", recovery:"", bodyBattery:"", focus:[] });
-  };
-
-  const addBio = () => {
-    if (!bioForm.weight) return;
-    const finalImc = bioForm.imc ? +bioForm.imc : calcIMC(+bioForm.weight, 181);
-    setBios(p => [...p, {
-      ...bioForm, id: uid(), height: 181, weight: +bioForm.weight, fat: +bioForm.fat || null, muscle: +bioForm.muscle || null,
-      visceral: +bioForm.visceral || null, water: +bioForm.water || null, protein: +bioForm.protein || null, dmr: +bioForm.dmr || null,
-      imc: finalImc
-    }]);
-    setBioForm({ date:activeDate, height:"181", weight:"", fat:"", muscle:"", visceral:"", water:"", protein:"", dmr:"", imc:"" }); 
-  };
-
-  const autoImc = bioForm.weight ? calcIMC(+bioForm.weight, 181) : "";
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      
-      {/* Target Goals Banner */}
-      <div style={{ ...st.card, padding:"14px 18px" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, flexWrap:"wrap" }}>
-          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
-            {[["CAL", goals.cal, T.accent], ["PROT", goals.p, T.green], ["CARB", goals.c, T.blue], ["FAT", goals.g, T.purple]].map(([l,v,c]) => (
-              editG ? (
-                <div key={l} style={{ display:"flex", flexDirection:"column", gap:4, minWidth:80 }}>
-                  <span style={st.lbl}>{l}</span>
-                  <input style={{ ...st.inp, padding:"6px 10px", fontSize:12 }} type="number" value={v}
-                    onChange={e => setGoals(p => ({ ...p, [l.toLowerCase()]: +e.target.value }))}/>
-                </div>
-              ) : (
-                <div key={l} style={{ textAlign:"left" }}>
-                  <div style={{ fontSize:10, color:T.muted, fontWeight:700, fontFamily:T.font }}>{l}</div>
-                  <div style={{ fontSize:20, fontWeight:700, color:c, fontFamily:T.font }}>{v}</div>
-                </div>
-              )
-            ))}
-          </div>
-          <button style={st.btnSm} onClick={() => setEG(o => !o)}>{editG ? "✓ SAVE TGT" : "✏️ EDIT TGT"}</button>
-        </div>
-      </div>
-
-      {/* Log Inputs Grid */}
-      <div style={st.g2}>
-        {/* Daily Biometrics Form */}
-        <div style={st.card}>
-          <SH title="📋 LOG DAILY BIOMETRICS"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-            <div style={{ gridColumn:"span 2" }}>
-              <span style={st.lbl}>DATE</span>
-              <input style={st.inp} type="date" value={dailyForm.date} onChange={e => setDailyForm(p => ({ ...p, date: e.target.value }))}/>
-            </div>
-
-            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4 }}>
-              <span style={{ ...st.lbl, color:T.purple }}>🏷️ ENFOQUE DEL DÍA (MÚLTIPLE)</span>
-            </div>
-            
-            <div style={{ gridColumn:"span 2", display:"flex", gap:8, flexWrap:"wrap", marginBottom: 8 }}>
-              {FOCUS_TAGS.map(tag => {
-                const isActive = dailyForm.focus.includes(tag);
-                return (
-                  <button key={tag} onClick={() => toggleFocus(tag)}
-                    style={{
-                      background: isActive ? T.accentDim : T.card2,
-                      border: `1px solid ${isActive ? T.accent : T.border}`,
-                      color: isActive ? T.accent : T.muted,
-                      borderRadius: 16, padding: "6px 12px", fontSize: 11, cursor: "pointer",
-                      fontFamily: T.font, fontWeight: isActive ? 700 : 400, transition: "all 0.15s"
-                    }}>
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-            
-            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:4 }}>
-              <span style={{ ...st.lbl, color:T.accent }}>⚡ ERS & SLEEP</span>
-            </div>
-            
-            {[["SLEEP (hrs)","sleep"], ["SCORE (%)","score"]].map(([l,k]) => (
-              <div key={k}>
-                <span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" step={k === "sleep" ? "0.01" : "1"} placeholder="—"
-                  value={dailyForm[k]} onChange={e => setDailyForm(p => ({ ...p, [k]: e.target.value }))}/>
-              </div>
-            ))}
-
-            <div>
-              <span style={st.lbl}>BODY BATTERY (%)</span>
-              <input style={st.inp} type="number" placeholder="Ej: 80"
-                value={dailyForm.bodyBattery} onChange={e => setDailyForm(p => ({ ...p, bodyBattery: e.target.value }))}/>
-            </div>
-
-            <div>
-              <span style={st.lbl}>MANUAL RECOVERY %</span>
-              <input style={{ ...st.inp, borderColor: T.green + "50" }} type="number" max="100" placeholder="Ej: 85"
-                value={dailyForm.recovery} onChange={e => setDailyForm(p => ({ ...p, recovery: e.target.value }))}/>
-            </div>
-
-            <div style={{ gridColumn:"span 2", borderBottom:`1px dashed ${T.border}`, paddingBottom:4, marginTop:8 }}>
-              <span style={{ ...st.lbl, color:T.blue }}>🏃 AERO & DYNAMICS</span>
-            </div>
-
-            {[["CAL OUT","calOut"], ["STEPS","steps"]].map(([l,k]) => (
-              <div key={k}>
-                <span style={st.lbl}>{l}</span>
-                <input style={st.inp} type="number" value={dailyForm[k]} onChange={e => setDailyForm(p => ({ ...p, [k]: e.target.value }))}/>
-              </div>
-            ))}
-          </div>
-          <button style={st.btn} onClick={saveDaily}>💾 UPLOAD TELEMETRY</button>
-        </div>
-
-        {/* Body Weight / Composition Form */}
-        <div style={st.card}>
-          <SH title="⚖️ INPUT BODY COMPOSITION"/>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-            <div>
-              <span style={st.lbl}>DATE</span>
-              <input style={st.inp} type="date" value={bioForm.date} onChange={e => setBioForm(p => ({ ...p, date: e.target.value }))}/>
-            </div>
-            <div>
-              <span style={st.lbl}>HEIGHT (CM)</span>
-              <input style={{ ...st.inp, opacity:0.5, cursor:"not-allowed" }} type="number" readOnly value="181" />
-            </div>
-            {[["WEIGHT (KG) *","weight",T.accent], ["FAT %","fat",T.red], ["MUSC (KG)","muscle",T.green], ["WATER %","water",T.blue], ["PROT %","protein",T.purple], ["BMR KCAL","dmr",T.muted]].map(([l,k,c]) => (
-              <div key={k}>
-                <span style={st.lbl}>{l}</span>
-                <input style={{ ...st.inp, borderColor:`${c}55` }} type="number" step="0.1" placeholder=""
-                  value={bioForm[k]} onChange={e => setBioForm(p => ({ ...p, [k]: e.target.value }))}/>
-              </div>
-            ))}
-            <div>
-              <span style={st.lbl}>BMI (AUTO / MAN)</span>
-              <input style={{ ...st.inp, color: bioForm.imc ? T.text : T.accent, fontWeight: 700 }} type="number" step="0.1" placeholder={autoImc || "Auto..."}
-                value={bioForm.imc} onChange={e => setBioForm(p => ({ ...p, imc: e.target.value }))}/>
-            </div>
-          </div>
-          
-          <div style={{ background: T.card2, border: `1px solid ${T.border}`, borderRadius: 6, padding: "16px 12px", marginBottom: 16, display: "flex", justifyContent: "center" }}>
-            <NumberPicker value={bioForm.visceral} onChange={v => setBioForm(p => ({ ...p, visceral: v }))} options={VISCERAL_OPTIONS} label="VISCERAL LEVEL" T={T}/>
-          </div>
-
-          <button style={st.btn} onClick={addBio}>SAVE BIO DATA</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TAB: BIOMETRÍA & WEIGHT TELEMETRY (TRENDS & HISTORY)
-// ─────────────────────────────────────────────────────────────────────────────
-function Biometria({ bios, setBios, activeDate, T }) {
-  const st=mkS(T);
-  
-  const [bioEditId, setBioEId] = useState(null);
-  const [bioEditRow, setBioER] = useState({});
-
-  const tip = p => <ChartTip {...p} T={T}/>;
-
-  const [filterType, setFilterType] = useState("month"); // "week", "month", "year", "all"
-  
-  const { grouped, groupKeys } = useMemo(() => {
-    const groups = {};
-    bios.forEach(b => {
-      let key;
-      if (filterType === "week") key = getWeekStart(b.date);
-      else if (filterType === "month") key = getMonthKey(b.date);
-      else if (filterType === "year") key = b.date.substring(0, 4);
-      else key = "all";
-
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(b);
-    });
-    return { grouped: groups, groupKeys: Object.keys(groups).sort().reverse() };
-  }, [bios, filterType]);
-
-  const [selKey, setSelKey] = useState("");
-  
-  useEffect(() => {
-    if (groupKeys.length > 0 && !grouped[selKey]) {
-      setSelKey(groupKeys[0]);
-    }
-  }, [groupKeys, grouped, selKey]);
-
-  const currentData = grouped[selKey] || [];
-  const chartData = [...currentData].sort((a, b) => a.date.localeCompare(b.date)).map(b => ({ date:b.date, Peso:b.weight, Grasa:b.fat, Músculo:b.muscle, Agua:b.water }));
-
-  const last = bios[bios.length-1], first = bios[0];
-  const delta = last && first ? (last.weight - first.weight).toFixed(1) : null;
-
-  const weeklyBios = useMemo(() => {
-    const groups = {};
-    bios.forEach(b => {
-      const wk = getWeekStart(b.date);
-      if (!groups[wk]) groups[wk] = { count: 0, weight: 0, fat: 0, muscle: 0, water: 0, imc: 0 };
-      groups[wk].count++;
-      groups[wk].weight += b.weight || 0;
-      if (b.fat) groups[wk].fat += b.fat;
-      if (b.muscle) groups[wk].muscle += b.muscle;
-      if (b.water) groups[wk].water += b.water;
-      if (b.imc) groups[wk].imc += b.imc;
-    });
-    return Object.keys(groups).sort().reverse().map(wk => ({
-      week: wk,
-      count: groups[wk].count,
-      weight: groups[wk].weight / groups[wk].count,
-      fat: groups[wk].fat ? groups[wk].fat / groups[wk].count : null,
-      muscle: groups[wk].muscle ? groups[wk].muscle / groups[wk].count : null,
-      water: groups[wk].water ? groups[wk].water / groups[wk].count : null,
-      imc: groups[wk].imc ? groups[wk].imc / groups[wk].count : null,
-    }));
-  }, [bios]);
-
-  const saveBioEd = () => {
-    setBios(p => p.map(b => b.id === bioEditId ? {
-      ...b, ...bioEditRow, weight: +bioEditRow.weight, fat: +bioEditRow.fat || null, muscle: +bioEditRow.muscle || null,
-      visceral: +bioEditRow.visceral || null, water: +bioEditRow.water || null, protein: +bioEditRow.protein || null, dmr: +bioEditRow.dmr || null,
-      imc: +bioEditRow.imc || calcIMC(+bioEditRow.weight, 181)
-    } : b));
-    setBioEId(null);
-  };
-
-  const formatPeriod = (k, type) => {
-    if (type === "all") return "TODOS LOS REGISTROS";
-    if (type === "week") return fmtWeek(k);
-    if (type === "month") return fmtMonth(k).toUpperCase();
-    return k;
-  };
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      
-      {/* 1. COMPACT LAST READING WIDGET */}
-      {last && (
-        <div style={{...st.card, padding: "12px 16px"}}>
-          <SH title={`ÚLTIMA LECTURA · ${last.date.slice(5)}`}/>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:8, justifyContent:"space-between" }}>
-            {[{l:"WGT",v:`${last.weight}KG`,c:T.accent},{l:"BMI",v:last.imc??"—",c:last.imc?(last.imc<25?T.green:last.imc<30?T.accent:T.red):T.muted},{l:"FAT",v:last.fat?`${last.fat}%`:"—",c:T.red},{l:"MUSC",v:last.muscle?`${last.muscle}KG`:"—",c:T.green},{l:"VISC",v:last.visceral?`LV${last.visceral}`:"—",c:last.visceral?(last.visceral<=9?T.green:last.visceral<=14?T.accent:T.red):T.muted},{l:"H2O",v:last.water?`${last.water}%`:"—",c:T.blue},{l:"PROT",v:last.protein?`${last.protein}%`:"—",c:T.purple},{l:"BMR",v:last.dmr||"—",c:T.orange},{l:"ΔWGT",v:delta?`${delta>0?"+":""}${delta}KG`:"—",c:delta?(parseFloat(delta)<=0?T.green:T.red):T.muted}].map(m=>(
-              <div key={m.l} style={{ flex:"1 1 50px", background:T.card2, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 4px", textAlign:"center" }}>
-                <div style={{fontSize:9, color:T.muted, fontWeight:700, fontFamily:T.font}}>{m.l}</div>
-                <div style={{fontSize:12, fontWeight:700, color:m.c, marginTop:2, fontFamily:T.font}}>{m.v}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 2. TRENDS CHART WITH FILTERS */}
-      <div style={{ ...st.card }}>
-        <SH title="📈 METRIC TRENDS"/>
-        
-        {/* Controls Bar for Chart */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
-          <div style={{ display: "flex", gap: 6, background: T.card2, padding: 4, borderRadius: 6, border: `1px solid ${T.border}` }}>
-            {["week", "month", "year", "all"].map(type => (
-              <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
-                style={{
-                  background: filterType === type ? T.accent : "transparent",
-                  color: filterType === type ? "#000" : T.muted,
-                  border: "none",
-                  borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                  fontFamily:T.font, textTransform:"uppercase", transition: "all 0.2s"
-                }}>
-                {type === "week" ? "Sem" : type === "month" ? "Mes" : type === "year" ? "Año" : "Todo"}
-              </button>
-            ))}
-          </div>
-          {filterType !== "all" && (
-            <div style={{ minWidth: 200, flex: 1 }}>
-              <select style={st.sel} value={selKey} onChange={e => setSelKey(e.target.value)}>
-                {groupKeys.map(k => <option key={k} value={k}>{formatPeriod(k, filterType)}</option>)}
-              </select>
-            </div>
-          )}
-        </div>
-
-        {chartData.length < 2 ? <Placeholder msg="NEED 2+ RECORDS" T={T}/> : (
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: -22 }}>
-              <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 10, fontFamily: T.font }} tickFormatter={d => d.slice(5)}/>
-              <YAxis tick={{ fill: T.muted, fontSize: 10, fontFamily: T.font }} domain={["auto","auto"]}/>
-              <Tooltip content={tip}/>
-              <Line type="linear" dataKey="Peso" stroke={T.accent} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.accent, strokeWidth: 2 }} activeDot={{ r: 6 }}/>
-              <Line type="linear" dataKey="Grasa" stroke={T.red} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.red, strokeWidth: 2 }}/>
-              <Line type="linear" dataKey="Músculo" stroke={T.green} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.green, strokeWidth: 2 }}/>
-              <Line type="linear" dataKey="Agua" stroke={T.blue} strokeWidth={2} dot={{ r: 3, fill: T.card, stroke: T.blue, strokeWidth: 2 }}/>
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
-      {/* 3. WEEKLY AVERAGES */}
-      {weeklyBios.length > 0 && (
-        <div style={{ ...st.card, overflowX: "auto" }}>
-          <SH title="🗓️ PROMEDIOS SEMANALES (AXIOMA)" right={<span style={{ fontSize: 10, color: T.muted, fontFamily: T.font }}>EVOLUCIÓN</span>}/>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 700, fontFamily: T.font }}>
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.card2 }}>
-                {["SEMANA", "PESO", "IMC", "GRASA", "MÚSCULO", "AGUA", "DÍAS LOG"].map(h => (
-                  <th key={h} style={{ padding: "10px 8px", color: T.muted, fontWeight: 700, textAlign: h === "SEMANA" ? "left" : "right", letterSpacing: "0.1em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {weeklyBios.map((w) => (
-                <tr key={w.week} style={{ borderBottom: `1px solid ${T.border}` }}>
-                  <td style={{ padding: "12px 8px", textAlign: "left", fontWeight: 700 }}>{fmtWeek(w.week)}</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.accent, fontWeight: 700 }}>{w.weight.toFixed(1)} KG</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right" }}>{w.imc ? w.imc.toFixed(1) : "—"}</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.red }}>{w.fat ? w.fat.toFixed(1) + "%" : "—"}</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.green }}>{w.muscle ? w.muscle.toFixed(1) + " KG" : "—"}</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.blue }}>{w.water ? w.water.toFixed(1) + "%" : "—"}</td>
-                  <td style={{ padding: "12px 8px", textAlign: "right", color: T.muted }}>{w.count}/7</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* 4. BODY LOGS HISTORY TABLE */}
-      {bios.length > 0 && (
-        <div style={{ ...st.card, overflowX: "auto" }}>
-          <SH title="📋 WEIGHT & BODY COMP LOGS" right={<span style={{ fontSize: 10, color: T.muted, fontFamily: T.font }}>{bios.length} RECORDS</span>}/>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 700, fontFamily: T.font }}>
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.card2 }}>
-                {["DATE", "WEIGHT", "BMI", "FAT %", "MUSC", "VISC", "WATER", "PROT", "BMR", ""].map(h => (
-                  <th key={h} style={{ padding: "10px 8px", color: T.muted, fontWeight: 700, textAlign: h === "" ? "center" : "right", letterSpacing: "0.1em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[...bios].reverse().map(b => bioEditId === b.id ? (
-                <tr key={b.id}>
-                  <td colSpan={10} style={{ padding: "8px 0" }}>
-                    <EditRow fields={[{ k: "date", l: "Date", t: "date" }, { k: "weight", l: "Kg", t: "number", step: "0.1" }, { k: "imc", l: "BMI", t: "number", step: "0.1" }, { k: "fat", l: "Fat%", t: "number", step: "0.1" }, { k: "muscle", l: "Musc", t: "number", step: "0.1" }, { k: "visceral", l: "Visc", t: "number" }, { k: "water", l: "H2o%", t: "number", step: "0.1" }, { k: "protein", l: "Prot%", t: "number", step: "0.1" }, { k: "dmr", l: "BMR", t: "number" }]}
-                      vals={bioEditRow} onChange={(k, v) => setBioER(p => ({ ...p, [k]: v }))} onSave={saveBioEd} onCancel={() => setBioEId(null)} T={T}/>
-                  </td>
-                </tr>
-              ) : (
-                <tr key={b.id} style={{ borderBottom: `1px solid ${T.border}`, background: b.date === activeDate ? T.accentDim : "transparent" }}>
-                  {[b.date.slice(5), `${b.weight}KG`, b.imc ?? "—", b.fat ? `${b.fat}%` : "—", b.muscle ? `${b.muscle}KG` : "—", b.visceral ? `LV${b.visceral}` : "—", b.water ? `${b.water}%` : "—", b.protein ? `${b.protein}%` : "—", b.dmr || "—"].map((v, i) => (
-                    <td key={i} style={{ padding: "12px 8px", textAlign: i === 0 ? "left" : "right", color: i === 0 ? T.text : T.muted, fontWeight: i === 0 ? 700 : 400 }}>{v}</td>
-                  ))}
-                  <td style={{ padding: "12px 8px", textAlign: "center" }}>
-                    <button style={st.icon()} onClick={() => { setBioEId(b.id); setBioER({ date: b.date, weight: b.weight, imc: b.imc || "", fat: b.fat || "", muscle: b.muscle || "", visceral: b.visceral || "", water: b.water || "", protein: b.protein || "", dmr: b.dmr || "" }); }}>
-                      <EditIcon color={T.accent} />
-                    </button>
-                    <button style={st.icon()} onClick={() => setBios(p => p.filter(x => x.id !== b.id))}>
-                      <DeleteIcon color={T.red} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TAB: SUEÑO / RECOVERY (REDISEÑADO & ESPACIOSO)
-// ─────────────────────────────────────────────────────────────────────────────
-function Sueno({ healthLog, T }) {
-  const st = mkS(T);
-  const tip = p => <ChartTip {...p} T={T} />;
-  const [filterType, setFilterType] = useState("week"); // "week", "month", "year"
-  
-  const sleepData = useMemo(() => {
-    return healthLog.filter(d => d.sleep > 0 || d.score > 0 || d.recovery > 0).sort((a, b) => a.date.localeCompare(b.date));
-  }, [healthLog]);
-
-  const { grouped, groupKeys } = useMemo(() => {
-    const groups = {};
-    sleepData.forEach(d => {
-      let key;
-      if (filterType === "week") key = getWeekStart(d.date);
-      else if (filterType === "month") key = getMonthKey(d.date);
-      else key = d.date.substring(0, 4);
-
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(d);
-    });
-    return { grouped: groups, groupKeys: Object.keys(groups).sort().reverse() };
-  }, [sleepData, filterType]);
-
-  const [selKey, setSelKey] = useState("");
-  
-  useEffect(() => {
-    if (groupKeys.length > 0 && !grouped[selKey]) {
-      setSelKey(groupKeys[0]);
-    }
-  }, [groupKeys, grouped, selKey]);
-
-  const currentData = grouped[selKey] || [];
-  const lastNight = sleepData[sleepData.length - 1];
-
-  const calcAvg = (arr, key) => {
-    const valid = arr.filter(x => x[key] > 0);
-    return valid.length ? valid.reduce((s,x)=>s+x[key], 0) / valid.length : 0;
-  };
-
-  const avgSleep = calcAvg(currentData, 'sleep');
-  const avgScore = calcAvg(currentData, 'score');
-  const avgRec = calcAvg(currentData, 'recovery');
-
-  const scCol = s => s >= 85 ? T.green : s >= 70 ? T.accent : T.red;
-
-  const formatPeriod = (k, type) => {
-    if (type === "week") return fmtWeek(k);
-    if (type === "month") return fmtMonth(k).toUpperCase();
-    return k;
-  };
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      
-      {/* Target Last Night KPI Banner */}
-      {lastNight && (
-        <div style={{ display: "flex", alignItems: "center", gap: 20, background: T.card2, borderRadius: 8, padding: "18px 24px", border: `1px solid ${T.border}` }}>
-          <MiniRing pct={lastNight.score/100} color={scCol(lastNight.score)} size={52} sw={5}/>
-          <div>
-            <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.15em", fontFamily:T.font }}>SLEEP PERFORMANCE (LAST READING)</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginTop: 4, fontFamily:T.font }}>
-              SCORE: <span style={{ color: scCol(lastNight.score) }}>{lastNight.score}%</span> • {fmt(lastNight.sleep, 1)} HRS
-            </div>
-          </div>
-        </div>
-      )}
-
-      {sleepData.length === 0 ? (
-        <div style={st.card}>
-          <Placeholder msg="NO SLEEP TELEMETRY FOUND" T={T} />
-        </div>
-      ) : (
-        <>
-          {/* Controls Bar */}
-          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", gap: 6, background: T.card2, padding: 4, borderRadius: 6, border: `1px solid ${T.border}` }}>
-              {["week", "month", "year"].map(type => (
-                <button key={type} onClick={() => { setFilterType(type); setSelKey(""); }}
-                  style={{
-                    background: filterType === type ? T.accent : "transparent",
-                    color: filterType === type ? "#000" : T.muted,
-                    border: "none",
-                    borderRadius: 4, padding: "6px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                    fontFamily:T.font, textTransform:"uppercase", transition: "all 0.2s"
-                  }}>
-                  {type}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ minWidth: 260, flex: 1 }}>
-              <select style={st.sel} value={selKey} onChange={e => setSelKey(e.target.value)}>
-                {groupKeys.map(k => <option key={k} value={k}>{formatPeriod(k, filterType)}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Key Summary Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
-              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG HOURS</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: avgSleep >= 7 ? T.green : avgSleep >= 6 ? T.accent : T.red, lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
-                {avgSleep ? `${fmt(avgSleep, 1)}h` : "—"}
-              </div>
-            </div>
-            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
-              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG SCORE</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: avgScore >= 85 ? T.green : avgScore >= 70 ? T.accent : T.red, lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
-                {avgScore ? `${Math.round(avgScore)}%` : "—"}
-              </div>
-            </div>
-            <div style={{ ...st.card2, textAlign: "center", padding: "18px 14px" }}>
-              <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, letterSpacing: "0.1em", fontFamily:T.font }}>AVG RECOVERY</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: getRecoveryColor(avgRec, T), lineHeight: 1, marginTop: 8, fontFamily:T.font }}>
-                {avgRec ? `${Math.round(avgRec)}%` : "—"}
-              </div>
-            </div>
-          </div>
-
-          {/* Individual Chart Cards (Full Width Layout to Prevent Cramping) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            
-            {/* Hours Chart */}
-            <div style={st.card}>
-              <SH title="⏱️ SLEEP DURATION (HOURS vs 8H TGT)" />
-              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={currentData} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
-                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[4, 10]} />
-                    <Tooltip content={tip} />
-                    <ReferenceLine y={8} stroke={T.green} strokeDasharray="3 3" label={{ value: "TGT 8H", fill: T.green, fontSize: 10 }} />
-                    <Line type="step" dataKey="sleep" stroke={T.blue} strokeWidth={2} dot={{ fill: T.card, stroke: T.blue, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.blue }} name="Horas" />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* Score Chart */}
-            <div style={st.card}>
-              <SH title="🔋 SLEEP QUALITY SCORE (vs 85% TGT)" />
-              {currentData.length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <AreaChart data={currentData} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
-                    <defs>
-                      <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={T.purple} stopOpacity={0.3} />
-                        <stop offset="95%" stopColor={T.purple} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[40, 100]} />
-                    <Tooltip content={tip} />
-                    <ReferenceLine y={85} stroke={T.green} strokeDasharray="3 3" label={{ value: "TGT 85%", fill: T.green, fontSize: 10 }} />
-                    <Area type="monotone" dataKey="score" stroke={T.purple} fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: T.card, stroke: T.purple, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.purple }} name="Score %" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* Recovery Chart */}
-            <div style={st.card}>
-              <SH title="🔥 RECOVERY TREND TELEMETRY" />
-              {currentData.filter(d=>d.recovery>0).length < 2 ? <Placeholder msg="INSUFFICIENT DATA FOR TELEMETRY" T={T} /> : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={currentData.filter(d=>d.recovery>0)} margin={{ top: 20, right: 20, bottom: 10, left: -20 }}>
-                    <CartesianGrid strokeDasharray="2 2" stroke={T.border} vertical={false}/>
-                    <XAxis dataKey="date" tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} tickFormatter={d => d.slice(5)} />
-                    <YAxis tick={{ fill: T.muted, fontSize: 11, fontWeight: 700, fontFamily:T.font }} domain={[0, 100]} />
-                    <Tooltip content={tip} />
-                    <Line type="linear" dataKey="recovery" stroke={T.green} strokeWidth={2} dot={{ fill: T.card, stroke: T.green, strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: T.green }} name="Recovery %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ROOT APP
-// ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
-  useEffect(()=>{
-    const l=document.createElement("link");
-    l.href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500;700&display=swap";
-    l.rel="stylesheet"; document.head.appendChild(l);
-    return()=>{try{document.head.removeChild(l);}catch(_){}};
-  },[]);
-
-  // Telemetría con soporte liberado de Dark/Light/Blueprint/Winter Arc mode
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem(LS + "theme");
     if (savedTheme) return JSON.parse(savedTheme);
-    const isDark = lsGet("dark", true); 
-    return isDark ? "dark" : "light";
+    return "dark";
   });
   
-  const T = theme === "dark" ? DARK : theme === "blueprint" ? BLUEPRINT : theme === "winter_arc" ? WINTER_ARC : LIGHT;
-
   const [activeDate, setActiveDate] = useState(TODAY);
 
   const [tab,        setTab]  =useState("dashboard");
@@ -2421,7 +1757,6 @@ export default function App() {
   const [goals,    setGoals]=useState(()=>lsGet("goals",{...DEFAULT_GOALS}));
   const [program,  setProg] =useState(()=>lsGet("prog","Hipertrofia"));
   const [plans,    setPlans]=useState(()=>lsGet("plans",Object.fromEntries(Object.entries(PLANS).map(([k,v])=>[k,{...v}]))));
-  const [projects, setProjs]=useState(()=>lsGet("projs",{}));
   
   const [runGoal,    setRunGoal]   =useState(()=>lsGet("runGoal",21.1));
   const [targetTime, setTargetTime] =useState(()=>lsGet("targetTime", "02:00:00"));
@@ -2437,7 +1772,6 @@ export default function App() {
   useEffect(()=>{lsSet("goals",goals);},[goals]);
   useEffect(()=>{lsSet("prog",program);},[program]);
   useEffect(()=>{lsSet("plans",plans);},[plans]);
-  useEffect(()=>{lsSet("projs",projects);},[projects]);
   useEffect(()=>{lsSet("runGoal",runGoal);},[runGoal]);
   useEffect(()=>{lsSet("targetTime",targetTime);},[targetTime]);
 
@@ -2449,7 +1783,6 @@ export default function App() {
       try {
         const d=JSON.parse(evt.target.result);
         if(Array.isArray(d.healthLog))   setHL(d.healthLog);
-        if(Array.isArray(d.garminLog)) setHL(prev=>{const m={};prev.forEach(h=>{m[h.date]=h});d.garminLog.forEach(g=>{const o=m[g.date]||{};m[g.date]={...o,...g,goals:o.goals||{...DEFAULT_GOALS}}});return Object.values(m).sort((a,b)=>a.date.localeCompare(b.date))});
         if(Array.isArray(d.foodLog))     setFL(d.foodLog);
         if(Array.isArray(d.nutritionDB)) setDb(d.nutritionDB);
         if(Array.isArray(d.strengthLog)) setStr(d.strengthLog);
@@ -2459,7 +1792,6 @@ export default function App() {
         if(d.goals&&typeof d.goals==="object")        setGoals(d.goals);
         if(typeof d.program==="string")               setProg(d.program);
         if(d.weeklyPlans&&typeof d.weeklyPlans==="object") setPlans(d.weeklyPlans);
-        if(d.projects&&typeof d.projects==="object")  setProjs(d.projects);
         if(typeof d.runGoal==="number")               setRunGoal(d.runGoal);
         if(typeof d.targetTime==="string")            setTargetTime(d.targetTime);
         alert("✅ Importación exitosa");
@@ -2469,11 +1801,11 @@ export default function App() {
   },[]);
 
   const exportJSON=useCallback(()=>{
-    const data={healthLog,foodLog,nutritionDB:db,strengthLog:strLog,runs,biometrics:bios,shoes,goals,program,weeklyPlans:plans,projects,runGoal,targetTime,exportedAt:new Date().toISOString()};
+    const data={healthLog,foodLog,nutritionDB:db,strengthLog:strLog,runs,biometrics:bios,shoes,goals,program,weeklyPlans:plans,runGoal,targetTime,exportedAt:new Date().toISOString()};
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
-    a.download=`aristeia_v7_${TODAY}.json`; a.click();
-  },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,projects,runGoal,targetTime]);
+    a.download=`aristeia_v8_${TODAY}.json`; a.click();
+  },[healthLog,foodLog,db,strLog,runs,bios,shoes,goals,program,plans,runGoal,targetTime]);
 
   const getDayData=useCallback((date)=>{
     const h=healthLog.find(d=>d.date===date)||{};
@@ -2482,7 +1814,7 @@ export default function App() {
     const p=hasF?r1(fs.reduce((s,f)=>s+f.p,0)):(h.p||0);
     const c=hasF?r1(fs.reduce((s,f)=>s+f.c,0)):(h.c||0);
     const g=hasF?r1(fs.reduce((s,f)=>s+f.g,0)):(h.g||0);
-    return{date,calOut:h.calOut||0,calIn,p,c,g,sleep:h.sleep||null,score:h.score||null,hrv:h.hrv||null,rhr:h.rhr||null,recovery:h.recovery||null,bodyBattery:h.bodyBattery||null,steps:h.steps||null,balance:calIn-(h.calOut||0),goals:h.goals||{...DEFAULT_GOALS}, focus:h.focus||[]};
+    return{date,calOut:h.calOut||0,calIn,p,c,g,sleep:h.sleep||null,score:h.score||null,hrv:h.hrv||null,rhr:h.rhr||null,recovery:h.recovery||null,bodyBattery:h.bodyBattery||null,steps:h.steps||null,balance: (calIn > 0 && h.calOut > 0) ? calIn - h.calOut : null,goals:h.goals||{...DEFAULT_GOALS}, focus:h.focus||[]};
   },[healthLog,foodLog]);
 
   const allDates = useMemo(() => {
@@ -2497,130 +1829,124 @@ export default function App() {
   const activeFood = useMemo(()=>foodLog.filter(f=>f.date===activeDate), [foodLog, activeDate]);
   const allDayData = useMemo(()=>allDates.map(d=>getDayData(d)), [allDates, getDayData]);
 
-  // Se eliminó la pestaña TELEMETRY de aquí (sus funciones ahora las cubre RECAP)
   const TABS=[
-    {id:"dashboard",l:"SYS DASHBOARD"},
-    {id:"daily",l:"DAILY DATA"},     
-    {id:"recap",l:"RECAP"},
-    {id:"calendario",l:"CALENDAR"},
-    {id:"nutricion",l:"FUEL"},
-    {id:"fuerza",l:"CHASSIS"},
-    {id:"running",l:"AERO"},
-    {id:"bio",l:"WEIGHT"},           
-    {id:"sleep",l:"RECOVERY"},
+    {id:"dashboard",l:"Dashboard"},
+    {id:"daily",l:"Datos diarios"},     
+    {id:"recap",l:"Resumen"},
+    {id:"calendario",l:"Calendario"},
+    {id:"nutricion",l:"Alimentación"},
+    {id:"fuerza",l:"Fuerza"},
+    {id:"running",l:"Cardio"},
+    {id:"bio",l:"Biometría"},           
+    {id:"sleep",l:"Recuperación"},
   ];
 
-  const bCol=b=>b<0?T.green:b<300?T.accent:T.red;
   const currentHour=new Date().getHours();
-  const greeting=currentHour<12?"MORNING":currentHour<18?"AFTERNOON":"EVENING";
-  const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
+  const greeting=currentHour<12?"Buenos días":currentHour<18?"Buenas tardes":"Buenas noches";
+  const rawDate = new Date(activeDate + "T12:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "short" });
 
-  const cycleTheme = () => {
-    setTheme(t => t === "dark" ? "light" : t === "light" ? "blueprint" : t === "blueprint" ? "winter_arc" : "dark");
-  };
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
   return (
-    <div style={{
-      background:T.bg, minHeight:"100vh", position: "relative", overflow: "hidden",
-      fontFamily:T.font,
-      color:T.text, padding:"16px 18px",
-      transition:"background 0.3s,color 0.3s"
-    }}>
-      <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
+    <div className={`theme-${theme}`}>
+      <GlobalStyles />
+      <div style={{ padding:"16px 20px", minHeight: "100vh" }}>
+        <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
 
-      {/* ── Header ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
-        <div>
-          <div style={{ fontSize:20, fontWeight:700, letterSpacing:"0.1em", lineHeight:1.1, color:T.text }}>
-            {greeting}, <span style={{color:T.accent}}>RAFA</span>
+        {/* ── Header ── */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:24, flexWrap:"wrap", gap:14, position:"relative", zIndex:1 }}>
+          <div>
+            <div style={{ fontSize:24, fontWeight:600, lineHeight:1.1, color:T.text }}>
+              {greeting}, Rafa
+            </div>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+              <div style={{ 
+                position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
+                background: T.card, padding: "8px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
+                transition: "all 0.15s"
+              }}>
+                <span style={{ fontSize:14, color:T.text, fontWeight:600, textTransform: "capitalize" }}>{rawDate}</span>
+                <span style={{ fontSize:10, color:T.muted }}>▼</span>
+                <input 
+                  type="date" 
+                  value={activeDate} 
+                  max={TODAY} 
+                  onChange={(e) => setActiveDate(e.target.value)} 
+                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}
+                />
+              </div>
+
+              {activeDate !== TODAY && (
+                <button onClick={() => setActiveDate(TODAY)} style={{ background: T.text, color: T.bg, border: `none`, borderRadius: 6, padding: "8px 14px", fontSize: 13, cursor: "pointer", fontWeight: 600, fontFamily:T.font }}>
+                  Ir a Hoy
+                </button>
+              )}
+            </div>
           </div>
           
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-            <div style={{ 
-              position: "relative", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", 
-              background: T.card, padding: "6px 12px", borderRadius: 4, border: `1px solid ${T.border}`,
-              transition: "all 0.15s"
-            }}>
-              <span style={{ fontSize:12, color:T.text, fontWeight:700, letterSpacing:"0.1em" }}>{rawDate}</span>
-              <span style={{ fontSize:9, color:T.accent }}>▼</span>
-              <input 
-                type="date" 
-                value={activeDate} 
-                max={TODAY} 
-                onChange={(e) => setActiveDate(e.target.value)} 
-                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}
-              />
-            </div>
-
-            {activeDate !== TODAY && (
-              <button onClick={() => setActiveDate(TODAY)} style={{ background: T.accentDim, color: T.accent, border: `1px solid ${T.accent}`, borderRadius: 4, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontWeight: 700, fontFamily:T.font }}>
-                ↺ LIVE
-              </button>
+          <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+            
+            {activeDayData.calIn > 0 ? (
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ background:T.card, borderRadius:6, padding:"8px 14px", fontSize:14, color:T.text, border:`1px solid ${T.border}`, fontWeight:600, fontVariantNumeric:"tabular-nums" }}>
+                  {activeDayData.calIn.toLocaleString('es-ES')} kcal consumidas
+                </div>
+                {activeDayData.calOut > 0 && (
+                  <div style={{ background:T.card, borderRadius:6, padding:"8px 14px", fontSize:14, color: T.text, border:`1px solid ${T.border}`, fontWeight:600, fontVariantNumeric:"tabular-nums" }}>
+                    Balance: {activeDayData.balance > 0 ? "+" : ""}{activeDayData.balance.toLocaleString('es-ES')} kcal
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ color: T.muted, fontSize: 13, fontWeight: 500 }}>Aún sin registrar calorías</span>
+                <button onClick={() => setTab("nutricion")} style={{ display: "flex", alignItems: "center", gap: 6, background: T.btn, color: T.btnt, border: "none", borderRadius: 6, padding: "8px 14px", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                  <Icons.Food color={T.btnt} size={16} /> Registrar comida
+                </button>
+              </div>
             )}
+
+            <button 
+              onClick={toggleTheme} 
+              style={{ 
+                background: T.card2, color: T.text, border: `1px solid ${T.border}`, borderRadius: 20, 
+                padding: "8px 14px", fontWeight: 600, fontSize: 13, cursor: "pointer", 
+                fontFamily: T.font, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s"
+              }}>
+              {theme === "dark" ? <><Icons.Sun color={T.text} size={14}/> Modo claro</> : <><Icons.Moon color={T.text} size={14}/> Modo oscuro</>}
+            </button>
+
+            <button onClick={()=>importRef.current?.click()} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 12px", fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:T.font }}>Imp</button>
+            <button onClick={exportJSON} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 12px", fontWeight:600, fontSize:13, cursor:"pointer", fontFamily:T.font }}>Exp</button>
           </div>
         </div>
-        
-        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          <button 
-            onClick={cycleTheme} 
-            style={{ 
-              background: theme === "light" ? T.accent : T.card2, 
-              color: theme === "light" ? "#000" : T.text, 
-              border: `1px solid ${T.border}`, 
-              borderRadius: 20, 
-              padding: "6px 14px", 
-              fontWeight: 800, 
-              fontSize: 11, 
-              cursor: "pointer", 
-              fontFamily: T.font, 
-              display: "flex", 
-              alignItems: "center", 
-              gap: 6, 
-              boxShadow: theme === "light" ? T.shadow : "none",
-              transition: "all 0.2s"
-            }}>
-            {theme === "dark" ? "🌙 DARK" : theme === "light" ? "☀️ LIGHT" : theme === "blueprint" ? "📐 BLUEPRINT" : "❄️ WINTER ARC"}
-          </button>
 
-          {activeDayData.calIn>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, color:T.accent, fontWeight:700, border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.calIn} IN</div>}
-          {activeDayData.calOut>0&&<div style={{ background:T.card, borderRadius:4, padding:"6px 12px", fontSize:11, fontWeight:700, color:bCol(activeDayData.balance), border:`1px solid ${T.border}`, fontFamily:T.font }}>{activeDayData.balance>0?"+":""}{activeDayData.balance} BAL</div>}
-          <button onClick={()=>importRef.current?.click()} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 12px", fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font }}>↑ IMP</button>
-          <button onClick={exportJSON} style={{ background:T.card, color:T.text, border:`1px solid ${T.border}`, borderRadius:4, padding:"6px 12px", fontWeight:700, fontSize:11, cursor:"pointer", fontFamily:T.font }}>↓ EXP</button>
+        {/* ── Tabs ── */}
+        <div style={{ display:"flex", gap:8, marginBottom:24, flexWrap:"wrap", position:"relative", zIndex:1 }}>
+          {TABS.map(t=>(
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{
+              background:tab===t.id?T.sel:"transparent",
+              color:tab===t.id?T.text:T.muted,
+              border:`1px solid ${tab===t.id?T.border:"transparent"}`,
+              borderRadius:6, padding:"8px 16px", fontWeight:600, fontSize:13,
+              cursor:"pointer", transition:"all 0.2s", fontFamily:T.font
+            }}>{t.l}</button>
+          ))}
         </div>
-      </div>
 
-      {/* ── Tabs ── */}
-      <div style={{ display:"flex", gap:6, marginBottom:18, flexWrap:"wrap", position:"relative", zIndex:1 }}>
-        {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{
-            background:tab===t.id?T.accentDim:"transparent",
-            color:tab===t.id?T.accent:T.muted,
-            border:`1px solid ${tab===t.id?T.accent:T.border}`,
-            borderRadius:4, padding:"8px 16px", fontWeight:700, fontSize:11,
-            cursor:"pointer", transition:"all 0.2s", fontFamily:T.font, textTransform:"uppercase", letterSpacing:"0.1em"
-          }}>{t.l}</button>
-        ))}
-      </div>
-
-      {/* ── Content ── */}
-      <div style={{ position:"relative", zIndex:1 }}>
-        {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} theme={theme} T={T}/>}
-        {tab==="daily"      && <DailyData setBios={setBios} setHL={setHL} goals={goals} setGoals={setGoals} activeDate={activeDate} T={T}/>}
-        
-        {/* RECAP ahora procesa Ediciones y Borrados; por lo que necesita setHL y setBios */}
-        {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} setHL={setHL} setBios={setBios} T={T}/>}
-        
-        {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} theme={theme} T={T}/>}
-        {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
-        {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
-        {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} theme={theme} T={T}/>}
-        {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
-        {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
-      </div>
-
-      {/* GARMIN FOOTER */}
-      <div style={{ textAlign: "center", padding: "30px 0 10px", fontSize: 10, color: T.muted, letterSpacing: "0.2em", fontFamily: T.font, opacity: 0.5, fontWeight: 700 }}>
-        POWERED BY GARMIN
+        {/* ── Content ── */}
+        <div style={{ position:"relative", zIndex:1 }}>
+          {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} theme={theme} T={T}/>}
+          {tab==="daily"      && <DailyData setBios={setBios} setHL={setHL} goals={goals} setGoals={setGoals} activeDate={activeDate} T={T}/>}
+          {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} setHL={setHL} setBios={setBios} T={T}/>}
+          {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} theme={theme} T={T}/>}
+          {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
+          {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
+          {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} theme={theme} T={T}/>}
+          {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
+          {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
+        </div>
       </div>
     </div>
   );
