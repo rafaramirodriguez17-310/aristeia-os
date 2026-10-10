@@ -668,10 +668,12 @@ function Dashboard({ activeDayData, weekData, last7, goals, program, plans, setP
 // ─────────────────────────────────────────────────────────────────────────────
 // TAB: RECAP (WEEKLY AGGREGATES & DAILY LOGS) — PESTAÑA INDEPENDIENTE
 // ─────────────────────────────────────────────────────────────────────────────
-function Recap({ allDayData, bios, T }) {
+function Recap({ allDayData, bios, setHL, setBios, T }) {
   const st = mkS(T);
   const [expanded, setExpanded] = useState(new Set());
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [editDate, setEditDate] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   const toggle = wk => setExpanded(prev => {
     const s = new Set(prev);
@@ -766,6 +768,43 @@ function Recap({ allDayData, bios, T }) {
     return weeklyStats.filter(w => w.week.startsWith(selectedMonth));
   }, [weeklyStats, selectedMonth]);
 
+  const handleSaveEdit = () => {
+    // 1. Guardar en Health Log (Sleep, Score, Rec, Batt, CalOut, Steps)
+    setHL(prev => {
+      const i = prev.findIndex(x => x.date === editDate);
+      const existing = i >= 0 ? prev[i] : { date: editDate };
+      const entry = {
+        ...existing,
+        sleep: +editForm.sleep || null,
+        score: +editForm.score || null,
+        recovery: +editForm.recovery || null,
+        bodyBattery: +editForm.bodyBattery || null,
+        calOut: +editForm.calOut || 0,
+        steps: +editForm.steps || null
+      };
+      if (i >= 0) { const u = [...prev]; u[i] = entry; return u; }
+      return [...prev, entry];
+    });
+
+    // 2. Guardar en Biometrics (Peso, Grasa, Músculo)
+    if (editForm.weight || editForm.fat || editForm.muscle) {
+      setBios(prev => {
+        const i = prev.findIndex(x => x.date === editDate);
+        const existing = i >= 0 ? prev[i] : { date: editDate, id: uid(), height: 181 };
+        const entry = {
+          ...existing,
+          weight: +editForm.weight || null,
+          fat: +editForm.fat || null,
+          muscle: +editForm.muscle || null
+        };
+        entry.imc = entry.weight ? calcIMC(entry.weight, entry.height || 181) : null;
+        if (i >= 0) { const u = [...prev]; u[i] = entry; return u; }
+        return [...prev, entry];
+      });
+    }
+    setEditDate(null);
+  };
+
   const bCol = b => b < 0 ? T.green : b < 300 ? T.accent : T.red;
 
   return (
@@ -786,8 +825,8 @@ function Recap({ allDayData, bios, T }) {
         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11, minWidth:1000, fontFamily:T.font }}>
           <thead>
             <tr style={{ borderBottom:`1px solid ${T.border}`, background:T.card2 }}>
-              {["WEEK / DAY", "FOCUS", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "BATT %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)"].map((h, i) => (
-                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: i<=1 ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
+              {["WEEK / DAY", "FOCUS", "WEIGHT", "FAT %", "MUSC", "SLEEP", "REC %", "BATT %", "IN", "OUT", "BAL", "PROT", "CARB", "FAT (G)", ""].map((h, i) => (
+                <th key={h} style={{ padding:"10px 8px", color:T.muted, fontWeight:700, textAlign: (i<=1 || h==="") ? "left" : "right", letterSpacing:"0.1em" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -812,11 +851,40 @@ function Recap({ allDayData, bios, T }) {
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.green }}>{w.p ? Math.round(w.p) + "g" : "—"}</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.blue }}>{w.c ? Math.round(w.c) + "g" : "—"}</td>
                     <td style={{ padding:"12px 8px", textAlign:"right", color:T.purple }}>{w.g ? Math.round(w.g) + "g" : "—"}</td>
+                    <td></td>
                   </tr>
                   
                   {/* Filas Diarias (Visibles solo si la semana está expandida) */}
                   {isOpen && w.days.map(d => {
                     const dBal = (d.calIn > 0 && d.calOut > 0) ? d.calIn - d.calOut : null;
+                    
+                    if (editDate === d.date) {
+                      return (
+                        <tr key={`${d.date}-edit`}>
+                          <td colSpan={15} style={{ padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
+                            <EditRow 
+                              fields={[
+                                { k:"weight", l:"Peso (Kg)", t:"number", step:"0.1" },
+                                { k:"fat", l:"Grasa %", t:"number", step:"0.1" },
+                                { k:"muscle", l:"Musc (Kg)", t:"number", step:"0.1" },
+                                { k:"sleep", l:"Sueño (h)", step:"0.01", t:"number" },
+                                { k:"score", l:"Score %", t:"number" },
+                                { k:"recovery", l:"Rec %", t:"number" },
+                                { k:"bodyBattery", l:"Batt %", t:"number" },
+                                { k:"calOut", l:"Cal Out", t:"number" },
+                                { k:"steps", l:"Pasos", t:"number" }
+                              ]}
+                              vals={editForm}
+                              onChange={(k, v) => setEditForm(p => ({ ...p, [k]: v }))}
+                              onSave={handleSaveEdit}
+                              onCancel={() => setEditDate(null)}
+                              T={T}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    }
+
                     return (
                       <tr key={d.date} style={{ borderBottom:`1px solid ${T.border}`, background: T.card2, fontSize: 10 }}>
                         <td style={{ padding:"8px 8px 8px 24px", textAlign:"left", color:T.text }}>{d.date}</td>
@@ -835,6 +903,26 @@ function Recap({ allDayData, bios, T }) {
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.p ? Math.round(d.p) + "g" : "—"}</td>
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.c ? Math.round(d.c) + "g" : "—"}</td>
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.g ? Math.round(d.g) + "g" : "—"}</td>
+                        <td style={{ padding:"8px 8px", textAlign:"center" }}>
+                          <div style={{ display:"flex", gap:4 }}>
+                            <button style={st.icon(T.accent)} onClick={(e) => {
+                              e.stopPropagation();
+                              setEditDate(d.date);
+                              setEditForm({
+                                weight: d.weight || "", fat: d.fat || "", muscle: d.muscle || "",
+                                sleep: d.sleep || "", score: d.score || "", recovery: d.recovery || "",
+                                bodyBattery: d.bodyBattery || "", calOut: d.calOut || "", steps: d.steps || ""
+                              });
+                            }}>✏️</button>
+                            <button style={st.icon(T.red)} onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm("¿Eliminar registro de este día?")) {
+                                setHL(p => p.filter(x => x.date !== d.date));
+                                setBios(p => p.filter(x => x.date !== d.date));
+                              }
+                            }}>🗑</button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -1855,137 +1943,6 @@ function DailyData({ setBios, setHL, goals, setGoals, activeDate, T }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TAB: TELEMETRY LOGS (HISTORIAL DIARIO)
-// ─────────────────────────────────────────────────────────────────────────────
-function TelemetryLogs({ allDayData, setHL, projects, setProjects, activeDate, T }) {
-  const st = mkS(T);
-  const [dailyEditId, setDailyEId] = useState(null);
-  const [dailyEditRow, setDailyER] = useState({});
-  const [editProjKey, setEPK] = useState(null);
-  const [projTemp, setProjTemp] = useState("");
-  const [openMonths, setOM] = useState(() => new Set([getMonthKey(activeDate)]));
-  const [openWeeks, setOW] = useState(() => new Set([getWeekStart(activeDate)]));
-
-  const rows = allDayData.filter(d => d.calOut > 0 || d.sleep > 0 || d.steps > 0 || d.calIn > 0 || d.recovery > 0 || d.bodyBattery > 0);
-  
-  const groupedDaily = useMemo(() => {
-    const byMonth = {};
-    rows.forEach(d => {
-      const mk = getMonthKey(d.date), wk = getWeekStart(d.date);
-      if (!byMonth[mk]) byMonth[mk] = {};
-      if (!byMonth[mk][wk]) byMonth[mk][wk] = [];
-      byMonth[mk][wk].push(d);
-    });
-    return Object.entries(byMonth).sort(([a],[b]) => b.localeCompare(a)).map(([mk,weeks]) => ({
-      mk, weeks: Object.entries(weeks).sort(([a],[b]) => b.localeCompare(a)).map(([wk,days]) => ({wk,days}))
-    }));
-  }, [rows]);
-
-  const toggleMonth = mk => setOM(prev => { const s = new Set(prev); s.has(mk) ? s.delete(mk) : s.add(mk); return s; });
-  const toggleWeek = wk => setOW(prev => { const s = new Set(prev); s.has(wk) ? s.delete(wk) : s.add(wk); return s; });
-
-  const upsertDaily = entry => setHL(prev => {
-    const i = prev.findIndex(d => d.date === entry.date);
-    if (i >= 0) { const u = [...prev]; u[i] = { ...u[i], ...entry }; return u; }
-    return [...prev, entry];
-  });
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={st.card}>
-        <SH title="📋 DAILY TELEMETRY LOGS" />
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {groupedDaily.length === 0 && <div style={{ ...st.card2, color:T.muted, fontSize:12, fontFamily:T.font }}>[NO RECORDS FOUND]</div>}
-          {groupedDaily.map(({ mk, weeks }) => (
-            <div key={mk} style={{ border:`1px solid ${T.border}`, borderRadius:6, padding:12, background:T.card2 }}>
-              <button onClick={() => toggleMonth(mk)} style={{ background:"none", border:"none", cursor:"pointer", width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, color:T.text }}>
-                <div style={{ fontSize:13, fontWeight:700, textTransform:"uppercase", fontFamily:T.font }}>{fmtMonth(mk)}</div>
-                <div style={{ fontSize:11, color:T.muted, fontFamily:T.font }}>{openMonths.has(mk) ? "▲" : "▼"} {weeks.reduce((s,w) => s + w.days.length, 0)} LOGS</div>
-              </button>
-              {openMonths.has(mk) && weeks.map(({ wk, days }) => {
-                const projName = projects[wk];
-                return (
-                  <div key={wk} style={{ marginTop:12 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                      <button onClick={() => toggleWeek(wk)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, padding:0, color:T.text }}>
-                        <span style={{ fontSize:11, fontWeight:700, color:T.muted }}>{openWeeks.has(wk) ? "▼" : "▶"}</span>
-                        <span style={{ fontSize:12, fontWeight:700, fontFamily:T.font }}>{fmtWeek(wk)}</span>
-                      </button>
-                      {editProjKey === wk ? (
-                        <input autoFocus style={{ ...st.inp, width:140, padding:"4px 8px", fontSize:11 }}
-                          value={projTemp}
-                          onChange={e => setProjTemp(e.target.value)}
-                          onBlur={() => { setProjects(p => ({ ...p, [wk]: projTemp || undefined })); setEPK(null); }}
-                          onKeyDown={e => { if (e.key === "Enter") e.target.blur(); if (e.key === "Escape") setEPK(null); }}
-                          placeholder=""/>
-                      ) : (
-                        <button onClick={() => { setEPK(wk); setProjTemp(projects[wk] || ""); }}
-                          style={{ background: projName ? T.accentDim : "transparent", border: `1px dashed ${projName ? T.accent : T.border}`,
-                            borderRadius:4, padding:"2px 8px", fontSize:10, color: projName ? T.accent : T.muted,
-                            cursor:"pointer", fontWeight: projName ? 700 : 400, whiteSpace:"nowrap", fontFamily:T.font, textTransform:"uppercase" }}>
-                          {projName || "+ TAG"}
-                        </button>
-                      )}
-                    </div>
-                    {openWeeks.has(wk) && (
-                      <div style={{ display:"flex", flexDirection:"column", gap:8, paddingLeft:16 }}>
-                        {days.map(d => {
-                          const dayMetrics = [
-                            { l:"IN", v: d.calIn || "—", c: T.accent },
-                            { l:"OUT", v: d.calOut || "—", c: T.blue },
-                            { l:"PROT", v: d.p ? `${Math.round(d.p)}g` : "—", c: T.green },
-                            { l:"PASOS", v: d.steps ? d.steps.toLocaleString() : "—", c: T.purple },
-                            { l:"SUEÑO", v: d.sleep ? `${d.sleep}h` : "—", c: T.purple },
-                            { l:"SCORE", v: d.score ? `${d.score}%` : "—", c: d.score >= 85 ? T.green : d.score >= 70 ? T.accent : T.red },
-                            { l:"REC", v: d.recovery ? `${d.recovery}%` : "—", c: getRecoveryColor(d.recovery, T) },
-                            { l:"BATT", v: d.bodyBattery ? `${d.bodyBattery}%` : "—", c: T.teal }
-                          ];
-
-                          return (
-                            <div key={d.date}>
-                              {dailyEditId === d.date ? (
-                                <EditRow fields={[{ k:"recovery", l:"Rec %" }, { k:"bodyBattery", l:"Batt %", t:"number" }, { k:"calOut", l:"Cal Out" }, { k:"steps", l:"Steps", t:"number" }, { k:"sleep", l:"Sleep h", step:"0.01" }, { k:"score", l:"Score %" }]}
-                                  vals={dailyEditRow} onChange={(k,v) => setDailyER(p => ({ ...p, [k]: v }))}
-                                  onSave={() => { upsertDaily({ date: d.date, recovery: +dailyEditRow.recovery || null, bodyBattery: +dailyEditRow.bodyBattery || null, hrv: +dailyEditRow.hrv || null, rhr: +dailyEditRow.rhr || null, calOut: +dailyEditRow.calOut || 0, steps: +dailyEditRow.steps || null, sleep: +dailyEditRow.sleep || null, score: +dailyEditRow.score || null }); setDailyEId(null); }}
-                                  onCancel={() => setDailyEId(null)} T={T}/>
-                              ) : (
-                                <div style={{ ...st.card2, padding:"10px 12px", borderLeft:`2px solid ${d.date === activeDate ? T.accent : T.border}`, borderRadius:4 }}>
-                                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                                    <span style={{ fontWeight:700, fontSize:12, color: d.date === activeDate ? T.accent : T.text, fontFamily:T.font }}>
-                                      {d.date === TODAY ? "> TODAY" : d.date.slice(5)}
-                                    </span>
-                                    <div style={{ display:"flex", gap:4 }}>
-                                      <button style={st.icon(T.accent)} onClick={() => { setDailyEId(d.date); setDailyER({ recovery: d.recovery || "", bodyBattery: d.bodyBattery || "", hrv: d.hrv || "", rhr: d.rhr || "", calOut: d.calOut || "", steps: d.steps || "", sleep: d.sleep || "", score: d.score || "" }); }}>✏️</button>
-                                      <button style={st.icon(T.red)} onClick={() => setHL(p => p.filter(x => x.date !== d.date))}>🗑</button>
-                                    </div>
-                                  </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(50px,1fr))", gap:6, marginTop:8 }}>
-                                    {dayMetrics.map(m => (
-                                      <div key={m.l} style={{ background: T.card, padding:"6px 4px", borderRadius:4, textAlign:"center", border:`1px solid ${T.border}` }}>
-                                        <div style={{ fontSize:9, color: T.muted, fontWeight:700, marginBottom:4, fontFamily:T.font }}>{m.l}</div>
-                                        <div style={{ fontSize:11, fontWeight:700, color: m.c, fontFamily:T.font }}>{m.v}</div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // TAB: BIOMETRÍA & WEIGHT TELEMETRY (TRENDS & HISTORY)
 // ─────────────────────────────────────────────────────────────────────────────
 function Biometria({ bios, setBios, activeDate, T }) {
@@ -2496,6 +2453,7 @@ export default function App() {
   const activeFood = useMemo(()=>foodLog.filter(f=>f.date===activeDate), [foodLog, activeDate]);
   const allDayData = useMemo(()=>allDates.map(d=>getDayData(d)), [allDates, getDayData]);
 
+  // Se eliminó la pestaña TELEMETRY de aquí (sus funciones ahora las cubre RECAP)
   const TABS=[
     {id:"dashboard",l:"SYS DASHBOARD"},
     {id:"daily",l:"DAILY DATA"},     
@@ -2505,7 +2463,6 @@ export default function App() {
     {id:"fuerza",l:"CHASSIS"},
     {id:"running",l:"AERO"},
     {id:"bio",l:"WEIGHT"},           
-    {id:"telemetry",l:"DAILY LOGS"}, 
     {id:"sleep",l:"RECOVERY"},
   ];
 
@@ -2605,13 +2562,15 @@ export default function App() {
       <div style={{ position:"relative", zIndex:1 }}>
         {tab==="dashboard"  && <Dashboard activeDayData={activeDayData} weekData={weekData} last7={last7} goals={goals} program={program} plans={plans} setPlans={setPlans} setTab={setTab} activeDate={activeDate} theme={theme} T={T}/>}
         {tab==="daily"      && <DailyData setBios={setBios} setHL={setHL} goals={goals} setGoals={setGoals} activeDate={activeDate} T={T}/>}
-        {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} T={T}/>}
+        
+        {/* RECAP ahora procesa Ediciones y Borrados; por lo que necesita setHL y setBios */}
+        {tab==="recap"      && <Recap allDayData={allDayData} bios={bios} setHL={setHL} setBios={setBios} T={T}/>}
+        
         {tab==="calendario" && <Calendario allDayData={allDayData} bios={bios} activeDate={activeDate} setActiveDate={setActiveDate} theme={theme} T={T}/>}
         {tab==="nutricion"  && <Nutricion activeDayData={activeDayData} activeFood={activeFood} activeDate={activeDate} setFL={setFL} db={db} setDb={setDb} goals={goals} T={T}/>}
         {tab==="fuerza"     && <Fuerza   strLog={strLog} setStr={setStr} program={program} setProg={setProg} plans={plans} setPlans={setPlans} activeDate={activeDate} T={T}/>}
         {tab==="running"    && <Running  runs={runs} setRuns={setRuns} runGoal={runGoal} setRunGoal={setRunGoal} targetTime={targetTime} setTargetTime={setTargetTime} shoes={shoes} setShoes={setShoes} activeDate={activeDate} theme={theme} T={T}/>}
         {tab==="bio"        && <Biometria bios={bios} setBios={setBios} activeDate={activeDate} T={T}/>}
-        {tab==="telemetry"  && <TelemetryLogs allDayData={allDayData} setHL={setHL} projects={projects} setProjects={setProjs} activeDate={activeDate} T={T}/>}
         {tab==="sleep"      && <Sueno    healthLog={healthLog} T={T}/>}
       </div>
 
