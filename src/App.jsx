@@ -60,6 +60,24 @@ const WINTER_ARC = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ICONS (Minimalist SVG)
+// ─────────────────────────────────────────────────────────────────────────────
+const EditIcon = ({ color }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+const DeleteIcon = ({ color }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // STATIC DATA & WHOOP LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = {
@@ -232,7 +250,7 @@ function mkS(T) {
     btn:    { background:T.accent, color:"#000", border:"none", borderRadius:6, padding:"12px 22px", fontWeight:800, fontSize:13, cursor:"pointer", fontFamily:T.font, width:"100%", textTransform:"uppercase", letterSpacing:"0.05em" },
     btnSm:  { background:T.navyBright, color:T.text, border:`1px solid ${T.border}`, borderRadius:6, padding:"8px 18px", fontWeight:700, fontSize:12, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap" },
     ghost:  a=>({ background:a?T.accentDim:"transparent", color:a?T.accent:T.muted, border:`1px solid ${a?T.accent:T.border}`, borderRadius:6, padding:"8px 18px", fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:T.font, whiteSpace:"nowrap", transition:"all 0.15s" }),
-    icon:   c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"3px 6px", borderRadius:4, fontSize:13, lineHeight:1, display:"inline-flex", alignItems:"center" }),
+    icon:   c=>({ background:"none", border:"none", cursor:"pointer", color:c||T.muted, padding:"6px", borderRadius:4, display:"inline-flex", alignItems:"center", justifyContent:"center", transition:"background 0.15s" }),
     g2:     { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:16 },
   };
 }
@@ -769,7 +787,7 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
   }, [weeklyStats, selectedMonth]);
 
   const handleSaveEdit = () => {
-    // 1. Guardar en Health Log (Sleep, Score, Rec, Batt, CalOut, Steps)
+    // 1. Guardar en Health Log (Sleep, Score, Rec, Batt, CalOut, CalIn, Steps)
     setHL(prev => {
       const i = prev.findIndex(x => x.date === editDate);
       const existing = i >= 0 ? prev[i] : { date: editDate };
@@ -780,6 +798,7 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
         recovery: +editForm.recovery || null,
         bodyBattery: +editForm.bodyBattery || null,
         calOut: +editForm.calOut || 0,
+        calIn: +editForm.calIn || 0,
         steps: +editForm.steps || null
       };
       if (i >= 0) { const u = [...prev]; u[i] = entry; return u; }
@@ -871,6 +890,7 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                                 { k:"score", l:"Score %", t:"number" },
                                 { k:"recovery", l:"Rec %", t:"number" },
                                 { k:"bodyBattery", l:"Batt %", t:"number" },
+                                { k:"calIn", l:"Cal In", t:"number" },
                                 { k:"calOut", l:"Cal Out", t:"number" },
                                 { k:"steps", l:"Pasos", t:"number" }
                               ]}
@@ -905,22 +925,26 @@ function Recap({ allDayData, bios, setHL, setBios, T }) {
                         <td style={{ padding:"8px 8px", textAlign:"right", color:T.text }}>{d.g ? Math.round(d.g) + "g" : "—"}</td>
                         <td style={{ padding:"8px 8px", textAlign:"center" }}>
                           <div style={{ display:"flex", gap:4 }}>
-                            <button style={st.icon(T.accent)} onClick={(e) => {
+                            <button style={st.icon()} onClick={(e) => {
                               e.stopPropagation();
                               setEditDate(d.date);
                               setEditForm({
                                 weight: d.weight || "", fat: d.fat || "", muscle: d.muscle || "",
                                 sleep: d.sleep || "", score: d.score || "", recovery: d.recovery || "",
-                                bodyBattery: d.bodyBattery || "", calOut: d.calOut || "", steps: d.steps || ""
+                                bodyBattery: d.bodyBattery || "", calIn: d.calIn || "", calOut: d.calOut || "", steps: d.steps || ""
                               });
-                            }}>✏️</button>
-                            <button style={st.icon(T.red)} onClick={(e) => {
+                            }}>
+                              <EditIcon color={T.accent} />
+                            </button>
+                            <button style={st.icon()} onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm("¿Eliminar registro de este día?")) {
                                 setHL(p => p.filter(x => x.date !== d.date));
                                 setBios(p => p.filter(x => x.date !== d.date));
                               }
-                            }}>🗑</button>
+                            }}>
+                              <DeleteIcon color={T.red} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1291,8 +1315,12 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
                   <div><div style={{fontWeight:700,fontSize:12,textTransform:"uppercase"}}>{f.name}</div>
                     <div style={{fontSize:10,color:T.muted, fontFamily:T.font, marginTop:4}}>{f.cal} KCAL · {f.p}P · {f.c}C · {f.g}G · /{f.unit}</div></div>
                   <div style={{display:"flex",gap:4}}>
-                    <button style={st.icon(T.accent)} onClick={()=>{setDbEId(f.id);setDbER({...f});}}>✏️</button>
-                    <button style={st.icon(T.red)}    onClick={()=>setDb(p=>p.filter(x=>x.id!==f.id))}>🗑</button>
+                    <button style={st.icon()} onClick={()=>{setDbEId(f.id);setDbER({...f});}}>
+                      <EditIcon color={T.accent} />
+                    </button>
+                    <button style={st.icon()} onClick={()=>setDb(p=>p.filter(x=>x.id!==f.id))}>
+                      <DeleteIcon color={T.red} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1350,8 +1378,12 @@ function Nutricion({ activeDayData, activeFood, activeDate, setFL, db, setDb, go
                     <div style={{ display:"flex", gap:10, alignItems:"center" }}>
                       <span style={{ fontSize:16, fontWeight:700, color:T.accent, fontFamily:T.font }}>{f.cal}</span>
                       <div style={{ display:"flex", gap:2 }}>
-                        <button style={st.icon(T.accent)} onClick={()=>setLgEId(f.id)}>✏️</button>
-                        <button style={st.icon(T.red)}    onClick={()=>setFL(p=>p.filter(x=>x.id!==f.id))}>🗑</button>
+                        <button style={st.icon()} onClick={()=>setLgEId(f.id)}>
+                          <EditIcon color={T.accent} />
+                        </button>
+                        <button style={st.icon()} onClick={()=>setFL(p=>p.filter(x=>x.id!==f.id))}>
+                          <DeleteIcon color={T.red} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1577,8 +1609,12 @@ function Fuerza({ strLog, setStr, program, setProg, plans, setPlans, activeDate,
                   <span>{l.reps||"—"}</span><span>{l.sets||"—"}</span>
                   <span style={{color:l.rpe>=9?T.red:l.rpe>=7?T.accent:T.green,fontWeight:700}}>{l.rpe||"—"}</span>
                   <div style={{display:"flex",gap:2}}>
-                    <button style={st.icon(T.accent)} onClick={()=>{setEId(l.id);setER({exercise:l.exercise,weight:l.weight,reps:l.reps,sets:l.sets,rpe:l.rpe});}}>✏️</button>
-                    <button style={st.icon(T.red)} onClick={()=>setStr(p=>p.filter(x=>x.id!==l.id))}>🗑</button>
+                    <button style={st.icon()} onClick={()=>{setEId(l.id);setER({exercise:l.exercise,weight:l.weight,reps:l.reps,sets:l.sets,rpe:l.rpe});}}>
+                      <EditIcon color={T.accent} />
+                    </button>
+                    <button style={st.icon()} onClick={()=>setStr(p=>p.filter(x=>x.id!==l.id))}>
+                      <DeleteIcon color={T.red} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1728,8 +1764,12 @@ function Running({ runs, setRuns, runGoal, setRunGoal, targetTime, setTargetTime
                 <span style={{color:T.muted}}>{r.lpm?`${r.lpm} HR`:"—"}</span>
                 <span style={{color:T.muted}}>{r.ppm?`${r.ppm} CAD`:"—"}</span>
                 <div style={{display:"flex",gap:4}}>
-                  <button style={st.icon(T.accent)} onClick={()=>{setEId(r.id);setER({date:r.date,km:r.km,time:r.time,shoe:r.shoe||"",lpm:r.lpm||"",ppm:r.ppm||""});}}>✏️</button>
-                  <button style={st.icon(T.red)} onClick={()=>setRuns(p=>p.filter(x=>x.id!==r.id))}>🗑</button>
+                  <button style={st.icon()} onClick={()=>{setEId(r.id);setER({date:r.date,km:r.km,time:r.time,shoe:r.shoe||"",lpm:r.lpm||"",ppm:r.ppm||""});}}>
+                    <EditIcon color={T.accent} />
+                  </button>
+                  <button style={st.icon()} onClick={()=>setRuns(p=>p.filter(x=>x.id!==r.id))}>
+                    <DeleteIcon color={T.red} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -2141,8 +2181,12 @@ function Biometria({ bios, setBios, activeDate, T }) {
                     <td key={i} style={{ padding: "12px 8px", textAlign: i === 0 ? "left" : "right", color: i === 0 ? T.text : T.muted, fontWeight: i === 0 ? 700 : 400 }}>{v}</td>
                   ))}
                   <td style={{ padding: "12px 8px", textAlign: "center" }}>
-                    <button style={st.icon(T.accent)} onClick={() => { setBioEId(b.id); setBioER({ date: b.date, weight: b.weight, imc: b.imc || "", fat: b.fat || "", muscle: b.muscle || "", visceral: b.visceral || "", water: b.water || "", protein: b.protein || "", dmr: b.dmr || "" }); }}>✏️</button>
-                    <button style={st.icon(T.red)} onClick={() => setBios(p => p.filter(x => x.id !== b.id))}>🗑</button>
+                    <button style={st.icon()} onClick={() => { setBioEId(b.id); setBioER({ date: b.date, weight: b.weight, imc: b.imc || "", fat: b.fat || "", muscle: b.muscle || "", visceral: b.visceral || "", water: b.water || "", protein: b.protein || "", dmr: b.dmr || "" }); }}>
+                      <EditIcon color={T.accent} />
+                    </button>
+                    <button style={st.icon()} onClick={() => setBios(p => p.filter(x => x.id !== b.id))}>
+                      <DeleteIcon color={T.red} />
+                    </button>
                   </td>
                 </tr>
               ))}
